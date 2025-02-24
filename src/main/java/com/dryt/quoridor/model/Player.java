@@ -5,14 +5,16 @@ public class Player extends Entity {
     private int nbWall;
     private int goalRow;
     private GoalDimension goalDim;
+    public boolean isAI;
 
 
-    public Player(String name ,int x, int y , int goalRow , GoalDimension goalDim) {
+    public Player(String name ,int x, int y , int goalRow , GoalDimension goalDim, boolean isAI) {
         super(x, y);
         this.nom = name;
         this.nbWall =10;
         this.goalRow = goalRow;
         this.goalDim = goalDim;
+        this.isAI=isAI;
     }
     @Override
     public boolean move(int newX, int newY) {
@@ -45,10 +47,11 @@ public class Player extends Entity {
             nbWall--;
         }
     }
-    public String  getGoalRow() {
-        return ""+goalDim + goalRow;
-    }
 
+    public int  getGoalRow() {
+        return goalRow;
+    }
+    public  GoalDimension getGoalDim(){return  goalDim;}
     public boolean hasWall(){
         return this.nbWall > 0 ;
     }
