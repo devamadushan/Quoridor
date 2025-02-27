@@ -5,8 +5,11 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.dryt.quoridor.HelloController">
+<VBox alignment="CENTER" spacing="20.0"
+      xmlns:fx="http://javafx.com/javafx"
+      fx:controller="com.dryt.quoridor.HelloController"
+      stylesheets="@style.css">
+
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
@@ -14,6 +17,7 @@
 
     <Label fx:id="welcomeText" />
     <Label fx:id="salutTeam" />
+    <Label text="Bienvenue sur le jeu du Quoridor !"  />
 
     <Button fx:id="btnJouer" text="Jouer" onAction="#lancerPartie"/>
 

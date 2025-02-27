@@ -7,15 +7,12 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.dryt.quoridor.controller.GameController"
-
       alignment="CENTER" spacing="20.0"
-      style="-fx-padding: 20;">
+      style="-fx-padding: 20;"
+      stylesheets="@style.css">
 
-
-    <Label text="Bienvenue dans la partie" style="-fx-font-size: 18; -fx-font-weight: bold;" />
-    <Label text="METTRE LE PLATEAU ICI" style="-fx-font-size: 18; -fx-font-weight: bold;" />
-
+    <Label text="La partie a été lancé !"/>
+    <Label text="METTRE LE PLATEAU ICI"/>
 
     <Button fx:id="btnRetour" text="Retour" onAction="#pageRetour"/>
-
 </VBox>

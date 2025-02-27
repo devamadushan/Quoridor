@@ -1,0 +1,48 @@
+.root {
+    -fx-font-family: "Arial";
+    -fx-background-color: #23272A;
+}
+
+.label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+}
+
+#welcomeText, #salutTeam {
+    -fx-text-fill: #FFDD57;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px;
+}
+
+.button {
+    -fx-background-color: #7289DA;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 2);
+}
+
+.button:hover {
+    -fx-background-color: #677BC4;
+}
+
+.button:pressed {
+    -fx-background-color: #5A68B2;
+}
+
+#btnQuit {
+    -fx-background-color: #FF5555;
+}
+
+#btnQuit:hover {
+    -fx-background-color: #D43F3F;
+}
+
+#btnQuit:pressed {
+    -fx-background-color: #B23232;
+}

@@ -7,7 +7,8 @@
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.dryt.quoridor.controller.OptionsController"
       alignment="CENTER" spacing="20.0"
-      style="-fx-padding: 20;">
+      style="-fx-padding: 20;"
+      stylesheets="@style.css">
 
     <Label text="Options de Quoridor" style="-fx-font-size: 16; -fx-font-weight: bold;" />
     <Button fx:id="btnRetour" text="Retour" onAction="#pageRetour"/>
