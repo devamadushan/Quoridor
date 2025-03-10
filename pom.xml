@@ -106,10 +106,20 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.pixelduke</groupId>
+            <artifactId>fxthemes</artifactId>
+            <version>1.5.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>17.0.2</version>
         </dependency>
     </dependencies>
 
@@ -133,7 +143,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.dryt.quoridor/com.dryt.quoridor.HelloApplication</mainClass>
+                            <mainClass>com.dryt.quoridor.app.Menu</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>

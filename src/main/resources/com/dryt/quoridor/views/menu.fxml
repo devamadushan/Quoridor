@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" 
+            xmlns="http://javafx.com/javafx/21" 
+            fx:controller="com.dryt.quoridor.controller.MenuController"
+            stylesheets="@../styles/menu.css">
+    <!-- L'AnchorPane occupe toute la scène et affiche le fond défini dans le CSS -->
+    <children>
+        <VBox alignment="CENTER" spacing="20" prefWidth="600" prefHeight="400"
+              AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <!-- Titre du menu -->
+            <Label text="Bienvenue dans Quoridor" styleClass="title"/>
+            <!-- Boutons du menu -->
+            <Button fx:id="newGameButton" text="Nouvelle Partie" styleClass="menu-button"/>
+            <Button fx:id="optionsButton" text="Options" styleClass="menu-button"/>
+            <Button fx:id="exitButton" text="Quitter" styleClass="menu-button"/>
+        </VBox>
+    </children>
+</AnchorPane>
