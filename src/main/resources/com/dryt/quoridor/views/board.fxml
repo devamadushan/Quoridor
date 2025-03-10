@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.shape.Rectangle?>
 
 <GridPane xmlns:fx="http://javafx.com/fxml"
           fx:controller="com.dryt.quoridor.controller.BoardController"
           stylesheets="@../styles/board.css"
+          fx:id="boardGrid"
           hgap="2" vgap="2">
 </GridPane>

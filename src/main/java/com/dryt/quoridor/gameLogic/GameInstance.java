@@ -46,7 +46,9 @@ public class GameInstance {
     public Entity[][] getBoard() {
         return board;
     }
-
+    public Entity[] getPlayers() {
+        return players;
+    }
     public boolean turn() {
         return true;
     }
