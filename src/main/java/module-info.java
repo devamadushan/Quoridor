@@ -13,4 +13,13 @@ module com.dryt.quoridor {
 
     opens com.dryt.quoridor to javafx.fxml;
     exports com.dryt.quoridor;
+
+
+    exports com.dryt.quoridor.gameLogic;
+    exports com.dryt.quoridor.model;
+    opens com.dryt.quoridor.model;
+
 }
+
+
+

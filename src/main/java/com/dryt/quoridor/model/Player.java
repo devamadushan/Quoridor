@@ -26,18 +26,19 @@ public class Player extends Entity {
     }
 
 
-    public boolean hasWon(){
-        if(this.goalDim == GoalDimension.X){
+    public boolean hasWon() {
+        if (this.goalDim == GoalDimension.X) {
             return goalRow == this.x;
         }
-        if(this.goalDim == GoalDimension.Y){
+        if (this.goalDim == GoalDimension.Y) {
             return goalRow == this.y;
         }
         return false;
     }
 
+
     public String getNom() {
-        return nom;
+        return this.nom;
     }
     public int getNbWall() {
         return nbWall;
