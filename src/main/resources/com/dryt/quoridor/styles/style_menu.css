@@ -1,0 +1,8 @@
+.root {
+    -fx-background-image: url("Backgroundtroll.png");
+
+}
+.button {
+    -fx-font-size: 14px;
+    -fx-pref-width: 150px;
+}

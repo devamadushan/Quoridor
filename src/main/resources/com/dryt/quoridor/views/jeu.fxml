@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            prefWidth="800.0" prefHeight="600.0"
+            fx:controller="com.dryt.quoridor.controller.ControleurJeu">
+    <children>
+        <Pane fx:id="boardPane" layoutX="20.0" layoutY="100.0"
+              prefWidth="360.0" prefHeight="360.0" />
+        <VBox layoutX="720.0" layoutY="400.0" spacing="10.0">
+            <children>
+                <RadioButton fx:id="radHorizontal" text="Mur Horizontal" />
+                <RadioButton fx:id="radVertical" text="Mur Vertical" />
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

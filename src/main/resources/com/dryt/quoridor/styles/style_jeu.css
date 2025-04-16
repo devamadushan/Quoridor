@@ -1,0 +1,31 @@
+.cell {
+    -fx-background-color: #F0E68C;
+    -fx-border-color: black;
+    -fx-border-width: 0.5;
+}
+.highlight {
+    -fx-background-color: #7CFC00;
+}
+.player1 {
+    -fx-background-color: #3498DB;
+}
+.player2 {
+    -fx-background-color: #E74C3C;
+}
+.wall-placeholder {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+}
+.wall-placed {
+    -fx-background-color: saddlebrown;
+    -fx-border-color: black;
+    -fx-border-width: 1;
+}
+.wall-placed:disabled {
+    -fx-opacity: 1.0;
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?><!-- Options de jeu (plein écran, résolution) -->
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            prefWidth="800.0" prefHeight="600.0"
+            fx:controller="com.dryt.quoridor.controller.ControleurOptions">
+    <children>
+        <VBox alignment="CENTER" spacing="20.0"
+              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+              AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0">
+            <children>
+                <Button text="800x600" onAction="#onRes800x600" />
+                <Button text="1920x1080" onAction="#onRes1920x1080" />
+                <Button text="1024x1024" onAction="#onRes1024x024" />
+                <Button text="Retour" onAction="#onRetour" />
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
+
