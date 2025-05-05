@@ -9,14 +9,17 @@
 <AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             prefWidth="800.0" prefHeight="600.0"
             fx:controller="com.dryt.quoridor.controller.ControleurJeu">
+
     <children>
         <Pane fx:id="boardPane" layoutX="20.0" layoutY="100.0"
               prefWidth="360.0" prefHeight="360.0" />
         <VBox layoutX="720.0" layoutY="400.0" spacing="10.0">
             <children>
-                <RadioButton fx:id="radHorizontal" text="Mur Horizontal" />
-                <RadioButton fx:id="radVertical" text="Mur Vertical" />
+                <Label fx:id="labelMursRestants" layoutX="20" layoutY="20" text="Murs restants : 10" style="-fx-font-size: 18px;"/>
             </children>
+
+
         </VBox>
     </children>
+
 </AnchorPane>

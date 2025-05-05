@@ -1,44 +1,74 @@
+/* ----- CASES DE BASE ----- */
 .cell {
-    -fx-background-color: #F0E68C;
+    -fx-background-color: white;
     -fx-border-color: black;
     -fx-border-width: 0.5;
 }
-.cell.player1 {
-    -fx-background-color: red;
-}
-.cell.player2 {
-    -fx-background-color: blue;
-}
-.cell.player3 {
-    -fx-background-color: green;
-}
-.cell.player4 {
-    -fx-background-color: orange;
+
+/* ----- HIGHLIGHT DES DÉPLACEMENTS POSSIBLES ----- */
+.highlight {
+    -fx-background-color: #7CFC00; /* vert clair */
 }
 
-.highlight {
-    -fx-background-color: #7CFC00;
-}
+/* ----- STYLE DES PIONS EN RONDS ----- */
 .player1 {
-    -fx-background-color: #3498DB;
+    -fx-background-color: red;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-min-width: 25px;
+    -fx-min-height: 25px;
+    -fx-padding: 0;
 }
+
 .player2 {
-    -fx-background-color: #E74C3C;
+    -fx-background-color: blue;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-min-width: 25px;
+    -fx-min-height: 25px;
+    -fx-padding: 0;
 }
+
+.player3 {
+    -fx-background-color: green;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-min-width: 25px;
+    -fx-min-height: 25px;
+    -fx-padding: 0;
+}
+
+.player4 {
+    -fx-background-color: orange;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-min-width: 25px;
+    -fx-min-height: 25px;
+    -fx-padding: 0;
+}
+
+/* ----- BOUTONS DE PLACEMENT DE MUR ----- */
 .wall-placeholder {
     -fx-background-color: transparent;
-    -fx-text-fill: #333333;
-    -fx-font-weight: bold;
-    -fx-padding: 0;
+    -fx-text-fill: transparent;
     -fx-border-width: 0;
-    -fx-scale-x: 1;
-    -fx-scale-y: 1;
 }
+
+
+/* ----- MURS PLACÉS ----- */
 .wall-placed {
-    -fx-background-color: saddlebrown;
-    -fx-border-color: black;
-    -fx-border-width: 1;
+    -fx-fill: saddlebrown;
+    -fx-stroke: black;
+    -fx-stroke-width: 1;
 }
+
+
+
 .wall-placed:disabled {
-    -fx-opacity: 1.0;
+    -fx-opacity: 1.0; /* bien visible même désactivé */
+}
+.wall-ghost {
+    -fx-fill: rgba(139, 69, 19, 0.4); /* marron transparent */
+    -fx-stroke: black;
+    -fx-stroke-width: 0.5;
 }

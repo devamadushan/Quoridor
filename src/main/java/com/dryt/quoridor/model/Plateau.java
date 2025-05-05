@@ -50,6 +50,19 @@ public class Plateau {
         int index = joueurs.indexOf(currentPlayer);
         currentPlayer = joueurs.get((index + 1) % joueurs.size());
     }
+    public boolean peutPlacerMurSansChevauchement(int wx, int wy, boolean vertical) {
+        if (vertical) {
+            // Vérifie le mur actuel ET celui juste en dessous (car un mur vertical prend 2 blocs en hauteur)
+            if (verticalWallPositions[wx][wy]) return false;
+            if (wy < 7 && verticalWallPositions[wx][wy + 1]) return false;
+        } else {
+            // Vérifie le mur actuel ET celui juste à droite (car un mur horizontal prend 2 blocs en largeur)
+            if (horizontalWallPositions[wx][wy]) return false;
+            if (wx < 7 && horizontalWallPositions[wx + 1][wy]) return false;
+        }
+        return true;
+    }
+
 
     public List<int[]> getPossibleMoves() {
         List<int[]> moves = new ArrayList<>();
