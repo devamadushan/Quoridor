@@ -5,7 +5,6 @@ import com.dryt.quoridor.model.GoalDimension;
 import com.dryt.quoridor.model.Player;
 import com.dryt.quoridor.model.Wall;
 
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class GameInstance {
@@ -40,7 +39,7 @@ public class GameInstance {
             GoalDimension goalD = (pos[2] == 1) ? GoalDimension.X : GoalDimension.Y;
             side++;
 
-            players[nbPlayers - AIPlayers + i] = new Player("AI" + i, pos[1], pos[0], goalR, goalD, true);
+            players[nbPlayers - AIPlayers + i] = new Player("AI" + i, pos[0], pos[1], goalR, goalD, true); // x, y
             System.out.println("IA placée : " + players[nbPlayers - AIPlayers + i].getNom());
         }
 
@@ -50,7 +49,7 @@ public class GameInstance {
             GoalDimension goalD = (pos[2] == 1) ? GoalDimension.X : GoalDimension.Y;
             side++;
 
-            players[i] = new Player("Player" + i, pos[1], pos[0], goalR, goalD, false);
+            players[i] = new Player("Player" + i, pos[0], pos[1], goalR, goalD, false); // x, y
             System.out.println("Joueur placé : " + players[i].getNom());
         }
     }
@@ -87,10 +86,10 @@ public class GameInstance {
 
             int dx = 0, dy = 0;
             switch (input) {
-                case "Z" -> dy = -1; // Haut
-                case "S" -> dy = 1;  // Bas
-                case "Q" -> dx = -1; // Gauche
-                case "D" -> dx = 1;  // Droite
+                case "Z" -> dy = -1;
+                case "S" -> dy = 1;
+                case "Q" -> dx = -1;
+                case "D" -> dx = 1;
                 default -> {
                     System.out.println("Mouvement invalide !");
                     return;
@@ -133,7 +132,6 @@ public class GameInstance {
         }
     }
 
-
     private void playAITurn(Player aiPlayer) {
         if (aiPlayer.getGoalDim() == GoalDimension.Y) {
             aiPlayer.move(aiPlayer.getX(), aiPlayer.getY() + 2);
@@ -148,6 +146,10 @@ public class GameInstance {
         scanner.close();
     }
 
+    public Player[] getPlayers() {
+        return players;
+    }
+
     public Player getCurrentPlayer() {
         return players[turn];
     }
@@ -160,12 +162,15 @@ public class GameInstance {
     }
 
     private Integer[] calculateStarting(int side, int size) {
+        int midCol = size * 2 / 2 - 1; // milieu de la grille (0-indexé) → 8 pour une grille 18x18
         return switch (side) {
-            case 0 -> new Integer[]{1, size, 0};
-            case 1 -> new Integer[]{size, 1, 1};
-            case 2 -> new Integer[]{size, size * 2 - 1, 1};
-            case 3 -> new Integer[]{size * 2 - 1, size, 0};
+            case 0 -> new Integer[]{0, midCol, 0};                // 🔴 haut-centre (ligne 0, col 8)
+            case 1 -> new Integer[]{size * 2 - 1, midCol, 0};     // 🔵 bas-centre (ligne 17, col 8)
+            case 2 -> new Integer[]{midCol, 0, 1};                // gauche (facultatif)
+            case 3 -> new Integer[]{midCol, size * 2 - 1, 1};     // droite (facultatif)
             default -> throw new IllegalArgumentException("Invalid side: " + side);
         };
     }
+
+
 }

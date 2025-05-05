@@ -134,6 +134,8 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>com.dryt.quoridor/com.dryt.quoridor.HelloApplication</mainClass>
+                            <mainClass>com.dryt.quoridor/com.dryt.quoridor.GameApp</mainClass>
+
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>

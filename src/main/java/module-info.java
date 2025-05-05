@@ -12,14 +12,11 @@ module com.dryt.quoridor {
     requires com.almasb.fxgl.all;
 
     opens com.dryt.quoridor to javafx.fxml;
+    opens com.dryt.quoridor.controllers to javafx.fxml;
+    opens com.dryt.quoridor.model to javafx.fxml;
+
     exports com.dryt.quoridor;
-
-
+    exports com.dryt.quoridor.controllers;
     exports com.dryt.quoridor.gameLogic;
     exports com.dryt.quoridor.model;
-    opens com.dryt.quoridor.model;
-
 }
-
-
-
