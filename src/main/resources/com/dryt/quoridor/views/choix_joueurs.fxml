@@ -3,20 +3,19 @@
 <?import javafx.scene.layout.*?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.dryt.quoridor.controller.ControleurOptions"
+            fx:controller="com.dryt.quoridor.controller.ControleurChoixJoueurs"
             prefWidth="1024.0" prefHeight="1024.0">
 
     <VBox alignment="CENTER" spacing="20"
           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
           AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0">
 
-        <Label text="Résolution :" />
-        <Button text="800x600" onAction="#onRes800x600"/>
-        <Button text="1024x1024" onAction="#onRes1024x1024"/>
-        <Button text="1920x1080" onAction="#onRes1920x1080"/>
+        <Label text="Choisissez le nombre de joueurs" />
 
+        <RadioButton fx:id="radio2Joueurs" text="2 Joueurs" selected="true"/>
+        <RadioButton fx:id="radio4Joueurs" text="4 Joueurs"/>
 
-
+        <Button text="Valider" onAction="#onValider"/>
         <Button text="Retour" onAction="#onRetour"/>
     </VBox>
 </AnchorPane>

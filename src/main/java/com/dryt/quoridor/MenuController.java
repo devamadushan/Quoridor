@@ -18,7 +18,7 @@ public class MenuController {
     @FXML
     private void handlePlay(ActionEvent event) {
         // TODO: Implémenter la logique pour démarrer une nouvelle partie
-        System.out.println("Démarrer une nouvelle partie");
+        com.dryt.quoridor.app.JeuQuoridor.goChoixJoueurs();
     }
 
     @FXML

@@ -3,6 +3,19 @@
     -fx-border-color: black;
     -fx-border-width: 0.5;
 }
+.cell.player1 {
+    -fx-background-color: red;
+}
+.cell.player2 {
+    -fx-background-color: blue;
+}
+.cell.player3 {
+    -fx-background-color: green;
+}
+.cell.player4 {
+    -fx-background-color: orange;
+}
+
 .highlight {
     -fx-background-color: #7CFC00;
 }

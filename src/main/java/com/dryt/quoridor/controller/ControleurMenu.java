@@ -9,11 +9,7 @@ public class ControleurMenu {
 
     @FXML
     private void onJouer(ActionEvent event) {
-        try {
-            JeuQuoridor.startGame();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JeuQuoridor.goChoixJoueurs();
     }
 
     @FXML
