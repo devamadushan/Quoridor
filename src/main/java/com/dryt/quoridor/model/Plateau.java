@@ -15,18 +15,20 @@ public class Plateau {
         joueurs = new ArrayList<>();
         switch (nombreJoueurs) {
             case 2 -> {
+                // Bleu (haut), Rouge (bas) → ici on commence par Rouge
+                joueurs.add(new Joueur(2, 4, 8, 10)); // Rouge
                 joueurs.add(new Joueur(1, 4, 0, 10));
-                joueurs.add(new Joueur(2, 4, 8, 10));
             }
             case 4 -> {
-                joueurs.add(new Joueur(1, 4, 0, 5));
-                joueurs.add(new Joueur(2, 4, 8, 5));
-                joueurs.add(new Joueur(3, 0, 4, 5));
-                joueurs.add(new Joueur(4, 8, 4, 5));
+                joueurs.add(new Joueur(4, 8, 4, 5)); // Vert
+                joueurs.add(new Joueur(2, 4, 8, 5)); // Orange
+                joueurs.add(new Joueur(3, 0, 4, 5)); // Rouge.
+                joueurs.add(new Joueur(1, 4, 0, 5)); // Bleu
+
             }
             default -> throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
         }
-        currentPlayer = joueurs.get(0);
+        currentPlayer = getJoueurById(2); // le premier joueur dans la liste commence
 
         verticalWallPositions = new boolean[8][8];
         horizontalWallPositions = new boolean[8][8];
@@ -36,6 +38,13 @@ public class Plateau {
 
     public List<Joueur> getJoueurs() {
         return joueurs;
+    }
+
+    public Joueur getJoueurById(int id) {
+        for (Joueur j : joueurs) {
+            if (j.getId() == id) return j;
+        }
+        return null;
     }
 
     public Joueur getCurrentPlayer() {
