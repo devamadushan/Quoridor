@@ -1,9 +1,6 @@
 package com.dryt.quoridor.model;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class Plateau {
     private final int size = 9;
@@ -17,18 +14,17 @@ public class Plateau {
     public Plateau(int nombreJoueurs) {
         joueurs = new ArrayList<>();
         switch (nombreJoueurs) {
-            case 2:
+            case 2 -> {
                 joueurs.add(new Joueur(1, 4, 0, 10));
                 joueurs.add(new Joueur(2, 4, 8, 10));
-                break;
-            case 4:
+            }
+            case 4 -> {
                 joueurs.add(new Joueur(1, 4, 0, 5));
                 joueurs.add(new Joueur(2, 4, 8, 5));
                 joueurs.add(new Joueur(3, 0, 4, 5));
                 joueurs.add(new Joueur(4, 8, 4, 5));
-                break;
-            default:
-                throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
+            }
+            default -> throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
         }
         currentPlayer = joueurs.get(0);
 
@@ -45,24 +41,64 @@ public class Plateau {
     public Joueur getCurrentPlayer() {
         return currentPlayer;
     }
+    public boolean canPlaceWall(int wx, int wy, boolean vertical) {
+        // Vérifie les limites du plateau
+        if (vertical && wy >= 8) return false;
+        if (!vertical && wx >= 8) return false;
+
+        // Vérifie si un mur du même type est déjà présent
+        if (vertical && hasVerticalWall(wx, wy)) return false;
+        if (!vertical && hasHorizontalWall(wx, wy)) return false;
+
+        // Vérifie le croisement avec un mur opposé
+        if (vertical && hasHorizontalWall(wx, wy)) return false;
+        if (!vertical && hasVerticalWall(wx, wy)) return false;
+
+        // Optionnel : bloquer les placements si une des deux cases est déjà bloquée (superposition)
+        if (vertical && (blockedRight[wx][wy] || blockedRight[wx][wy + 1])) return false;
+        if (!vertical && (blockedDown[wx][wy] || blockedDown[wx + 1][wy])) return false;
+
+        return true;
+    }
 
     public void switchPlayerTurn() {
         int index = joueurs.indexOf(currentPlayer);
         currentPlayer = joueurs.get((index + 1) % joueurs.size());
     }
+
     public boolean peutPlacerMurSansChevauchement(int wx, int wy, boolean vertical) {
+        if (wx < 0 || wy < 0 || wx >= 8 || wy >= 8) return false;
+
         if (vertical) {
-            // Vérifie le mur actuel ET celui juste en dessous (car un mur vertical prend 2 blocs en hauteur)
-            if (verticalWallPositions[wx][wy]) return false;
-            if (wy < 7 && verticalWallPositions[wx][wy + 1]) return false;
+            if (wy >= 7) return false; // dépasse en bas
+            return !verticalWallPositions[wx][wy] && !verticalWallPositions[wx][wy + 1];
         } else {
-            // Vérifie le mur actuel ET celui juste à droite (car un mur horizontal prend 2 blocs en largeur)
-            if (horizontalWallPositions[wx][wy]) return false;
-            if (wx < 7 && horizontalWallPositions[wx + 1][wy]) return false;
+            if (wx >= 7) return false; // dépasse à droite
+            return !horizontalWallPositions[wx][wy] && !horizontalWallPositions[wx + 1][wy];
         }
-        return true;
     }
 
+    public boolean isVerticalWallAt(int x, int y) {
+        return x >= 0 && x < 8 && y >= 0 && y < 8 && verticalWallPositions[x][y];
+    }
+
+    public boolean isHorizontalWallAt(int x, int y) {
+        return x >= 0 && x < 8 && y >= 0 && y < 8 && horizontalWallPositions[x][y];
+    }
+
+
+    public boolean peutPlacerMurSansCroix(int x, int y, boolean vertical) {
+        if (vertical) {
+            return !(murExiste(x - 1, y, false) || murExiste(x, y, false));
+        } else {
+            return !(murExiste(x, y - 1, true) || murExiste(x, y, true));
+        }
+    }
+
+    private boolean murExiste(int x, int y, boolean vertical) {
+        if (x < 0 || y < 0 || x >= 8 || y >= 8) return false;
+        return vertical ? verticalWallPositions[x][y] : horizontalWallPositions[x][y];
+    }
 
     public List<int[]> getPossibleMoves() {
         List<int[]> moves = new ArrayList<>();
@@ -71,10 +107,10 @@ public class Plateau {
         int y = jp.getY();
 
         int[][] directions = switch (jp.getId()) {
-            case 1 -> new int[][] { {0, 1}, {-1, 0}, {1, 0} }; // bas, gauche, droite
-            case 2 -> new int[][] { {0, -1}, {-1, 0}, {1, 0} }; // haut, gauche, droite
-            case 3 -> new int[][] { {1, 0}, {0, -1}, {0, 1} }; // droite, haut, bas
-            case 4 -> new int[][] { {-1, 0}, {0, -1}, {0, 1} }; // gauche, haut, bas
+            case 1 -> new int[][]{{0, 1}, {-1, 0}, {1, 0}};
+            case 2 -> new int[][]{{0, -1}, {-1, 0}, {1, 0}};
+            case 3 -> new int[][]{{1, 0}, {0, -1}, {0, 1}};
+            case 4 -> new int[][]{{-1, 0}, {0, -1}, {0, 1}};
             default -> new int[0][0];
         };
 
@@ -142,47 +178,50 @@ public class Plateau {
     }
 
     public boolean placeWallCurrentPlayer(int wx, int wy, boolean vertical) {
-        if (wx < 0 || wy < 0 || wx >= 8 || wy >= 8) return false;
-        if (currentPlayer.getWallsRemaining() <= 0) return false;
-
+        // Si le mur est vertical, on vérifie qu'il ne dépasse pas la dernière ligne
         if (vertical) {
-            if (verticalWallPositions[wx][wy]) return false;
+            // Si on place un mur vertical sur la dernière ligne, il faut vérifier la ligne suivante
+            if (wy >= 8) return false; // Si wy est sur ou au-delà de 7, ça dépasse
+        } else {
+            // Si le mur est horizontal, on vérifie qu'il ne dépasse pas la dernière colonne
+            if (wx >= 8) return false; // Si wx est sur ou au-delà de 7, ça dépasse
+        }
+
+        // Si tout est valide, on place le mur
+        if (vertical) {
             verticalWallPositions[wx][wy] = true;
             blockedRight[wx][wy] = true;
             blockedRight[wx][wy + 1] = true;
         } else {
-            if (horizontalWallPositions[wx][wy]) return false;
             horizontalWallPositions[wx][wy] = true;
             blockedDown[wx][wy] = true;
             blockedDown[wx + 1][wy] = true;
-        }
-
-        for (Joueur j : joueurs) {
-            if (!hasPathToGoal(j)) {
-                if (vertical) {
-                    verticalWallPositions[wx][wy] = false;
-                    blockedRight[wx][wy] = false;
-                    blockedRight[wx][wy + 1] = false;
-                } else {
-                    horizontalWallPositions[wx][wy] = false;
-                    blockedDown[wx][wy] = false;
-                    blockedDown[wx + 1][wy] = false;
-                }
-                return false;
-            }
         }
 
         currentPlayer.decrementWalls();
         return true;
     }
 
+
+
+
+
+    public boolean hasVerticalWall(int x, int y) {
+        return x >= 0 && x < 8 && y >= 0 && y < 8 && verticalWallPositions[x][y];
+    }
+
+    public boolean hasHorizontalWall(int x, int y) {
+        return x >= 0 && x < 8 && y >= 0 && y < 8 && horizontalWallPositions[x][y];
+    }
+
+
     public Joueur getWinner() {
         for (Joueur j : joueurs) {
             switch (j.getId()) {
-                case 1: if (j.getY() == 8) return j; break;
-                case 2: if (j.getY() == 0) return j; break;
-                case 3: if (j.getX() == 8) return j; break;
-                case 4: if (j.getX() == 0) return j; break;
+                case 1 -> { if (j.getY() == 8) return j; }
+                case 2 -> { if (j.getY() == 0) return j; }
+                case 3 -> { if (j.getX() == 8) return j; }
+                case 4 -> { if (j.getX() == 0) return j; }
             }
         }
         return null;
@@ -200,10 +239,10 @@ public class Plateau {
             int y = pos[1];
 
             switch (j.getId()) {
-                case 1: if (y == 8) return true; break;
-                case 2: if (y == 0) return true; break;
-                case 3: if (x == 8) return true; break;
-                case 4: if (x == 0) return true; break;
+                case 1 -> { if (y == 8) return true; }
+                case 2 -> { if (y == 0) return true; }
+                case 3 -> { if (x == 8) return true; }
+                case 4 -> { if (x == 0) return true; }
             }
 
             for (int[] m : getNeighbors(x, y)) {

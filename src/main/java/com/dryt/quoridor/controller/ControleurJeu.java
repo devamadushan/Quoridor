@@ -10,8 +10,6 @@ import com.dryt.quoridor.model.Joueur;
 import com.dryt.quoridor.app.JeuQuoridor;
 import javafx.scene.shape.Rectangle;
 
-import java.util.List;
-
 public class ControleurJeu {
 
     @FXML
@@ -32,71 +30,118 @@ public class ControleurJeu {
         cellButtons = new Button[9][9];
 
         javafx.application.Platform.runLater(() -> {
-            int totalWidth = 9 * cellSize + 8 * wallSize;
-            int totalHeight = 9 * cellSize + 8 * wallSize;
-
             double offsetX = 80;
             double offsetY = 80;
 
-            for (int y = 0; y < 17; y++) {
-                for (int x = 0; x < 17; x++) {
-                    if (x % 2 == 0 && y % 2 == 0) {
-                        double posX = offsetX + (x / 2.0) * (cellSize + wallSize);
-                        double posY = offsetY + (y / 2.0) * (cellSize + wallSize);
-                        Button cell = new Button();
-                        cell.setPrefSize(cellSize, cellSize);
-                        cell.getStyleClass().add("cell");
-                        cell.setLayoutX(posX);
-                        cell.setLayoutY(posY);
-                        final int cx = x / 2;
-                        final int cy = y / 2;
-                        cell.setOnAction(event -> onCellClicked(cx, cy));
-                        cellButtons[cx][cy] = cell;
-                        boardPane.getChildren().add(cell);
-                    } else if (x % 2 != y % 2) {
-                        final int wx = x / 2;
-                        final int wy = y / 2;
+            for (int y = 0; y < 9; y++) {
+                for (int x = 0; x < 9; x++) {
+                    double baseX = offsetX + x * (cellSize + wallSize);
+                    double baseY = offsetY + y * (cellSize + wallSize);
 
-                        boolean vertical;
-                        if (x % 2 == 1 && y % 2 == 0) vertical = true;
-                        else if (x % 2 == 0 && y % 2 == 1) vertical = false;
-                        else continue;
+                    Button cell = new Button();
+                    cell.setPrefSize(cellSize, cellSize);
+                    cell.getStyleClass().add("cell");
+                    cell.setLayoutX(baseX);
+                    cell.setLayoutY(baseY);
+                    final int cx = x;
+                    final int cy = y;
+                    cell.setOnAction(event -> onCellClicked(cx, cy));
+                    cellButtons[cx][cy] = cell;
+                    boardPane.getChildren().add(cell);
 
-                        double posX, posY;
-                        if (vertical) {
-                            posX = offsetX + (x / 2) * (cellSize + wallSize) + cellSize;
-                            posY = offsetY + (y / 2.0) * (cellSize + wallSize);
-                        } else {
-                            posX = offsetX + (x / 2.0) * (cellSize + wallSize);
-                            posY = offsetY + (y / 2) * (cellSize + wallSize) + cellSize;
-                        }
-
-                        Button wallButton = new Button();
-                        wallButton.setPrefSize(wallSize + 4, wallSize + 4);
-                        wallButton.getStyleClass().add("wall-placeholder");
-                        wallButton.setLayoutX(posX);
-                        wallButton.setLayoutY(posY);
-                        wallButton.setFocusTraversable(false);
-
-                        wallButton.setOnAction(event -> {
-                            // ✅ Nouveau contrôle de chevauchement ajouté ici
-                            if (!plateau.peutPlacerMurSansChevauchement(wx, wy, vertical)) return;
-                            if (plateau.placeWallCurrentPlayer(wx, wy, vertical)) {
-                                wallButton.setVisible(false);
-                                drawWall(wx, wy, vertical, offsetX, offsetY);
-                                plateau.switchPlayerTurn();
-                                updateBoardState();
-                            }
-                        });
-                        wallButton.setOnMouseEntered(e -> showGhostWall(wx, wy, vertical, offsetX, offsetY));
-                        wallButton.setOnMouseExited(e -> hideGhostWall());
-                        boardPane.getChildren().add(wallButton);
-                    }
+                    if (x < 8 && y < 9)
+                        createWallPlaceholder(baseX + cellSize, baseY + cellSize / 2.0 - wallSize / 2.0, x, y, true, offsetX, offsetY);
+                    if (y < 8 && x < 9)
+                        createWallPlaceholder(baseX + cellSize / 2.0 - wallSize / 2.0, baseY + cellSize, x, y, false, offsetX, offsetY);
+                    if (x < 8 && y < 8)
+                        createWallPlaceholder(baseX + cellSize, baseY + cellSize, x, y, true, offsetX, offsetY);
                 }
             }
 
             updateBoardState();
         });
+    }
+
+    private void createWallPlaceholder(double x, double y, int wx, int wy, boolean vertical, double offsetX, double offsetY) {
+        double detectorSize = wallSize * 4;
+
+        Rectangle wallDetector = new Rectangle(detectorSize, detectorSize);
+        // Recentrage en reculant X et Y de la moitié de l'ajouté
+        wallDetector.setLayoutX(x - (detectorSize - wallSize) / 4.0);
+        wallDetector.setLayoutY(y - (detectorSize - wallSize) / 4.0);
+        //wallDetector.setStyle("-fx-fill: rgba(0, 0, 255, 0.3); -fx-stroke: blue;");
+        wallDetector.setStyle("-fx-fill: transparent; -fx-stroke: transparent;");
+
+        wallDetector.setOnMouseEntered(e -> showGhostWall(wx, wy, vertical, offsetX, offsetY));
+        wallDetector.setOnMouseExited(e -> hideGhostWall());
+
+        wallDetector.setOnMouseClicked(e -> {
+            int effectiveWx = wx;
+            int effectiveWy = wy;
+
+            if (!vertical && wx == 8) effectiveWx = 7;
+            if (vertical && wy == 8) effectiveWy = 7;
+
+            if (isCrossingWall(effectiveWx, effectiveWy, vertical)) {
+                System.out.println("❌ Croisement de mur interdit.");
+                return;
+            }
+
+            if (plateau.canPlaceWall(effectiveWx, effectiveWy, vertical) && plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
+                drawWall(effectiveWx, effectiveWy, vertical, offsetX, offsetY);
+                plateau.switchPlayerTurn();
+                updateBoardState();
+            }
+        });
+
+        boardPane.getChildren().add(wallDetector);
+    }
+
+    private boolean isCrossingWall(int wx, int wy, boolean vertical) {
+        if ((vertical && plateau.hasVerticalWall(wx, wy)) || (!vertical && plateau.hasHorizontalWall(wx, wy))) {
+            return true;
+        }
+        if ((vertical && plateau.hasHorizontalWall(wx, wy)) || (!vertical && plateau.hasVerticalWall(wx, wy))) {
+            return true;
+        }
+        return false;
+    }
+
+    private void showGhostWall(int wx, int wy, boolean vertical, double offsetX, double offsetY) {
+        hideGhostWall();
+        ghostWall = new Rectangle();
+        ghostWall.setMouseTransparent(true);
+
+        int effectiveWx = wx;
+        int effectiveWy = wy;
+
+        if (!vertical && wx == 8) effectiveWx = 7;
+        if (vertical && wy == 8) effectiveWy = 7;
+
+        boolean invalid = isCrossingWall(effectiveWx, effectiveWy, vertical) || !plateau.canPlaceWall(effectiveWx, effectiveWy, vertical);
+
+        ghostWall.setStyle(invalid ? "-fx-fill: rgba(255, 0, 0, 0.3); -fx-stroke: red;" : "-fx-fill: rgba(0, 0, 0, 0.3); -fx-stroke: green;");
+
+        if (vertical) {
+            ghostWall.setWidth(wallSize);
+            ghostWall.setHeight(cellSize * 2 + wallSize);
+            ghostWall.setX(offsetX + effectiveWx * (cellSize + wallSize) + cellSize);
+            ghostWall.setY(offsetY + effectiveWy * (cellSize + wallSize));
+        } else {
+            ghostWall.setWidth(cellSize * 2 + wallSize);
+            ghostWall.setHeight(wallSize);
+            ghostWall.setX(offsetX + effectiveWx * (cellSize + wallSize));
+            ghostWall.setY(offsetY + effectiveWy * (cellSize + wallSize) + cellSize);
+        }
+
+        boardPane.getChildren().add(ghostWall);
+    }
+
+    private void hideGhostWall() {
+        if (ghostWall != null) {
+            boardPane.getChildren().remove(ghostWall);
+            ghostWall = null;
+        }
     }
 
     private void drawWall(int wx, int wy, boolean vertical, double offsetX, double offsetY) {
@@ -114,40 +159,7 @@ public class ControleurJeu {
         }
         wallSegment.getStyleClass().add("wall-placed");
         boardPane.getChildren().add(wallSegment);
-    }
-
-    private void showGhostWall(int wx, int wy, boolean vertical, double offsetX, double offsetY) {
-        if (!plateau.peutPlacerMurSansChevauchement(wx, wy, vertical)) {
-            hideGhostWall();
-            return;
-        }
-
-        if (ghostWall != null) boardPane.getChildren().remove(ghostWall);
-        ghostWall = new Rectangle();
-        ghostWall.getStyleClass().add("wall-ghost");
-        ghostWall.setMouseTransparent(true);
-
-        if (vertical) {
-            ghostWall.setWidth(wallSize);
-            ghostWall.setHeight(cellSize * 2 + wallSize);
-            ghostWall.setX(offsetX + wx * (cellSize + wallSize) + cellSize);
-            ghostWall.setY(offsetY + wy * (cellSize + wallSize));
-        } else {
-            ghostWall.setWidth(cellSize * 2 + wallSize);
-            ghostWall.setHeight(wallSize);
-            ghostWall.setX(offsetX + wx * (cellSize + wallSize));
-            ghostWall.setY(offsetY + wy * (cellSize + wallSize) + cellSize);
-        }
-
-        boardPane.getChildren().add(ghostWall);
-    }
-
-
-    private void hideGhostWall() {
-        if (ghostWall != null) {
-            boardPane.getChildren().remove(ghostWall);
-            ghostWall = null;
-        }
+        System.out.println("Mur placé : " + (vertical ? "V" : "H") + " à " + wx + ", " + wy);
     }
 
     private void onCellClicked(int x, int y) {
@@ -163,6 +175,7 @@ public class ControleurJeu {
             JeuQuoridor.goMenu();
             return;
         }
+
         plateau.switchPlayerTurn();
         updateBoardState();
     }
@@ -173,14 +186,17 @@ public class ControleurJeu {
                 cellButtons[x][y].getStyleClass().removeAll("highlight", "player1", "player2", "player3", "player4");
             }
         }
+
         for (Joueur joueur : plateau.getJoueurs()) {
             String styleClass = "player" + joueur.getId();
             cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
         }
+
         for (int[] move : plateau.getPossibleMoves()) {
             cellButtons[move[0]][move[1]].getStyleClass().add("highlight");
         }
-        labelMursRestants.setText("Joueur " + plateau.getCurrentPlayer().getId() +
-                " - murs restants : " + plateau.getCurrentPlayer().getWallsRemaining());
+
+        labelMursRestants.setText("Joueur " + plateau.getCurrentPlayer().getId()
+                + " - murs restants : " + plateau.getCurrentPlayer().getWallsRemaining());
     }
 }
