@@ -20,23 +20,26 @@ public class Plateau {
                 joueurs.add(new Joueur(1, 4, 0, 10));
             }
             case 4 -> {
-                // Ordre souhaité : Orange (bas), Vert (droite), Rouge (gauche), Bleu (haut)
-
-                joueurs.add(new Joueur(1, 4, 0, 5)); // Bleu
-                joueurs.add(new Joueur(2, 4, 8, 5)); // Orange
-                joueurs.add(new Joueur(3, 0, 4, 5)); // Rouge
                 joueurs.add(new Joueur(4, 8, 4, 5)); // Vert
-
-
+                joueurs.add(new Joueur(2, 4, 8, 5)); // Orange
+                joueurs.add(new Joueur(3, 0, 4, 5)); // Rouge.
+                joueurs.add(new Joueur(1, 4, 0, 5)); // Bleu
             }
             default -> throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
         }
-        currentPlayer = joueurs.get(0); // le premier joueur dans la liste commence
+        currentPlayer = getJoueurById(2);; // le premier joueur dans la liste commence
 
         verticalWallPositions = new boolean[8][8];
         horizontalWallPositions = new boolean[8][8];
         blockedRight = new boolean[9][9];
         blockedDown = new boolean[9][9];
+    }
+
+    public Joueur getJoueurById(int id) {
+        for (Joueur j : joueurs) {
+            if (j.getId() == id) return j;
+        }
+        return null;
     }
 
 
@@ -248,8 +251,7 @@ public class Plateau {
                 return horizontalWallPositions[wx][wy] || horizontalWallPositions[wx + 1][wy];
             }
         }
-        // ⚠️ Si la position est hors-borne, on considère que ce n’est PAS un chevauchement,
-        // mais une erreur de borne à détecter ailleurs (dans canPlaceWall par exemple).
+
         return false;
     }
 
