@@ -205,6 +205,56 @@ public class Plateau {
     }
 
 
+    public boolean allPlayersHaveAPathAfterWall(int wx, int wy, boolean vertical) {
+        // Simuler l'ajout du mur
+        if (vertical) {
+            verticalWallPositions[wx][wy] = true;
+            blockedRight[wx][wy] = true;
+            blockedRight[wx][wy + 1] = true;
+        } else {
+            horizontalWallPositions[wx][wy] = true;
+            blockedDown[wx][wy] = true;
+            blockedDown[wx + 1][wy] = true;
+        }
+
+        boolean allHavePath = true;
+        for (Joueur j : joueurs) {
+            if (!hasPathToGoal(j)) {
+                allHavePath = false;
+                break;
+            }
+        }
+
+        // Annuler le mur simulé
+        if (vertical) {
+            verticalWallPositions[wx][wy] = false;
+            blockedRight[wx][wy] = false;
+            blockedRight[wx][wy + 1] = false;
+        } else {
+            horizontalWallPositions[wx][wy] = false;
+            blockedDown[wx][wy] = false;
+            blockedDown[wx + 1][wy] = false;
+        }
+
+        return allHavePath;
+    }
+    public boolean isWallOverlapping(int wx, int wy, boolean vertical) {
+        if (vertical) {
+            if (wx >= 0 && wx < 8 && wy >= 0 && wy < 7) {
+                return verticalWallPositions[wx][wy] || verticalWallPositions[wx][wy + 1];
+            }
+        } else {
+            if (wx >= 0 && wx < 7 && wy >= 0 && wy < 8) {
+                return horizontalWallPositions[wx][wy] || horizontalWallPositions[wx + 1][wy];
+            }
+        }
+        // ⚠️ Si la position est hors-borne, on considère que ce n’est PAS un chevauchement,
+        // mais une erreur de borne à détecter ailleurs (dans canPlaceWall par exemple).
+        return false;
+    }
+
+
+
 
 
 

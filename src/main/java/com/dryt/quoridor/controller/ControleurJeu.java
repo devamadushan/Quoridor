@@ -87,6 +87,15 @@ public class ControleurJeu {
                 System.out.println("❌ Croisement de mur interdit.");
                 return;
             }
+            if (!plateau.allPlayersHaveAPathAfterWall(effectiveWx, effectiveWy, vertical)) {
+                System.out.println("❌ Ce mur bloquerait un joueur complètement.");
+                return;
+            }
+            if (plateau.isWallOverlapping(effectiveWx, effectiveWy, vertical)) {
+                System.out.println("❌ Chevauchement de mur interdit.");
+                return;
+            }
+
 
             if (plateau.canPlaceWall(effectiveWx, effectiveWy, vertical) && plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
                 drawWall(effectiveWx, effectiveWy, vertical, offsetX, offsetY);
