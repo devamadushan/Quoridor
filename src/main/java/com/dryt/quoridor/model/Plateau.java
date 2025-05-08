@@ -115,13 +115,14 @@ public class Plateau {
         int x = jp.getX();
         int y = jp.getY();
 
-        int[][] directions = switch (jp.getId()) {
-            case 1 -> new int[][]{{0, 1}, {-1, 0}, {1, 0}};
-            case 2 -> new int[][]{{0, -1}, {-1, 0}, {1, 0}};
-            case 3 -> new int[][]{{1, 0}, {0, -1}, {0, 1}};
-            case 4 -> new int[][]{{-1, 0}, {0, -1}, {0, 1}};
-            default -> new int[0][0];
+        int[][] directions = new int[][]{
+                {0, 1},    // bas
+                {0, -1},   // haut
+                {-1, 0},   // gauche
+                {1, 0}     // droite
         };
+
+
 
         for (int[] dir : directions) {
             int nx = x + dir[0];
