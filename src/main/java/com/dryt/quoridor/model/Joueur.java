@@ -16,25 +16,20 @@ public class Joueur {
     public int getId() {
         return id;
     }
-
     public int getX() {
         return x;
     }
-
     public int getY() {
         return y;
     }
-
     public void setPosition(int newX, int newY) {
         this.x = newX;
         this.y = newY;
     }
 
-
     public int getWallsRemaining() {
         return wallsRemaining;
     }
-
     public void decrementWalls() {
         if (wallsRemaining > 0) {
             wallsRemaining--;

@@ -16,19 +16,22 @@ public class Plateau {
         switch (nombreJoueurs) {
             case 2 -> {
                 // Bleu (haut), Rouge (bas) → ici on commence par Rouge
-                joueurs.add(new Joueur(2, 4, 8, 10)); // Rouge
+                joueurs.add(new Joueur(2, 4, 8, 10)); // Rouge commence
                 joueurs.add(new Joueur(1, 4, 0, 10));
             }
             case 4 -> {
-                joueurs.add(new Joueur(4, 8, 4, 5)); // Vert
-                joueurs.add(new Joueur(2, 4, 8, 5)); // Orange
-                joueurs.add(new Joueur(3, 0, 4, 5)); // Rouge.
+                // Ordre souhaité : Orange (bas), Vert (droite), Rouge (gauche), Bleu (haut)
+
                 joueurs.add(new Joueur(1, 4, 0, 5)); // Bleu
+                joueurs.add(new Joueur(2, 4, 8, 5)); // Orange
+                joueurs.add(new Joueur(3, 0, 4, 5)); // Rouge
+                joueurs.add(new Joueur(4, 8, 4, 5)); // Vert
+
 
             }
             default -> throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
         }
-        currentPlayer = getJoueurById(2); // le premier joueur dans la liste commence
+        currentPlayer = joueurs.get(0); // le premier joueur dans la liste commence
 
         verticalWallPositions = new boolean[8][8];
         horizontalWallPositions = new boolean[8][8];
@@ -36,15 +39,9 @@ public class Plateau {
         blockedDown = new boolean[9][9];
     }
 
+
     public List<Joueur> getJoueurs() {
         return joueurs;
-    }
-
-    public Joueur getJoueurById(int id) {
-        for (Joueur j : joueurs) {
-            if (j.getId() == id) return j;
-        }
-        return null;
     }
 
     public Joueur getCurrentPlayer() {
@@ -176,6 +173,8 @@ public class Plateau {
         return false;
     }
 
+
+
     public boolean moveCurrentPlayer(int x, int y) {
         for (int[] m : getPossibleMoves()) {
             if (m[0] == x && m[1] == y) {
@@ -187,29 +186,24 @@ public class Plateau {
     }
 
     public boolean placeWallCurrentPlayer(int wx, int wy, boolean vertical) {
-        // Si le mur est vertical, on vérifie qu'il ne dépasse pas la dernière ligne
-        if (vertical) {
-            // Si on place un mur vertical sur la dernière ligne, il faut vérifier la ligne suivante
-            if (wy >= 8) return false; // Si wy est sur ou au-delà de 7, ça dépasse
-        } else {
-            // Si le mur est horizontal, on vérifie qu'il ne dépasse pas la dernière colonne
-            if (wx >= 8) return false; // Si wx est sur ou au-delà de 7, ça dépasse
-        }
+        if (currentPlayer.getWallsRemaining() <= 0) return false; // ✅ bloque si plus de murs
 
-        // Si tout est valide, on place le mur
         if (vertical) {
+            if (wy >= 8) return false;
             verticalWallPositions[wx][wy] = true;
             blockedRight[wx][wy] = true;
             blockedRight[wx][wy + 1] = true;
         } else {
+            if (wx >= 8) return false;
             horizontalWallPositions[wx][wy] = true;
             blockedDown[wx][wy] = true;
             blockedDown[wx + 1][wy] = true;
         }
 
-        currentPlayer.decrementWalls();
+        currentPlayer.decrementWalls(); // ✅ décrémente le compteur
         return true;
     }
+
 
 
 

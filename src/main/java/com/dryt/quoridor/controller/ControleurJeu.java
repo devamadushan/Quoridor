@@ -27,6 +27,7 @@ public class ControleurJeu {
     @FXML
     private void initialize() {
         plateau = JeuQuoridor.getPlateau();
+
         cellButtons = new Button[9][9];
 
         javafx.application.Platform.runLater(() -> {
@@ -114,13 +115,17 @@ public class ControleurJeu {
 
         int effectiveWx = wx;
         int effectiveWy = wy;
-
         if (!vertical && wx == 8) effectiveWx = 7;
         if (vertical && wy == 8) effectiveWy = 7;
 
-        boolean invalid = isCrossingWall(effectiveWx, effectiveWy, vertical) || !plateau.canPlaceWall(effectiveWx, effectiveWy, vertical);
+        boolean noWallsLeft = plateau.getCurrentPlayer().getWallsRemaining() <= 0;
+        boolean invalid = isCrossingWall(effectiveWx, effectiveWy, vertical)
+                || !plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
+                || noWallsLeft;
 
-        ghostWall.setStyle(invalid ? "-fx-fill: rgba(255, 0, 0, 0.3); -fx-stroke: red;" : "-fx-fill: rgba(0, 0, 0, 0.3); -fx-stroke: green;");
+        ghostWall.setStyle(invalid
+                ? "-fx-fill: rgba(255, 0, 0, 0.3); -fx-stroke: red;"
+                : "-fx-fill: rgba(0, 0, 0, 0.3); -fx-stroke: green;");
 
         if (vertical) {
             ghostWall.setWidth(wallSize);
@@ -136,6 +141,7 @@ public class ControleurJeu {
 
         boardPane.getChildren().add(ghostWall);
     }
+
 
     private void hideGhostWall() {
         if (ghostWall != null) {
