@@ -11,19 +11,21 @@ public class Plateau {
     private boolean[][] blockedRight;
     private boolean[][] blockedDown;
 
-    public Plateau(int nombreJoueurs) {
+    public Plateau(){}
+
+    public Plateau(int nombreJoueurs, int nbAI) {
         joueurs = new ArrayList<>();
         switch (nombreJoueurs) {
             case 2 -> {
                 // Bleu (haut), Rouge (bas) → ici on commence par Rouge
-                joueurs.add(new Joueur(2, 4, 8, 10)); // Rouge commence
-                joueurs.add(new Joueur(1, 4, 0, 10));
+                joueurs.add(new Joueur(2, 4, 8, 10,false)); // Rouge commence
+                joueurs.add(new Joueur(1, 4, 0, 10,true));
             }
             case 4 -> {
-                joueurs.add(new Joueur(4, 8, 4, 5)); // Vert
-                joueurs.add(new Joueur(2, 4, 8, 5)); // Orange
-                joueurs.add(new Joueur(3, 0, 4, 5)); // Rouge.
-                joueurs.add(new Joueur(1, 4, 0, 5)); // Bleu
+                joueurs.add(new Joueur(4, 8, 4, 5,true)); // Vert
+                joueurs.add(new Joueur(2, 4, 8, 5,false)); // Orange
+                joueurs.add(new Joueur(3, 0, 4, 5,true)); // Rouge.
+                joueurs.add(new Joueur(1, 4, 0, 5,false)); // Bleu
             }
             default -> throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
         }
@@ -50,6 +52,7 @@ public class Plateau {
     public Joueur getCurrentPlayer() {
         return currentPlayer;
     }
+
     public boolean canPlaceWall(int wx, int wy, boolean vertical) {
         // Vérifie les limites du plateau
         if (vertical && wy >= 8) return false;
@@ -72,6 +75,7 @@ public class Plateau {
 
     public void switchPlayerTurn() {
         int index = joueurs.indexOf(currentPlayer);
+//        System.out.println("Searching for currentPlayer ID=" + currentPlayer.getId() + ", index=" + index);
         currentPlayer = joueurs.get((index + 1) % joueurs.size());
     }
 
@@ -186,6 +190,7 @@ public class Plateau {
                 return true;
             }
         }
+        System.out.println("Move Fails");
         return false;
     }
 
@@ -193,12 +198,12 @@ public class Plateau {
         if (currentPlayer.getWallsRemaining() <= 0) return false; // ✅ bloque si plus de murs
 
         if (vertical) {
-            if (wy >= 8) return false;
+            if (wy >= 8){ System.out.println("Wall Fails"); return false;}
             verticalWallPositions[wx][wy] = true;
             blockedRight[wx][wy] = true;
             blockedRight[wx][wy + 1] = true;
         } else {
-            if (wx >= 8) return false;
+            if (wx >= 8){ System.out.println("Wall Fails"); return false;}
             horizontalWallPositions[wx][wy] = true;
             blockedDown[wx][wy] = true;
             blockedDown[wx + 1][wy] = true;
@@ -255,9 +260,6 @@ public class Plateau {
 
         return false;
     }
-
-
-
 
 
 
@@ -319,4 +321,57 @@ public class Plateau {
         if (x < size - 1 && !blockedRight[x][y]) neighbors.add(new int[]{x + 1, y});
         return neighbors;
     }
+
+    public void removeVerticalWall(int x, int y) {
+        verticalWallPositions[x][y] = false;
+        blockedRight[x][y] = false;
+        blockedRight[x][y + 1] = false;
+    }
+
+    public void removeHorizontalWall(int x, int y) {
+        horizontalWallPositions[x][y] = false;
+        blockedDown[x][y] = false;
+        blockedDown[x + 1][y] = false;
+    }
+
+    @Override
+    public Plateau clone() {
+        Plateau copy = new Plateau(); // bypass constructor logic
+
+        // Copy wall positions
+        copy.verticalWallPositions = deepCopy(this.verticalWallPositions);
+        copy.horizontalWallPositions = deepCopy(this.horizontalWallPositions);
+        copy.blockedRight = deepCopy(this.blockedRight);
+        copy.blockedDown = deepCopy(this.blockedDown);
+
+        // Copy players
+        copy.joueurs = new ArrayList<>();
+        for (Joueur j : this.joueurs) {
+            copy.joueurs.add(j.clone());
+        }
+
+
+        // Copy current player
+        copy.currentPlayer = copy.getJoueurById(this.currentPlayer.getId());
+
+//        System.out.println("Original Joueur IDs: ");
+//        for (Joueur j : this.joueurs) System.out.print(j.getId() + " ");
+//        System.out.println("\nCloned Joueur IDs: ");
+//        for (Joueur j : copy.joueurs) System.out.print(j.getId() + " ");
+//
+//        System.out.println("Set currentPlayer to Original: ID=" + this.currentPlayer.getId());
+//        System.out.println("Set currentPlayer to clone: ID=" + copy.getJoueurById(this.currentPlayer.getId()).getId());
+
+
+        return copy;
+    }
+
+    private boolean[][] deepCopy(boolean[][] original) {
+        boolean[][] copy = new boolean[original.length][];
+        for (int i = 0; i < original.length; i++) {
+            copy[i] = original[i].clone();
+        }
+        return copy;
+    }
+
 }

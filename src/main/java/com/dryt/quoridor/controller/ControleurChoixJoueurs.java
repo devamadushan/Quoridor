@@ -27,7 +27,7 @@ public class ControleurChoixJoueurs {
         int nombreJoueurs = radio4Joueurs.isSelected() ? 4 : 2;
 
         // Créer le plateau avec le nombre de joueurs choisi
-        Plateau plateau = new Plateau(nombreJoueurs);  // Crée un nouveau plateau avec le nombre de joueurs
+        Plateau plateau = new Plateau(nombreJoueurs,3);  // Crée un nouveau plateau avec le nombre de joueurs
 
         // Assure-toi que l'application utilise ce plateau
         JeuQuoridor.setPlateau(plateau);  // Mets à jour le plateau global de l'application

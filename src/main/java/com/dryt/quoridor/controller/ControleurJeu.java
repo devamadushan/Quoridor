@@ -1,5 +1,8 @@
 package com.dryt.quoridor.controller;
 
+import com.dryt.quoridor.ai.Action;
+import com.dryt.quoridor.ai.MinimaxAI;
+import com.dryt.quoridor.ai.MoveType;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
@@ -9,6 +12,8 @@ import com.dryt.quoridor.model.Plateau;
 import com.dryt.quoridor.model.Joueur;
 import com.dryt.quoridor.app.JeuQuoridor;
 import javafx.scene.shape.Rectangle;
+
+import java.util.Arrays;
 
 public class ControleurJeu {
 
@@ -23,6 +28,7 @@ public class ControleurJeu {
     private final int cellSize = 60;
     private final int wallSize = 8;
     private Rectangle ghostWall;
+    private MinimaxAI aiStrategy;
 
     @FXML
     private void initialize() {
@@ -61,6 +67,8 @@ public class ControleurJeu {
 
             updateBoardState();
         });
+
+        aiStrategy = new MinimaxAI(2);
     }
 
     private void createWallPlaceholder(double x, double y, int wx, int wy, boolean vertical, double offsetX, double offsetY) {
@@ -99,8 +107,8 @@ public class ControleurJeu {
 
             if (plateau.canPlaceWall(effectiveWx, effectiveWy, vertical) && plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
                 drawWall(effectiveWx, effectiveWy, vertical, offsetX, offsetY);
-                plateau.switchPlayerTurn();
-                updateBoardState();
+                switchPlayerTurn();
+
             }
         });
 
@@ -191,8 +199,7 @@ public class ControleurJeu {
             return;
         }
 
-        plateau.switchPlayerTurn();
-        updateBoardState();
+        switchPlayerTurn();
     }
 
     private void updateBoardState() {
@@ -207,11 +214,39 @@ public class ControleurJeu {
             cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
         }
 
+        System.out.println("Possible moves: ");
         for (int[] move : plateau.getPossibleMoves()) {
+            System.out.println(Arrays.toString(move));
             cellButtons[move[0]][move[1]].getStyleClass().add("highlight");
         }
 
         labelMursRestants.setText("Joueur " + plateau.getCurrentPlayer().getId()
                 + " - murs restants : " + plateau.getCurrentPlayer().getWallsRemaining());
+    }
+
+
+    private void switchPlayerTurn(){
+
+        plateau.switchPlayerTurn();
+        updateBoardState();
+
+        if (plateau.getCurrentPlayer().isAI()) {
+            System.out.println("AI looking for move");
+            Action action = aiStrategy.getBestAction(plateau);
+            System.out.println("Move found");
+            if (action.getType() == MoveType.MOVE) {
+               plateau.moveCurrentPlayer(action.getX(), action.getY());
+                switchPlayerTurn();
+
+
+            } else if (action.getType() == MoveType.WALL) {
+
+                plateau.placeWallCurrentPlayer(action.getX(),action.getY(), action.getVertical());
+                drawWall(action.getX(), action.getY(), action.getVertical(), 0,0);
+                switchPlayerTurn();
+
+            }
+
+        }
     }
 }
