@@ -198,7 +198,8 @@ public class ControleurJeu {
     private void updateBoardState() {
         for (int y = 0; y < 9; y++) {
             for (int x = 0; x < 9; x++) {
-                cellButtons[x][y].getStyleClass().removeAll("highlight", "player1", "player2", "player3", "player4");
+                cellButtons[x][y].getStyleClass().clear();
+                cellButtons[x][y].getStyleClass().add("cell");
             }
         }
 
@@ -211,7 +212,6 @@ public class ControleurJeu {
             cellButtons[move[0]][move[1]].getStyleClass().add("highlight");
         }
 
-        labelMursRestants.setText("Joueur " + plateau.getCurrentPlayer().getId()
-                + " - murs restants : " + plateau.getCurrentPlayer().getWallsRemaining());
+        labelMursRestants.setText("Joueur " + plateau.getCurrentPlayer().getId() + " - Murs restants : " + plateau.getCurrentPlayer().getWallsRemaining());
     }
 }

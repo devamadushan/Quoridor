@@ -1,9 +1,65 @@
 .root {
-    -fx-background-image: url("Backgroundtroll.png");
-
+    -fx-background-color: #2C3E50;
+    -fx-font-family: 'Arial', sans-serif;
+    -fx-animation: fadeIn 0.5s ease-in;
 }
+
 .button {
-    -fx-font-size: 20px;
-    -fx-pref-width: 200px;
-    -fx-padding: 10px;
+    -fx-background-color: #3498DB;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 15 30;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+
+.button:hover {
+    -fx-background-color: #2980B9;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 8, 0, 0, 2);
+}
+
+.button:pressed {
+    -fx-background-color: #2471A3;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+.label {
+    -fx-text-fill: #ECF0F1;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+}
+
+.radio-button {
+    -fx-text-fill: #ECF0F1;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.radio-button .radio {
+    -fx-background-color: #34495E;
+    -fx-border-color: #3498DB;
+    -fx-border-width: 2;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.radio-button:selected .radio {
+    -fx-background-color: #3498DB;
+}
+
+.radio-button:hover .radio {
+    -fx-border-color: #2980B9;
+}
+
+@keyframes fadeIn {
+    from { -fx-opacity: 0; }
+    to { -fx-opacity: 1; }
 }

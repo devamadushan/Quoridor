@@ -1,50 +1,67 @@
+/* ----- STYLE GÉNÉRAL ----- */
+.root {
+    -fx-background-color: #2C3E50;
+    -fx-font-family: 'Arial', sans-serif;
+}
+
 /* ----- CASES DE BASE ----- */
 .cell {
-    -fx-background-color: white;
-    -fx-border-color: black;
-    -fx-border-width: 0.5;
+    -fx-background-color: #ECF0F1;
+    -fx-border-color: #34495E;
+    -fx-border-width: 1;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 1);
+    -fx-transition: all 0.3s ease;
+}
+
+.cell:hover {
+    -fx-background-color: #D6EAF8;
+    -fx-cursor: hand;
 }
 
 /* ----- HIGHLIGHT DES DÉPLACEMENTS POSSIBLES ----- */
 .highlight {
-    -fx-background-color: #7CFC00; /* vert clair */
+    -fx-background-color: #2ECC71;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(46,204,113,0.3), 10, 0, 0, 2);
+    -fx-transition: all 0.3s ease;
 }
 
-/* ----- STYLE DES PIONS EN RONDS ----- */
-.player1 {
-    -fx-background-color: red;
-    -fx-background-radius: 50%;
-    -fx-border-radius: 50%;
-    -fx-min-width: 25px;
-    -fx-min-height: 25px;
+.highlight:hover {
+    -fx-background-color: #27AE60;
+    -fx-cursor: hand;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* ----- STYLE DES PIONS EN TROLLS ----- */
+.player1, .player2, .player3, .player4 {
+    -fx-background-size: 50px 50px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-min-width: 50px;
+    -fx-min-height: 50px;
     -fx-padding: 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 2);
+    -fx-transition: all 0.3s ease;
+}
+
+.player1 {
+    -fx-background-image: url('../images/piontroll1.png');
 }
 
 .player2 {
-    -fx-background-color: blue;
-    -fx-background-radius: 50%;
-    -fx-border-radius: 50%;
-    -fx-min-width: 25px;
-    -fx-min-height: 25px;
-    -fx-padding: 0;
+    -fx-background-image: url('../images/piontroll2.png');
 }
 
 .player3 {
-    -fx-background-color: green;
-    -fx-background-radius: 50%;
-    -fx-border-radius: 50%;
-    -fx-min-width: 25px;
-    -fx-min-height: 25px;
-    -fx-padding: 0;
+    -fx-background-image: url('../images/piontroll1.png');
 }
 
 .player4 {
-    -fx-background-color: orange;
-    -fx-background-radius: 50%;
-    -fx-border-radius: 50%;
-    -fx-min-width: 25px;
-    -fx-min-height: 25px;
-    -fx-padding: 0;
+    -fx-background-image: url('../images/piontroll2.png');
 }
 
 /* ----- BOUTONS DE PLACEMENT DE MUR ----- */
@@ -52,23 +69,46 @@
     -fx-background-color: transparent;
     -fx-text-fill: transparent;
     -fx-border-width: 0;
+    -fx-cursor: hand;
 }
-
 
 /* ----- MURS PLACÉS ----- */
 .wall-placed {
-    -fx-fill: saddlebrown;
-    -fx-stroke: black;
+    -fx-fill: #8B4513;
+    -fx-stroke: #5D4037;
     -fx-stroke-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
 }
-
-
 
 .wall-placed:disabled {
-    -fx-opacity: 1.0; /* bien visible même désactivé */
+    -fx-opacity: 1.0;
 }
+
 .wall-ghost {
-    -fx-fill: rgba(139, 69, 19, 0.4); /* marron transparent */
-    -fx-stroke: black;
+    -fx-fill: rgba(139, 69, 19, 0.4);
+    -fx-stroke: #5D4037;
     -fx-stroke-width: 0.5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3, 0, 0, 1);
+}
+
+/* ----- LABEL DES MURS RESTANTS ----- */
+#labelMursRestants {
+    -fx-text-fill: #ECF0F1;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10;
+    -fx-background-color: #34495E;
+    -fx-background-radius: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+}
+
+/* ----- ANIMATIONS ----- */
+@keyframes pulse {
+    0% { -fx-scale-x: 1; -fx-scale-y: 1; }
+    50% { -fx-scale-x: 1.05; -fx-scale-y: 1.05; }
+    100% { -fx-scale-x: 1; -fx-scale-y: 1; }
+}
+
+.highlight {
+    -fx-animation: pulse 1s infinite;
 }

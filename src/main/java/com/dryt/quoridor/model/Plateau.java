@@ -150,14 +150,16 @@ public class Plateau {
                             moves.add(new int[]{nnx, nny});
                         } else {
                             if (dir[0] == 0) {
-                                if (nx > 0 && !blockedRight[nx - 1][ny] && !isPlayerAt(nx - 1, ny))
+                                // Vérification pour le déplacement horizontal
+                                if (nx > 0 && !blockedRight[nx - 1][ny] && !isPlayerAt(nx - 1, ny) && !blockedDown[nx - 1][ny])
                                     moves.add(new int[]{nx - 1, ny});
-                                if (nx < size - 1 && !blockedRight[nx][ny] && !isPlayerAt(nx + 1, ny))
+                                if (nx < size - 1 && !blockedRight[nx][ny] && !isPlayerAt(nx + 1, ny) && !blockedDown[nx + 1][ny])
                                     moves.add(new int[]{nx + 1, ny});
                             } else if (dir[1] == 0) {
-                                if (ny > 0 && !blockedDown[nx][ny - 1] && !isPlayerAt(nx, ny - 1))
+                                // Vérification pour le déplacement vertical
+                                if (ny > 0 && !blockedDown[nx][ny - 1] && !isPlayerAt(nx, ny - 1) && !blockedRight[nx][ny - 1])
                                     moves.add(new int[]{nx, ny - 1});
-                                if (ny < size - 1 && !blockedDown[nx][ny] && !isPlayerAt(nx, ny + 1))
+                                if (ny < size - 1 && !blockedDown[nx][ny] && !isPlayerAt(nx, ny + 1) && !blockedRight[nx][ny + 1])
                                     moves.add(new int[]{nx, ny + 1});
                             }
                         }
