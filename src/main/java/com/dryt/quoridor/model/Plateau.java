@@ -250,7 +250,7 @@ public class Plateau {
     public boolean isWallOverlapping(int wx, int wy, boolean vertical) {
         if (vertical) {
             if (wx >= 0 && wx < 8 && wy >= 0 && wy < 7) {
-                return verticalWallPositions[wx][wy] || verticalWallPositions[wx][wy + 1];
+                return verticalWallPositions[wx][wy] || verticalWallPositions[wx][wy - 1];
             }
         } else {
             if (wx >= 0 && wx < 7 && wy >= 0 && wy < 8) {

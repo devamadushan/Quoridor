@@ -116,13 +116,13 @@ public class ControleurJeu {
     }
 
     private boolean isCrossingWall(int wx, int wy, boolean vertical) {
-        if ((vertical && plateau.hasVerticalWall(wx, wy)) || (!vertical && plateau.hasHorizontalWall(wx, wy))) {
-            return true;
+        if (vertical) {
+            // Vérifie si un mur horizontal existe à gauche ou à droite du mur vertical
+            return plateau.hasHorizontalWall(wx, wy) || plateau.hasHorizontalWall(wx - 1, wy);
+        } else {
+            // Vérifie si un mur vertical existe au-dessus ou en dessous du mur horizontal
+            return plateau.hasVerticalWall(wx, wy) || plateau.hasVerticalWall(wx, wy - 1);
         }
-        if ((vertical && plateau.hasHorizontalWall(wx, wy)) || (!vertical && plateau.hasVerticalWall(wx, wy))) {
-            return true;
-        }
-        return false;
     }
 
     private void showGhostWall(int wx, int wy, boolean vertical, double offsetX, double offsetY) {

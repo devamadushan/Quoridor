@@ -3,7 +3,9 @@ package com.dryt.quoridor.ai;
 import com.dryt.quoridor.model.Joueur;
 import com.dryt.quoridor.model.Plateau;
 
-public class Action {
+public class
+
+Action {
 
 
     private final MoveType type;
