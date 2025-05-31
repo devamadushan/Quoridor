@@ -27,19 +27,17 @@ public class ControleurJeu {
     private Button[][] cellButtons;
     private final int cellSize = 60;
     private final int wallSize = 8;
+    private final double offsetX = 80;
+    private final double offsetY = 80;
     private Rectangle ghostWall;
     private MinimaxAI aiStrategy;
 
     @FXML
     private void initialize() {
         plateau = JeuQuoridor.getPlateau();
-
         cellButtons = new Button[9][9];
 
         javafx.application.Platform.runLater(() -> {
-            double offsetX = 80;
-            double offsetY = 80;
-
             for (int y = 0; y < 9; y++) {
                 for (int x = 0; x < 9; x++) {
                     double baseX = offsetX + x * (cellSize + wallSize);
@@ -57,37 +55,33 @@ public class ControleurJeu {
                     boardPane.getChildren().add(cell);
 
                     if (x < 8 && y < 9)
-                        createWallPlaceholder(baseX + cellSize, baseY + cellSize / 2.0 - wallSize / 2.0, x, y, true, offsetX, offsetY);
+                        createWallPlaceholder(baseX + cellSize, baseY + cellSize / 2.0 - wallSize / 2.0, x, y, true);
                     if (y < 8 && x < 9)
-                        createWallPlaceholder(baseX + cellSize / 2.0 - wallSize / 2.0, baseY + cellSize, x, y, false, offsetX, offsetY);
+                        createWallPlaceholder(baseX + cellSize / 2.0 - wallSize / 2.0, baseY + cellSize, x, y, false);
                     if (x < 8 && y < 8)
-                        createWallPlaceholder(baseX + cellSize, baseY + cellSize, x, y, true, offsetX, offsetY);
+                        createWallPlaceholder(baseX + cellSize, baseY + cellSize, x, y, true);
                 }
             }
-
             updateBoardState();
         });
 
         aiStrategy = new MinimaxAI(2);
     }
 
-    private void createWallPlaceholder(double x, double y, int wx, int wy, boolean vertical, double offsetX, double offsetY) {
+    private void createWallPlaceholder(double x, double y, int wx, int wy, boolean vertical) {
         double detectorSize = wallSize * 4;
 
         Rectangle wallDetector = new Rectangle(detectorSize, detectorSize);
-        // Recentrage en reculant X et Y de la moitié de l'ajouté
         wallDetector.setLayoutX(x - (detectorSize - wallSize) / 4.0);
         wallDetector.setLayoutY(y - (detectorSize - wallSize) / 4.0);
-        //wallDetector.setStyle("-fx-fill: rgba(0, 0, 255, 0.3); -fx-stroke: blue;");
         wallDetector.setStyle("-fx-fill: transparent; -fx-stroke: transparent;");
 
-        wallDetector.setOnMouseEntered(e -> showGhostWall(wx, wy, vertical, offsetX, offsetY));
+        wallDetector.setOnMouseEntered(e -> showGhostWall(wx, wy, vertical));
         wallDetector.setOnMouseExited(e -> hideGhostWall());
 
         wallDetector.setOnMouseClicked(e -> {
             int effectiveWx = wx;
             int effectiveWy = wy;
-
             if (!vertical && wx == 8) effectiveWx = 7;
             if (vertical && wy == 8) effectiveWy = 7;
 
@@ -104,28 +98,24 @@ public class ControleurJeu {
                 return;
             }
 
-
-            if (plateau.canPlaceWall(effectiveWx, effectiveWy, vertical) && plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
-                drawWall(effectiveWx, effectiveWy, vertical, offsetX, offsetY);
+            if (plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
+                    && plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
+                drawWall(effectiveWx, effectiveWy, vertical);
                 switchPlayerTurn();
-
             }
         });
-
         boardPane.getChildren().add(wallDetector);
     }
 
     private boolean isCrossingWall(int wx, int wy, boolean vertical) {
         if (vertical) {
-            // Vérifie si un mur horizontal existe à gauche ou à droite du mur vertical
             return plateau.hasHorizontalWall(wx, wy) || plateau.hasHorizontalWall(wx - 1, wy);
         } else {
-            // Vérifie si un mur vertical existe au-dessus ou en dessous du mur horizontal
             return plateau.hasVerticalWall(wx, wy) || plateau.hasVerticalWall(wx, wy - 1);
         }
     }
 
-    private void showGhostWall(int wx, int wy, boolean vertical, double offsetX, double offsetY) {
+    private void showGhostWall(int wx, int wy, boolean vertical) {
         hideGhostWall();
         ghostWall = new Rectangle();
         ghostWall.setMouseTransparent(true);
@@ -159,7 +149,6 @@ public class ControleurJeu {
         boardPane.getChildren().add(ghostWall);
     }
 
-
     private void hideGhostWall() {
         if (ghostWall != null) {
             boardPane.getChildren().remove(ghostWall);
@@ -167,7 +156,7 @@ public class ControleurJeu {
         }
     }
 
-    private void drawWall(int wx, int wy, boolean vertical, double offsetX, double offsetY) {
+    private void drawWall(int wx, int wy, boolean vertical) {
         Rectangle wallSegment = new Rectangle();
         if (vertical) {
             wallSegment.setWidth(wallSize);
@@ -224,9 +213,7 @@ public class ControleurJeu {
                 + " - murs restants : " + plateau.getCurrentPlayer().getWallsRemaining());
     }
 
-
-    private void switchPlayerTurn(){
-
+    private void switchPlayerTurn() {
         plateau.switchPlayerTurn();
         updateBoardState();
 
@@ -234,19 +221,19 @@ public class ControleurJeu {
             System.out.println("AI looking for move");
             Action action = aiStrategy.getBestAction(plateau);
             System.out.println("Move found");
+
             if (action.getType() == MoveType.MOVE) {
-               plateau.moveCurrentPlayer(action.getX(), action.getY());
+                plateau.moveCurrentPlayer(action.getX(), action.getY());
                 switchPlayerTurn();
-
-
             } else if (action.getType() == MoveType.WALL) {
-
-                plateau.placeWallCurrentPlayer(action.getX(),action.getY(), action.getVertical());
-                drawWall(action.getX(), action.getY(), action.getVertical(), 0,0);
+                if (plateau.canPlaceWall(action.getX(), action.getY(), action.getVertical())
+                        && plateau.allPlayersHaveAPathAfterWall(action.getX(), action.getY(), action.getVertical())
+                        && !plateau.isWallOverlapping(action.getX(), action.getY(), action.getVertical())) {
+                    plateau.placeWallCurrentPlayer(action.getX(), action.getY(), action.getVertical());
+                    drawWall(action.getX(), action.getY(), action.getVertical());
+                }
                 switchPlayerTurn();
-
             }
-
         }
     }
 }

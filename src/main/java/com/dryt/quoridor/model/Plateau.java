@@ -249,15 +249,19 @@ public class Plateau {
     }
     public boolean isWallOverlapping(int wx, int wy, boolean vertical) {
         if (vertical) {
-            if (wx >= 0 && wx < 8 && wy >= 0 && wy < 7) {
-                return verticalWallPositions[wx][wy] || verticalWallPositions[wx][wy - 1];
+            if (wx >= 0 && wx < 8 && wy >= 0 && wy < 8) {
+                boolean above = (wy > 0) && verticalWallPositions[wx][wy - 1];
+                boolean current = verticalWallPositions[wx][wy];
+                boolean below = (wy < 7) && verticalWallPositions[wx][wy + 1];
+                return current || above || below;
             }
         } else {
-            if (wx >= 0 && wx < 7 && wy >= 0 && wy < 8) {
-                return horizontalWallPositions[wx][wy] || horizontalWallPositions[wx + 1][wy];
+            if (wx >= 0 && wx < 8 && wy >= 0 && wy < 8) {
+                boolean current = horizontalWallPositions[wx][wy];
+                boolean right = (wx < 7) && horizontalWallPositions[wx + 1][wy];
+                return current || right;
             }
         }
-
         return false;
     }
 
