@@ -4,7 +4,9 @@ import com.dryt.quoridor.model.Joueur;
 import com.dryt.quoridor.model.Plateau;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MinimaxAI {
 
@@ -15,40 +17,40 @@ public class MinimaxAI {
     }
 
     public Action getBestAction(Plateau plateau) {
-        return minimax(plateau, maxDepth, true).action;
+        return minimax(plateau, maxDepth, true,Integer.MIN_VALUE, Integer.MAX_VALUE).action;
     }
 
-    private ActionScore minimax(Plateau plateau, int depth, boolean maximizingPlayer) {
+    private ActionScore minimax(Plateau plateau, int depth, boolean maximizingPlayer, int alpha, int beta) {
         Joueur winner = plateau.getWinner();
+        Joueur aiPlayer = maximizingPlayer ? plateau.getCurrentPlayer() : plateau.getPreviousPlayer();
         if (depth == 0 || winner != null) {
-            return new ActionScore(null, evaluateBoard(plateau));
+            return new ActionScore(null, evaluateBoard(plateau, aiPlayer));
         }
-
 
         List<Action> actions = generateAllActions(plateau);
-
-        if (depth == maxDepth) {
-            System.out.println("Evaluating " + actions.size() + " actions for player " + plateau.getCurrentPlayer().getId());
-        }
-
-
         Action bestAction = null;
         int bestScore = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
         for (Action action : actions) {
             Plateau cloned = plateau.clone();
-            boolean valid = action.apply(cloned);
-            if (!valid) continue;
-
+            if (!action.apply(cloned)) continue;
             cloned.switchPlayerTurn();
-            int score = minimax(cloned, depth - 1, !maximizingPlayer).score;
+            int score = minimax(cloned, depth - 1, !maximizingPlayer, alpha, beta).score;
 
-            if (maximizingPlayer && score > bestScore) {
-                bestScore = score;
-                bestAction = action;
-            } else if (!maximizingPlayer && score < bestScore) {
-                bestScore = score;
-                bestAction = action;
+            if (maximizingPlayer) {
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestAction = action;
+                }
+                alpha = Math.max(alpha, bestScore);
+                if (beta <= alpha) break; // Beta cut-off
+            } else {
+                if (score < bestScore) {
+                    bestScore = score;
+                    bestAction = action;
+                }
+                beta = Math.min(beta, bestScore);
+                if (beta <= alpha) break; // Alpha cut-off
             }
         }
         return new ActionScore(bestAction, bestScore);
@@ -80,17 +82,56 @@ public class MinimaxAI {
         return actions;
     }
 
-    private int evaluateBoard(Plateau plateau) {
-        int score = 0;
+    private int evaluateBoard(Plateau plateau, Joueur aiPlayer) {
+        int score = 100;
+        int currentDist = estimateDistance(aiPlayer);
+
+        // Strongly reward forward progress
+        score -= 4 * currentDist;
+
+        // Penalize walls behind opponents
         for (Joueur j : plateau.getJoueurs()) {
-            int dist = estimateDistance(j);
-            if (j == plateau.getCurrentPlayer()) {
-                score -= dist;
-            } else {
-                score += dist;
+            if (j != aiPlayer) {
+                score -= countWallsBehindPlayer(plateau, j) * 10;
+                score -= (int) Math.round(0.25 * estimateDistance(j));
             }
         }
         return score;
+    }
+    private int countWallsBehindPlayer(Plateau plateau, Joueur player) {
+        int count = 0;
+        // Check vertical walls
+        for (int wx = 0; wx < 8; wx++) {
+            for (int wy = 0; wy < 8; wy++) {
+                if (plateau.hasVerticalWall(wx, wy) && isWallBehindPlayer(wx, wy, true, player)) {
+                    count++;
+                }
+            }
+        }
+        // Check horizontal walls
+        for (int wx = 0; wx < 8; wx++) {
+            for (int wy = 0; wy < 8; wy++) {
+                if (plateau.hasHorizontalWall(wx, wy) && isWallBehindPlayer(wx, wy, false, player)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    private boolean isWallBehindPlayer(int wx, int wy, boolean vertical, Joueur player) {
+        switch (player.getId()) {
+            case 1: // Goal is y == 8, so behind is wy < player.getY()
+                return (!vertical && wy < player.getY());
+            case 2: // Goal is y == 0, so behind is wy > player.getY()
+                return (!vertical && wy > player.getY());
+            case 3: // Goal is x == 8, so behind is wx < player.getX()
+                return (vertical && wx < player.getX());
+            case 4: // Goal is x == 0, so behind is wx > player.getX()
+                return (vertical && wx > player.getX());
+            default:
+                return false;
+        }
     }
 
     private int estimateDistance(Joueur joueur) {

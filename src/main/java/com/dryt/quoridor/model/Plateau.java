@@ -53,6 +53,12 @@ public class Plateau {
         return currentPlayer;
     }
 
+    public  Joueur getPreviousPlayer() {
+        int index = joueurs.indexOf(currentPlayer);
+        if (index == -1) return null; // Si le joueur actuel n'est pas trouvé
+        return joueurs.get((index - 1 + joueurs.size()) % joueurs.size());
+    }
+
     public boolean canPlaceWall(int wx, int wy, boolean vertical) {
         // Vérifie les limites du plateau
         if (vertical && wy >= 8) return false;
@@ -377,5 +383,7 @@ public class Plateau {
         }
         return copy;
     }
+
+
 
 }
