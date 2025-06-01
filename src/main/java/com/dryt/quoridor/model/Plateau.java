@@ -15,26 +15,57 @@ public class Plateau {
 
     public Plateau(int nombreJoueurs, int nbAI) {
         joueurs = new ArrayList<>();
-        switch (nombreJoueurs) {
-            case 2 -> {
-                // Bleu (haut), Rouge (bas) → ici on commence par Rouge
-                joueurs.add(new Joueur(2, 4, 8, 10,false)); // Rouge commence
-                joueurs.add(new Joueur(1, 4, 0, 10,true));
+        if (nombreJoueurs == 21) {
+            // 2 joueurs humains
+            joueurs.add(new Joueur(1, 4, 0, 10, false)); // Bleu
+            joueurs.add(new Joueur(2, 4, 8, 10, false)); // Rouge
+        } else if (nombreJoueurs == 22) {
+            // 1 joueur contre IA
+            joueurs.add(new Joueur(2, 4, 8, 10, false)); // Bleu (humain)
+            joueurs.add(new Joueur(1, 4, 0, 10, true));  // rouge (IA)
+        } else if (nombreJoueurs == 2) {
+            // fallback ancien comportement (humain + IA inversés)
+            joueurs.add(new Joueur(2, 4, 8, 10, false)); // bleu (humain)
+            joueurs.add(new Joueur(1, 4, 0, 10, true));  // rouge (IA)
+        } else if (nombreJoueurs == 4) {
+            // Ajout explicite pour chaque configuration d'IA dans une partie à 4 joueurs
+            if (nbAI == 1) {
+                joueurs.add(new Joueur(4, 8, 4, 5, true));  // Vert IA
+                joueurs.add(new Joueur(2, 4, 8, 5, false)); // Orange
+                joueurs.add(new Joueur(3, 0, 4, 5, false)); // Rouge
+                joueurs.add(new Joueur(1, 4, 0, 5, false)); // Bleu
+            } else if (nbAI == 2) {
+                joueurs.add(new Joueur(4, 8, 4, 5, true));
+                joueurs.add(new Joueur(2, 4, 8, 5, false));  // bleue
+                joueurs.add(new Joueur(3, 0, 4, 5, false)); // vert
+                joueurs.add(new Joueur(1, 4, 0, 5, true));
+
+            } else if (nbAI == 3) {
+                joueurs.add(new Joueur(4, 8, 4, 5, true));
+                joueurs.add(new Joueur(2, 4, 8, 5, false));  // bleu
+                joueurs.add(new Joueur(3, 0, 4, 5, true));
+                joueurs.add(new Joueur(1, 4, 0, 5, true));
+
+            } else {
+                joueurs.add(new Joueur(4, 8, 4, 5, false)); // Vert
+                joueurs.add(new Joueur(2, 4, 8, 5, false)); // Orange
+                joueurs.add(new Joueur(3, 0, 4, 5, false)); // Rouge
+                joueurs.add(new Joueur(1, 4, 0, 5, false)); // Bleu
             }
-            case 4 -> {
-                joueurs.add(new Joueur(4, 8, 4, 5,true)); // Vert
-                joueurs.add(new Joueur(2, 4, 8, 5,false)); // Orange
-                joueurs.add(new Joueur(3, 0, 4, 5,true)); // Rouge.
-                joueurs.add(new Joueur(1, 4, 0, 5,false)); // Bleu
-            }
-            default -> throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
+        } else {
+            throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
         }
-        currentPlayer = getJoueurById(2);; // le premier joueur dans la liste commence
+
+        currentPlayer = getJoueurById(2); // Rouge commence
 
         verticalWallPositions = new boolean[8][8];
         horizontalWallPositions = new boolean[8][8];
         blockedRight = new boolean[9][9];
         blockedDown = new boolean[9][9];
+        System.out.println("🎮 Configuration des joueurs :");
+        for (Joueur j : joueurs) {
+            System.out.println("Joueur " + j.getId() + " - " + (j.isAI() ? "IA" : "Humain"));
+        }
     }
 
     public Joueur getJoueurById(int id) {

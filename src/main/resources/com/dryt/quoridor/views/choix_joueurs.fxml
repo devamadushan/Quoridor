@@ -8,14 +8,25 @@
 
     <VBox alignment="CENTER" spacing="20"
           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-          AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0">
+          AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+          style="-fx-padding: 40;">
 
-        <Label text="Choisissez le nombre de joueurs" />
+        <Label text="Choisissez le mode de jeu"
+               style="-fx-font-size: 24px; -fx-font-weight: bold;" />
 
-        <RadioButton fx:id="radio2Joueurs" text="2 Joueurs" selected="true"/>
-        <RadioButton fx:id="radio4Joueurs" text="4 Joueurs"/>
+        <RadioButton fx:id="radio2Humains" text="1 vs 1 (humains)" selected="true" style="-fx-text-fill: white;"/>
+        <RadioButton fx:id="radio1v1Bot" text="1 vs 1 IA" style="-fx-text-fill: white;"/>
+        <RadioButton fx:id="radio4Joueurs" text="4 Joueurs (humains + IA)" style="-fx-text-fill: white;"/>
 
-        <Button text="Valider" onAction="#onValider"/>
-        <Button text="Retour" onAction="#onRetour"/>
+        <HBox alignment="CENTER" spacing="10">
+            <Label text="Nombre d'IA :" />
+            <Spinner fx:id="spinnerIA" prefWidth="80"/>
+        </HBox>
+
+        <HBox spacing="20" alignment="CENTER">
+            <Button text="Valider" onAction="#onValider" prefWidth="150"/>
+            <Button text="Retour" onAction="#onRetour" prefWidth="150"/>
+        </HBox>
+
     </VBox>
 </AnchorPane>

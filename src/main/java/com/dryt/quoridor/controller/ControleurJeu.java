@@ -218,13 +218,12 @@ public class ControleurJeu {
         updateBoardState();
 
         if (plateau.getCurrentPlayer().isAI()) {
-            System.out.println("AI looking for move");
+            System.out.println("AI " + plateau.getCurrentPlayer().getId() + " looking for move");
             Action action = aiStrategy.getBestAction(plateau);
             System.out.println("Move found");
 
             if (action.getType() == MoveType.MOVE) {
                 plateau.moveCurrentPlayer(action.getX(), action.getY());
-                switchPlayerTurn();
             } else if (action.getType() == MoveType.WALL) {
                 if (plateau.canPlaceWall(action.getX(), action.getY(), action.getVertical())
                         && plateau.allPlayersHaveAPathAfterWall(action.getX(), action.getY(), action.getVertical())
@@ -232,8 +231,21 @@ public class ControleurJeu {
                     plateau.placeWallCurrentPlayer(action.getX(), action.getY(), action.getVertical());
                     drawWall(action.getX(), action.getY(), action.getVertical());
                 }
-                switchPlayerTurn();
             }
+
+            Joueur winner = plateau.getWinner();
+            if (winner != null) {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setHeaderText("Partie terminée");
+                alert.setContentText("Le joueur " + winner.getId() + " a gagné !");
+                alert.showAndWait();
+                JeuQuoridor.goMenu();
+                return;
+            }
+
+            // ✅ Cette ligne fait que si le suivant est encore une IA, elle joue aussi :
+            switchPlayerTurn();
         }
     }
+
 }
