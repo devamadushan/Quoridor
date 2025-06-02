@@ -10,53 +10,49 @@ public class Plateau {
     private boolean[][] horizontalWallPositions;
     private boolean[][] blockedRight;
     private boolean[][] blockedDown;
+    private List<Mur> mursPlaces = new ArrayList<>();
+
 
     public Plateau(){}
 
     public Plateau(int nombreJoueurs, int nbAI) {
         joueurs = new ArrayList<>();
         if (nombreJoueurs == 21) {
-            // 2 joueurs humains
-            joueurs.add(new Joueur(1, 4, 0, 10, false)); // Bleu
-            joueurs.add(new Joueur(2, 4, 8, 10, false)); // Rouge
+            joueurs.add(new Joueur(1, 4, 0, 10, false));
+            joueurs.add(new Joueur(2, 4, 8, 10, false));
         } else if (nombreJoueurs == 22) {
-            // 1 joueur contre IA
-            joueurs.add(new Joueur(2, 4, 8, 10, false)); // Bleu (humain)
-            joueurs.add(new Joueur(1, 4, 0, 10, true));  // rouge (IA)
+            joueurs.add(new Joueur(2, 4, 8, 10, false));
+            joueurs.add(new Joueur(1, 4, 0, 10, true));
         } else if (nombreJoueurs == 2) {
-            // fallback ancien comportement (humain + IA inversés)
-            joueurs.add(new Joueur(2, 4, 8, 10, false)); // bleu (humain)
-            joueurs.add(new Joueur(1, 4, 0, 10, true));  // rouge (IA)
+            joueurs.add(new Joueur(2, 4, 8, 10, false));
+            joueurs.add(new Joueur(1, 4, 0, 10, true));
         } else if (nombreJoueurs == 4) {
-            // Ajout explicite pour chaque configuration d'IA dans une partie à 4 joueurs
             if (nbAI == 1) {
-                joueurs.add(new Joueur(4, 8, 4, 5, true));  // Vert IA
-                joueurs.add(new Joueur(2, 4, 8, 5, false)); // Orange
-                joueurs.add(new Joueur(3, 0, 4, 5, false)); // Rouge
-                joueurs.add(new Joueur(1, 4, 0, 5, false)); // Bleu
+                joueurs.add(new Joueur(4, 8, 4, 5, true));
+                joueurs.add(new Joueur(2, 4, 8, 5, false));
+                joueurs.add(new Joueur(3, 0, 4, 5, false));
+                joueurs.add(new Joueur(1, 4, 0, 5, false));
             } else if (nbAI == 2) {
                 joueurs.add(new Joueur(4, 8, 4, 5, true));
-                joueurs.add(new Joueur(2, 4, 8, 5, false));  // bleue
-                joueurs.add(new Joueur(3, 0, 4, 5, false)); // vert
+                joueurs.add(new Joueur(2, 4, 8, 5, false));
+                joueurs.add(new Joueur(3, 0, 4, 5, false));
                 joueurs.add(new Joueur(1, 4, 0, 5, true));
-
             } else if (nbAI == 3) {
                 joueurs.add(new Joueur(4, 8, 4, 5, true));
-                joueurs.add(new Joueur(2, 4, 8, 5, false));  // bleu
+                joueurs.add(new Joueur(2, 4, 8, 5, false));
                 joueurs.add(new Joueur(3, 0, 4, 5, true));
                 joueurs.add(new Joueur(1, 4, 0, 5, true));
-
             } else {
-                joueurs.add(new Joueur(4, 8, 4, 5, false)); // Vert
-                joueurs.add(new Joueur(2, 4, 8, 5, false)); // Orange
-                joueurs.add(new Joueur(3, 0, 4, 5, false)); // Rouge
-                joueurs.add(new Joueur(1, 4, 0, 5, false)); // Bleu
+                joueurs.add(new Joueur(4, 8, 4, 5, false));
+                joueurs.add(new Joueur(2, 4, 8, 5, false));
+                joueurs.add(new Joueur(3, 0, 4, 5, false));
+                joueurs.add(new Joueur(1, 4, 0, 5, false));
             }
         } else {
             throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
         }
 
-        currentPlayer = getJoueurById(2); // Rouge commence
+        currentPlayer = getJoueurById(2);
 
         verticalWallPositions = new boolean[8][8];
         horizontalWallPositions = new boolean[8][8];
@@ -67,6 +63,10 @@ public class Plateau {
             System.out.println("Joueur " + j.getId() + " - " + (j.isAI() ? "IA" : "Humain"));
         }
     }
+
+
+
+
 
     public Joueur getJoueurById(int id) {
         for (Joueur j : joueurs) {
@@ -241,7 +241,12 @@ public class Plateau {
         }
 
         currentPlayer.decrementWalls(); // ✅ décrémente le compteur
+        mursPlaces.add(new Mur(vertical, wx, wy));
+
         return true;
+    }
+    public List<Mur> getMurs() {
+        return mursPlaces;
     }
 
 

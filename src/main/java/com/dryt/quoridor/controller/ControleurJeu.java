@@ -10,6 +10,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import com.dryt.quoridor.model.Plateau;
 import com.dryt.quoridor.model.Joueur;
+import com.dryt.quoridor.model.Mur;
 import com.dryt.quoridor.app.JeuQuoridor;
 import javafx.scene.shape.Rectangle;
 
@@ -97,6 +98,10 @@ public class ControleurJeu {
                 System.out.println("❌ Chevauchement de mur interdit.");
                 return;
             }
+            if (isWallAlreadyPresent(effectiveWx, effectiveWy, vertical)) {
+                System.out.println("❌ Un mur est déjà présent ici.");
+                return;
+            }
 
             if (plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
                     && plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
@@ -107,11 +112,20 @@ public class ControleurJeu {
         boardPane.getChildren().add(wallDetector);
     }
 
+    private boolean isWallAlreadyPresent(int wx, int wy, boolean vertical) {
+        for (Mur mur : plateau.getMurs()) {
+            if (mur.getX() == wx && mur.getY() == wy && mur.isVertical() == vertical) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isCrossingWall(int wx, int wy, boolean vertical) {
         if (vertical) {
-            return plateau.hasHorizontalWall(wx, wy) || plateau.hasHorizontalWall(wx - 1, wy);
+            return plateau.hasHorizontalWall(wx, wy) && plateau.hasHorizontalWall(wx + 1, wy);
         } else {
-            return plateau.hasVerticalWall(wx, wy) || plateau.hasVerticalWall(wx, wy - 1);
+            return plateau.hasVerticalWall(wx, wy) && plateau.hasVerticalWall(wx, wy + 1);
         }
     }
 
@@ -128,7 +142,8 @@ public class ControleurJeu {
         boolean noWallsLeft = plateau.getCurrentPlayer().getWallsRemaining() <= 0;
         boolean invalid = isCrossingWall(effectiveWx, effectiveWy, vertical)
                 || !plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
-                || noWallsLeft;
+                || noWallsLeft
+                || isWallAlreadyPresent(effectiveWx, effectiveWy, vertical);
 
         ghostWall.setStyle(invalid
                 ? "-fx-fill: rgba(255, 0, 0, 0.3); -fx-stroke: red;"
@@ -227,7 +242,8 @@ public class ControleurJeu {
             } else if (action.getType() == MoveType.WALL) {
                 if (plateau.canPlaceWall(action.getX(), action.getY(), action.getVertical())
                         && plateau.allPlayersHaveAPathAfterWall(action.getX(), action.getY(), action.getVertical())
-                        && !plateau.isWallOverlapping(action.getX(), action.getY(), action.getVertical())) {
+                        && !plateau.isWallOverlapping(action.getX(), action.getY(), action.getVertical())
+                        && !isWallAlreadyPresent(action.getX(), action.getY(), action.getVertical())) {
                     plateau.placeWallCurrentPlayer(action.getX(), action.getY(), action.getVertical());
                     drawWall(action.getX(), action.getY(), action.getVertical());
                 }
@@ -243,9 +259,7 @@ public class ControleurJeu {
                 return;
             }
 
-            // ✅ Cette ligne fait que si le suivant est encore une IA, elle joue aussi :
             switchPlayerTurn();
         }
     }
-
 }
