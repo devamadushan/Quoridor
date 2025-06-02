@@ -56,29 +56,39 @@ public class MinimaxAI {
         return new ActionScore(bestAction, bestScore);
     }
 
-    private List<Action> generateAllActions(Plateau plateau) {
-        List<Action> actions = new ArrayList<>();
 
-        // 1. All pawn moves
+    private List<Action> generateAllActions(Plateau plateau) {
+        List<Action> pawnMoves = new ArrayList<>();
+        List<Action> wallMoves = new ArrayList<>();
+
+        // 1. All pawn moves (always include)
         for (int[] move : plateau.getPossibleMoves()) {
-            actions.add(Action.move(move[0], move[1]));
+            pawnMoves.add(Action.move(move[0], move[1]));
         }
 
-        // 2. All valid wall placements
+        // 2. Pruned wall placements (only near players)
         Joueur current = plateau.getCurrentPlayer();
         if (current.getWallsRemaining() > 0) {
-            for (int x = 0; x < 8; x++) {
-                for (int y = 0; y < 8; y++) {
-                    for (boolean vertical : new boolean[]{true, false}) {
-                        if (plateau.canPlaceWall(x, y, vertical) &&
-                                plateau.allPlayersHaveAPathAfterWall(x, y, vertical)) {
-                            actions.add(Action.wall(x, y, vertical));
+            for (Joueur j : plateau.getJoueurs()) {
+                int px = j.getX(), py = j.getY();
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dy = -1; dy <= 1; dy++) {
+                        int wx = px + dx, wy = py + dy;
+                        for (boolean vertical : new boolean[]{true, false}) {
+                            if (wx >= 0 && wx < 8 && wy >= 0 && wy < 8 &&
+                                    plateau.canPlaceWall(wx, wy, vertical) &&
+                                    plateau.allPlayersHaveAPathAfterWall(wx, wy, vertical)) {
+                                wallMoves.add(Action.wall(wx, wy, vertical));
+                            }
                         }
                     }
                 }
             }
         }
 
+        // Move ordering: pawn moves first
+        List<Action> actions = new ArrayList<>(pawnMoves);
+        actions.addAll(wallMoves);
         return actions;
     }
 
