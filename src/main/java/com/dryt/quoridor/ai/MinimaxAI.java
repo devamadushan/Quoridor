@@ -20,18 +20,15 @@ public class MinimaxAI {
 
     private ActionScore minimax(Plateau plateau, int depth, boolean maximizingPlayer) {
         Joueur winner = plateau.getWinner();
-        if (depth == 0 || winner != null) {
+        if (winner != null) {
+            int score = (maximizingPlayer == (winner == plateau.getCurrentPlayer())) ? 10000 : -10000;
+            return new ActionScore(null, score);
+        }
+        if (depth == 0) {
             return new ActionScore(null, evaluateBoard(plateau));
         }
 
-
         List<Action> actions = generateAllActions(plateau);
-
-        if (depth == maxDepth) {
-            System.out.println("Evaluating " + actions.size() + " actions for player " + plateau.getCurrentPlayer().getId());
-        }
-
-
         Action bestAction = null;
         int bestScore = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
@@ -41,6 +38,14 @@ public class MinimaxAI {
             if (!valid) continue;
 
             cloned.switchPlayerTurn();
+
+            // Check if maximizing player's distance is zero after this move
+            Joueur maximizing = maximizingPlayer ? plateau.getCurrentPlayer() : cloned.getCurrentPlayer();
+            if (estimateDistance(maximizing) == 0) {
+                int winScore = maximizingPlayer ? 10000 : -10000;
+                return new ActionScore(action, winScore);
+            }
+
             int score = minimax(cloned, depth - 1, !maximizingPlayer).score;
 
             if (maximizingPlayer && score > bestScore) {
@@ -55,28 +60,37 @@ public class MinimaxAI {
     }
 
     private List<Action> generateAllActions(Plateau plateau) {
-        List<Action> actions = new ArrayList<>();
+        List<Action> pawnMoves = new ArrayList<>();
+        List<Action> wallMoves = new ArrayList<>();
 
-        // 1. All pawn moves
+        // 1. All pawn moves (always include)
         for (int[] move : plateau.getPossibleMoves()) {
-            actions.add(Action.move(move[0], move[1]));
+            pawnMoves.add(Action.move(move[0], move[1]));
         }
 
-        // 2. All valid wall placements
+        // 2. Pruned wall placements (only near players)
         Joueur current = plateau.getCurrentPlayer();
         if (current.getWallsRemaining() > 0) {
-            for (int x = 0; x < 8; x++) {
-                for (int y = 0; y < 8; y++) {
-                    for (boolean vertical : new boolean[]{true, false}) {
-                        if (plateau.canPlaceWall(x, y, vertical) &&
-                                plateau.allPlayersHaveAPathAfterWall(x, y, vertical)) {
-                            actions.add(Action.wall(x, y, vertical));
+            for (Joueur j : plateau.getJoueurs()) {
+                int px = j.getX(), py = j.getY();
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dy = -1; dy <= 1; dy++) {
+                        int wx = px + dx, wy = py + dy;
+                        for (boolean vertical : new boolean[]{true, false}) {
+                            if (wx >= 0 && wx < 8 && wy >= 0 && wy < 8 &&
+                                    plateau.canPlaceWall(wx, wy, vertical) &&
+                                    plateau.allPlayersHaveAPathAfterWall(wx, wy, vertical)) {
+                                wallMoves.add(Action.wall(wx, wy, vertical));
+                            }
                         }
                     }
                 }
             }
         }
 
+        // Move ordering: pawn moves first
+        List<Action> actions = new ArrayList<>(pawnMoves);
+        actions.addAll(wallMoves);
         return actions;
     }
 
@@ -84,7 +98,9 @@ public class MinimaxAI {
         int score = 0;
         for (Joueur j : plateau.getJoueurs()) {
             int dist = estimateDistance(j);
+
             if (j == plateau.getCurrentPlayer()) {
+
                 score -= dist;
             } else {
                 score += dist;
