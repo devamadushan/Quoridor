@@ -39,9 +39,8 @@ public class MinimaxAI {
 
             cloned.switchPlayerTurn();
 
-            // Check if maximizing player's distance is zero after this move
             Joueur maximizing = maximizingPlayer ? plateau.getCurrentPlayer() : cloned.getCurrentPlayer();
-            if (estimateDistance(maximizing) == 0) {
+            if (estimateDistance(cloned, maximizing) == 0) {
                 int winScore = maximizingPlayer ? 10000 : -10000;
                 return new ActionScore(action, winScore);
             }
@@ -63,13 +62,22 @@ public class MinimaxAI {
         List<Action> pawnMoves = new ArrayList<>();
         List<Action> wallMoves = new ArrayList<>();
 
-        // 1. All pawn moves (always include)
+        Joueur current = plateau.getCurrentPlayer();
+        int currentDist = estimateDistance(plateau, current);
+
+        // Only include pawn moves that reduce the shortest path to goal
         for (int[] move : plateau.getPossibleMoves()) {
-            pawnMoves.add(Action.move(move[0], move[1]));
+            Plateau cloned = plateau.clone();
+            cloned.moveCurrentPlayer(move[0], move[1]);
+            Joueur clonedPlayer = cloned.getCurrentPlayer();
+            int newDist = estimateDistance(cloned, clonedPlayer);
+
+            if (newDist < currentDist && newDist < 100) { // 100 = unreachable
+                pawnMoves.add(Action.move(move[0], move[1]));
+            }
         }
 
-        // 2. Pruned wall placements (only near players)
-        Joueur current = plateau.getCurrentPlayer();
+        // Wall moves as before
         if (current.getWallsRemaining() > 0) {
             for (Joueur j : plateau.getJoueurs()) {
                 int px = j.getX(), py = j.getY();
@@ -88,7 +96,6 @@ public class MinimaxAI {
             }
         }
 
-        // Move ordering: pawn moves first
         List<Action> actions = new ArrayList<>(pawnMoves);
         actions.addAll(wallMoves);
         return actions;
@@ -97,10 +104,9 @@ public class MinimaxAI {
     private int evaluateBoard(Plateau plateau) {
         int score = 0;
         for (Joueur j : plateau.getJoueurs()) {
-            int dist = estimateDistance(j);
+            int dist = estimateDistance(plateau, j);
 
             if (j == plateau.getCurrentPlayer()) {
-
                 score -= dist;
             } else {
                 score += dist;
@@ -109,14 +115,10 @@ public class MinimaxAI {
         return score;
     }
 
-    private int estimateDistance(Joueur joueur) {
-        return switch (joueur.getId()) {
-            case 1 -> 8 - joueur.getY();
-            case 2 -> joueur.getY();
-            case 3 -> 8 - joueur.getX();
-            case 4 -> joueur.getX();
-            default -> 100;
-        };
+    // Use Plateau.getShortestPathToGoal to get the true shortest path length
+    private int estimateDistance(Plateau plateau, Joueur joueur) {
+        List<int[]> path = plateau.getShortestPathToGoal(joueur);
+        return path.isEmpty() ? 100 : path.size() - 1;
     }
 
     private static class ActionScore {
@@ -127,7 +129,5 @@ public class MinimaxAI {
             this.action = action;
             this.score = score;
         }
-
-
     }
 }

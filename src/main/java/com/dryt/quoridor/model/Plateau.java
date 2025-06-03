@@ -353,6 +353,59 @@ public class Plateau {
         return false;
     }
 
+    public List<int[]> getShortestPathToGoal(Joueur j) {
+        boolean[][] visited = new boolean[size][size];
+        int[][][] parent = new int[size][size][2]; // To reconstruct path
+        for (int x = 0; x < size; x++)
+            for (int y = 0; y < size; y++)
+                parent[x][y] = new int[]{-1, -1};
+
+        Queue<int[]> queue = new LinkedList<>();
+        queue.add(new int[]{j.getX(), j.getY()});
+        visited[j.getX()][j.getY()] = true;
+
+        int[] goal = null;
+
+        while (!queue.isEmpty()) {
+            int[] pos = queue.poll();
+            int x = pos[0], y = pos[1];
+
+            // Check if goal reached
+            boolean isGoal = switch (j.getId()) {
+                case 1 -> y == 8;
+                case 2 -> y == 0;
+                case 3 -> x == 8;
+                case 4 -> x == 0;
+                default -> false;
+            };
+            if (isGoal) {
+                goal = new int[]{x, y};
+                break;
+            }
+
+            for (int[] m : getNeighbors(x, y)) {
+                int nx = m[0], ny = m[1];
+                if (!visited[nx][ny]) {
+                    visited[nx][ny] = true;
+                    parent[nx][ny] = new int[]{x, y};
+                    queue.add(new int[]{nx, ny});
+                }
+            }
+        }
+
+        List<int[]> path = new ArrayList<>();
+        if (goal != null) {
+            int[] curr = goal;
+            while (!(curr[0] == j.getX() && curr[1] == j.getY())) {
+                path.add(curr);
+                curr = parent[curr[0]][curr[1]];
+            }
+            path.add(new int[]{j.getX(), j.getY()});
+            Collections.reverse(path);
+        }
+        return path;
+    }
+
     private List<int[]> getNeighbors(int x, int y) {
         List<int[]> neighbors = new ArrayList<>();
         if (y > 0 && !blockedDown[x][y - 1]) neighbors.add(new int[]{x, y - 1});
