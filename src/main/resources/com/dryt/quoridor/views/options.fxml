@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml"
+<StackPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.dryt.quoridor.controller.ControleurOptions"
-            prefWidth="1024.0" prefHeight="1024.0">
+            prefWidth="1024.0" prefHeight="1024.0"
+            styleClass="menu-background">
 
-    <VBox alignment="CENTER" spacing="20"
-          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-          AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0">
-
-        <Label text="Résolution :" />
-        <Button text="800x600" onAction="#onRes800x600"/>
-        <Button text="1024x1024" onAction="#onRes1024x1024"/>
-        <Button text="1920x1080" onAction="#onRes1920x1080"/>
-
-
-
-        <Button text="Retour" onAction="#onRetour"/>
+    <VBox spacing="50" alignment="CENTER">
+        
+        <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
+            <Button text="800x600" onAction="#onRes800x600" styleClass="menu-button"/>
+            <Button text="1024x1024" onAction="#onRes1024x1024" styleClass="menu-button"/>
+            <Button text="1920x1080" onAction="#onRes1920x1080" styleClass="menu-button"/>
+            <Button text="RETOUR" onAction="#onRetour" styleClass="menu-button"/>
+        </VBox>
     </VBox>
-</AnchorPane>
+</StackPane>

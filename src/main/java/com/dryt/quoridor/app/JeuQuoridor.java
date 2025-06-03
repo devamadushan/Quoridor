@@ -14,7 +14,9 @@ public class JeuQuoridor extends Application {
     public static Scene sceneChoixJoueurs;
 
     private static int nombreJoueurs = 2;
-    private static Plateau plateau; // ✅ Nouveau champ ajouté
+    private static Plateau plateau;
+    private static double windowX;
+    private static double windowY;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -37,6 +39,17 @@ public class JeuQuoridor extends Application {
         stage.setScene(sceneMenu);
         stage.setResizable(false);
         stage.show();
+
+        // Sauvegarder la position initiale
+        windowX = stage.getX();
+        windowY = stage.getY();
+    }
+
+    private static void updateWindowPosition() {
+        if (primaryStage != null) {
+            primaryStage.setX(windowX);
+            primaryStage.setY(windowY);
+        }
     }
 
     public static Stage getPrimaryStage() {
@@ -65,18 +78,28 @@ public class JeuQuoridor extends Application {
         Scene sceneJeu = new Scene(gameRoot, primaryStage.getWidth(), primaryStage.getHeight());
         sceneJeu.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
         primaryStage.setScene(sceneJeu);
+        updateWindowPosition();
     }
 
     public static void goMenu() {
+        windowX = primaryStage.getX();
+        windowY = primaryStage.getY();
         primaryStage.setScene(sceneMenu);
+        updateWindowPosition();
     }
 
     public static void goOptions() {
+        windowX = primaryStage.getX();
+        windowY = primaryStage.getY();
         primaryStage.setScene(sceneOptions);
+        updateWindowPosition();
     }
 
     public static void goChoixJoueurs() {
+        windowX = primaryStage.getX();
+        windowY = primaryStage.getY();
         primaryStage.setScene(sceneChoixJoueurs);
+        updateWindowPosition();
     }
 
     public static void main(String[] args) {

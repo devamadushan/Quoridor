@@ -9,14 +9,13 @@ import com.dryt.quoridor.app.JeuQuoridor;
 
 public class ControleurOptions {
 
-
-
     @FXML
     private void onRes800x600(ActionEvent event) {
         Stage stage = JeuQuoridor.getPrimaryStage();
         stage.setWidth(800);
         stage.setHeight(600);
-        stage.centerOnScreen();
+        stage.setX(0);
+        stage.setY(0);
     }
 
     @FXML
@@ -24,7 +23,8 @@ public class ControleurOptions {
         Stage stage = JeuQuoridor.getPrimaryStage();
         stage.setWidth(1024);
         stage.setHeight(1024);
-        stage.centerOnScreen();
+        stage.setX(0);
+        stage.setY(-500);
     }
 
     @FXML
@@ -32,12 +32,15 @@ public class ControleurOptions {
         Stage stage = JeuQuoridor.getPrimaryStage();
         stage.setWidth(1920);
         stage.setHeight(1080);
-        stage.centerOnScreen();
+        stage.setX(0);
+        stage.setY(-500);
     }
-
 
     @FXML
     private void onRetour(ActionEvent event) {
+        Stage stage = JeuQuoridor.getPrimaryStage();
         JeuQuoridor.goMenu();
+        stage.setX(0);
+        stage.setY(0);
     }
 }
