@@ -157,8 +157,6 @@ public class Plateau {
                 {1, 0}     // droite
         };
 
-
-
         for (int[] dir : directions) {
             int nx = x + dir[0];
             int ny = y + dir[1];
@@ -174,22 +172,38 @@ public class Plateau {
                 if (isPlayerAt(nx, ny)) {
                     int nnx = nx + dir[0];
                     int nny = ny + dir[1];
-                    if (nnx >= 0 && nnx < size && nny >= 0 && nny < size) {
-                        boolean blockedJump = false;
-                        if (dir[0] == 1 && blockedRight[nx][ny]) blockedJump = true;
-                        if (dir[0] == -1 && blockedRight[nx - 1][ny]) blockedJump = true;
-                        if (dir[1] == 1 && blockedDown[nx][ny]) blockedJump = true;
-                        if (dir[1] == -1 && blockedDown[nx][ny - 1]) blockedJump = true;
 
-                        if (!blockedJump && !isPlayerAt(nnx, nny)) {
-                            moves.add(new int[]{nnx, nny});
-                        } else {
-                            if (dir[0] == 0) {
+                    boolean jumpBlocked = false;
+                    if (dir[0] == 1) { // saut vers le bas
+                        if (nnx >= size || blockedRight[nx][ny] || blockedRight[nnx - 1][ny]) jumpBlocked = true;
+                    }
+                    if (dir[0] == -1) { // saut vers le haut
+                        if (nnx < 0 || blockedRight[nnx][ny] || blockedRight[nx - 1][ny]) jumpBlocked = true;
+                    }
+                    if (dir[1] == 1) { // saut vers la droite
+                        if (nny >= size || blockedDown[nx][ny] || blockedDown[nx][nny - 1]) jumpBlocked = true;
+                    }
+                    if (dir[1] == -1) { // saut vers la gauche
+                        if (nny < 0 || blockedDown[nx][nny] || blockedDown[nx][ny - 1]) jumpBlocked = true;
+                    }
+
+                    if (!jumpBlocked && nnx >= 0 && nnx < size && nny >= 0 && nny < size && !isPlayerAt(nnx, nny)) {
+                        moves.add(new int[]{nnx, nny}); // saut par-dessus
+                    } else {
+                        // Contournement latéral seulement si un mur bloque le saut
+                        if (dir[0] == 0) { // déplacement vertical (haut ou bas)
+                            boolean sautVersHaut = (y > ny);
+                            boolean sautVersBas = (y < ny);
+                            if ((sautVersHaut && blockedDown[nx][ny]) || (sautVersBas && blockedDown[x][y])) {
                                 if (nx > 0 && !blockedRight[nx - 1][ny] && !isPlayerAt(nx - 1, ny))
                                     moves.add(new int[]{nx - 1, ny});
                                 if (nx < size - 1 && !blockedRight[nx][ny] && !isPlayerAt(nx + 1, ny))
                                     moves.add(new int[]{nx + 1, ny});
-                            } else if (dir[1] == 0) {
+                            }
+                        } else if (dir[1] == 0) { // déplacement horizontal (gauche ou droite)
+                            boolean sautVersGauche = (x > nx);
+                            boolean sautVersDroite = (x < nx);
+                            if ((sautVersGauche && blockedRight[nx][ny]) || (sautVersDroite && blockedRight[x][y])) {
                                 if (ny > 0 && !blockedDown[nx][ny - 1] && !isPlayerAt(nx, ny - 1))
                                     moves.add(new int[]{nx, ny - 1});
                                 if (ny < size - 1 && !blockedDown[nx][ny] && !isPlayerAt(nx, ny + 1))
@@ -202,8 +216,12 @@ public class Plateau {
                 }
             }
         }
+
         return moves;
     }
+
+
+
 
     private boolean isPlayerAt(int x, int y) {
         for (Joueur j : joueurs) {
