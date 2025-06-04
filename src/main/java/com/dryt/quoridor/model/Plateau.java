@@ -157,8 +157,6 @@ public class Plateau {
                 {1, 0}     // droite
         };
 
-
-
         for (int[] dir : directions) {
             int nx = x + dir[0];
             int ny = y + dir[1];
@@ -174,22 +172,38 @@ public class Plateau {
                 if (isPlayerAt(nx, ny)) {
                     int nnx = nx + dir[0];
                     int nny = ny + dir[1];
-                    if (nnx >= 0 && nnx < size && nny >= 0 && nny < size) {
-                        boolean blockedJump = false;
-                        if (dir[0] == 1 && blockedRight[nx][ny]) blockedJump = true;
-                        if (dir[0] == -1 && blockedRight[nx - 1][ny]) blockedJump = true;
-                        if (dir[1] == 1 && blockedDown[nx][ny]) blockedJump = true;
-                        if (dir[1] == -1 && blockedDown[nx][ny - 1]) blockedJump = true;
 
-                        if (!blockedJump && !isPlayerAt(nnx, nny)) {
-                            moves.add(new int[]{nnx, nny});
-                        } else {
-                            if (dir[0] == 0) {
+                    boolean jumpBlocked = false;
+                    if (dir[0] == 1) { // saut vers le bas
+                        if (nnx >= size || blockedRight[nx][ny] || blockedRight[nnx - 1][ny]) jumpBlocked = true;
+                    }
+                    if (dir[0] == -1) { // saut vers le haut
+                        if (nnx < 0 || blockedRight[nnx][ny] || blockedRight[nx - 1][ny]) jumpBlocked = true;
+                    }
+                    if (dir[1] == 1) { // saut vers la droite
+                        if (nny >= size || blockedDown[nx][ny] || blockedDown[nx][nny - 1]) jumpBlocked = true;
+                    }
+                    if (dir[1] == -1) { // saut vers la gauche
+                        if (nny < 0 || blockedDown[nx][nny] || blockedDown[nx][ny - 1]) jumpBlocked = true;
+                    }
+
+                    if (!jumpBlocked && nnx >= 0 && nnx < size && nny >= 0 && nny < size && !isPlayerAt(nnx, nny)) {
+                        moves.add(new int[]{nnx, nny}); // saut par-dessus
+                    } else {
+                        // Contournement latéral seulement si un mur bloque le saut
+                        if (dir[0] == 0) { // déplacement vertical (haut ou bas)
+                            boolean sautVersHaut = (y > ny);
+                            boolean sautVersBas = (y < ny);
+                            if ((sautVersHaut && blockedDown[nx][ny]) || (sautVersBas && blockedDown[x][y])) {
                                 if (nx > 0 && !blockedRight[nx - 1][ny] && !isPlayerAt(nx - 1, ny))
                                     moves.add(new int[]{nx - 1, ny});
                                 if (nx < size - 1 && !blockedRight[nx][ny] && !isPlayerAt(nx + 1, ny))
                                     moves.add(new int[]{nx + 1, ny});
-                            } else if (dir[1] == 0) {
+                            }
+                        } else if (dir[1] == 0) { // déplacement horizontal (gauche ou droite)
+                            boolean sautVersGauche = (x > nx);
+                            boolean sautVersDroite = (x < nx);
+                            if ((sautVersGauche && blockedRight[nx][ny]) || (sautVersDroite && blockedRight[x][y])) {
                                 if (ny > 0 && !blockedDown[nx][ny - 1] && !isPlayerAt(nx, ny - 1))
                                     moves.add(new int[]{nx, ny - 1});
                                 if (ny < size - 1 && !blockedDown[nx][ny] && !isPlayerAt(nx, ny + 1))
@@ -202,8 +216,12 @@ public class Plateau {
                 }
             }
         }
+
         return moves;
     }
+
+
+
 
     private boolean isPlayerAt(int x, int y) {
         for (Joueur j : joueurs) {
@@ -351,6 +369,59 @@ public class Plateau {
             }
         }
         return false;
+    }
+
+    public List<int[]> getShortestPathToGoal(Joueur j) {
+        boolean[][] visited = new boolean[size][size];
+        int[][][] parent = new int[size][size][2]; // To reconstruct path
+        for (int x = 0; x < size; x++)
+            for (int y = 0; y < size; y++)
+                parent[x][y] = new int[]{-1, -1};
+
+        Queue<int[]> queue = new LinkedList<>();
+        queue.add(new int[]{j.getX(), j.getY()});
+        visited[j.getX()][j.getY()] = true;
+
+        int[] goal = null;
+
+        while (!queue.isEmpty()) {
+            int[] pos = queue.poll();
+            int x = pos[0], y = pos[1];
+
+            // Check if goal reached
+            boolean isGoal = switch (j.getId()) {
+                case 1 -> y == 8;
+                case 2 -> y == 0;
+                case 3 -> x == 8;
+                case 4 -> x == 0;
+                default -> false;
+            };
+            if (isGoal) {
+                goal = new int[]{x, y};
+                break;
+            }
+
+            for (int[] m : getNeighbors(x, y)) {
+                int nx = m[0], ny = m[1];
+                if (!visited[nx][ny]) {
+                    visited[nx][ny] = true;
+                    parent[nx][ny] = new int[]{x, y};
+                    queue.add(new int[]{nx, ny});
+                }
+            }
+        }
+
+        List<int[]> path = new ArrayList<>();
+        if (goal != null) {
+            int[] curr = goal;
+            while (!(curr[0] == j.getX() && curr[1] == j.getY())) {
+                path.add(curr);
+                curr = parent[curr[0]][curr[1]];
+            }
+            path.add(new int[]{j.getX(), j.getY()});
+            Collections.reverse(path);
+        }
+        return path;
     }
 
     private List<int[]> getNeighbors(int x, int y) {

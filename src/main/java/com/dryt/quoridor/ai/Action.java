@@ -55,6 +55,10 @@ Action {
         };
     }
 
+    public boolean isPawnMove() {
+        return type == MoveType.MOVE;
+    }
+
     @Override
     public String toString() {
         return (type == MoveType.MOVE ? "Move to (" + x + "," + y + ")" :
