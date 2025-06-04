@@ -21,8 +21,8 @@
             </HBox>
 
             <HBox spacing="30" alignment="CENTER">
-                <Button text="VALIDER" onAction="#onValider" styleClass="menu-button"/>
-                <Button text="RETOUR" onAction="#onRetour" styleClass="menu-button"/>
+                <Button text="VALIDER" onAction="#onValider" styleClass="validate-button"/>
+                <Button text="RETOUR" onAction="#onRetour" styleClass="back-button"/>
             </HBox>
         </VBox>
     </VBox>

@@ -38,9 +38,6 @@ public class ControleurOptions {
 
     @FXML
     private void onRetour(ActionEvent event) {
-        Stage stage = JeuQuoridor.getPrimaryStage();
         JeuQuoridor.goMenu();
-        stage.setX(0);
-        stage.setY(0);
     }
 }

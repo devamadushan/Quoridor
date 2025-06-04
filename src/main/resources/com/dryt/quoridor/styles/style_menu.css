@@ -1,5 +1,4 @@
 .root {
-    -fx-background-image: url("trollidor.png");
 
 }
 .button {
@@ -10,9 +9,10 @@
 
 .menu-background {
     -fx-background-color: transparent;
-    -fx-background-image: url("trollidor.png");
+    -fx-background-image: url("../images/trollidor.png");
     -fx-background-size: 100% 100%;
     -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
 }
 
 .title-text {
@@ -25,8 +25,8 @@
 
 .menu-buttons {
     -fx-padding: 30px;
-    -fx-background-color: rgba(44, 88, 44, 0.7);
-    -fx-background-radius: 20px;
+    -fx-background-color: rgba(25, 62, 25, 0.5);
+    -fx-background-radius: 60px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
 }
 
@@ -128,7 +128,7 @@
 }
 
 .play-button {
-    -fx-background-image: url("bouttonjouer.png");
+    -fx-background-image: url("../images/bouttons/bouttonjouer.png");
     -fx-background-size: 100% 150%;
     -fx-background-position: center;
     -fx-background-repeat: no-repeat;
@@ -151,6 +151,118 @@
 }
 
 .play-button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+.options-button {
+    -fx-background-image: url("../images/bouttons/bouttonoptions.png");
+    -fx-background-size: 100% 165%;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-color: transparent;
+    -fx-text-fill: transparent;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-min-width: 180px;
+    -fx-min-height: 80px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 5, 0, 0, 2);
+    -fx-transition: all 0.3s ease;
+}
+
+.options-button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 3);
+}
+
+.options-button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+.quit-button {
+    -fx-background-image: url("../images/bouttons/bouttonquitter.png");
+    -fx-background-size: 100% 160%;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-color: transparent;
+    -fx-text-fill: transparent;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-min-width: 180px;
+    -fx-min-height: 80px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 5, 0, 0, 2);
+    -fx-transition: all 0.3s ease;
+}
+
+.quit-button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 3);
+}
+
+.quit-button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+.back-button {
+    -fx-background-image: url("../images/bouttons/bouttonretour.png");
+    -fx-background-size: 100% 160%;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-color: transparent;
+    -fx-text-fill: transparent;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-min-width: 180px;
+    -fx-min-height: 80px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 5, 0, 0, 2);
+    -fx-transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 3);
+}
+
+.back-button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+.validate-button {
+    -fx-background-image: url("../images/bouttons/bouttonvalider.png");
+    -fx-background-size: 100% 160%;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-color: transparent;
+    -fx-text-fill: transparent;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-min-width: 180px;
+    -fx-min-height: 80px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 5, 0, 0, 2);
+    -fx-transition: all 0.3s ease;
+}
+
+.validate-button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 3);
+}
+
+.validate-button:pressed {
     -fx-scale-x: 0.95;
     -fx-scale-y: 0.95;
 }

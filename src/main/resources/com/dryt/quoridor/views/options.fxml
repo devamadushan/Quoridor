@@ -4,9 +4,8 @@
 <?import javafx.scene.text.Text?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.dryt.quoridor.controller.ControleurOptions"
-            prefWidth="1024.0" prefHeight="1024.0"
-            styleClass="menu-background">
+             fx:controller="com.dryt.quoridor.controller.ControleurOptions"
+             styleClass="menu-background">
 
     <VBox spacing="50" alignment="CENTER">
         
@@ -14,7 +13,7 @@
             <Button text="800x600" onAction="#onRes800x600" styleClass="menu-button"/>
             <Button text="1024x1024" onAction="#onRes1024x1024" styleClass="menu-button"/>
             <Button text="1920x1080" onAction="#onRes1920x1080" styleClass="menu-button"/>
-            <Button text="RETOUR" onAction="#onRetour" styleClass="menu-button"/>
+            <Button text="RETOUR" onAction="#onRetour" styleClass="back-button"/>
         </VBox>
     </VBox>
 </StackPane>
