@@ -9,19 +9,14 @@
             styleClass="menu-background">
 
     <VBox spacing="50" alignment="CENTER">
+         <Text text="CHOIX DES JOUEURS" styleClass="title-text"/>
         
         <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
-            <RadioButton fx:id="radio2Humains" text="1 VS 1 (HUMAINS)" selected="true" styleClass="menu-radio"/>
-            <RadioButton fx:id="radio1v1Bot" text="1 VS 1 IA" styleClass="menu-radio"/>
-            <RadioButton fx:id="radio4Joueurs" text="4 JOUEURS (HUMAINS + IA)" styleClass="menu-radio"/>
-
-            <HBox alignment="CENTER" spacing="20" styleClass="menu-buttons">
-                <Label text="NOMBRE D'IA :" styleClass="menu-label"/>
-                <Spinner fx:id="spinnerIA" prefWidth="80" styleClass="menu-spinner"/>
-            </HBox>
+            <Button text="1 VS 1 (HUMAINS)" onAction="#on1v1Humain" styleClass="menu-button"/>
+            <Button text="1 VS 1 IA" onAction="#on1v1IA" styleClass="menu-button"/>
+            <Button text="4 JOUEURS" onAction="#on4Joueurs" styleClass="menu-button"/>
 
             <HBox spacing="30" alignment="CENTER">
-                <Button text="VALIDER" onAction="#onValider" styleClass="validate-button"/>
                 <Button text="RETOUR" onAction="#onRetour" styleClass="back-button"/>
             </HBox>
         </VBox>

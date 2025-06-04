@@ -104,6 +104,54 @@ public class JeuQuoridor extends Application {
         updateWindowPosition(); // Appliquer la position après le changement de scène
     }
 
+    // Nouvelle méthode pour naviguer vers le choix des skins
+    public static void goChoixSkins() {
+        windowX = primaryStage.getX();
+        windowY = primaryStage.getY();
+        try {
+            // Charger la scène du choix des skins (fichier FXML à créer)
+            Parent skinsRoot = FXMLLoader.load(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/choix_skins.fxml"));
+            Scene sceneSkins = new Scene(skinsRoot, primaryStage.getWidth(), primaryStage.getHeight());
+            sceneSkins.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm()); // Utiliser le style du menu pour l'instant
+            primaryStage.setScene(sceneSkins);
+            updateWindowPosition();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Nouvelle méthode pour naviguer vers le choix de difficulté de l'IA (mode 1v1 IA)
+    public static void goChoixDifficulteIA() {
+        windowX = primaryStage.getX();
+        windowY = primaryStage.getY();
+        try {
+            // Charger la scène du choix de difficulté IA (fichier FXML à créer)
+            Parent difficulteRoot = FXMLLoader.load(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/choix_difficulte_ia.fxml"));
+            Scene sceneDifficulte = new Scene(difficulteRoot, primaryStage.getWidth(), primaryStage.getHeight());
+            sceneDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm()); // Utiliser le style du menu pour l'instant
+            primaryStage.setScene(sceneDifficulte);
+            updateWindowPosition();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Nouvelle méthode pour naviguer vers le choix du nombre et de la difficulté des IA (mode 4 joueurs)
+    public static void goChoixNbIADifficulte() {
+        windowX = primaryStage.getX();
+        windowY = primaryStage.getY();
+        try {
+            // Charger la scène du choix nb IA et difficulté (fichier FXML à créer)
+            Parent nbDifficulteRoot = FXMLLoader.load(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/choix_nb_ia_difficulte.fxml"));
+            Scene sceneNbDifficulte = new Scene(nbDifficulteRoot, primaryStage.getWidth(), primaryStage.getHeight());
+            sceneNbDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm()); // Utiliser le style du menu pour l'instant
+            primaryStage.setScene(sceneNbDifficulte);
+            updateWindowPosition();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
