@@ -27,6 +27,10 @@ public class ControleurChoixSkins {
     public void initialize() {
         nombreJoueurs = JeuQuoridor.getNombreJoueurs();
         updateMessageJoueur();
+         // Initialiser skinsSelectionnes avec une valeur par défaut ou 0
+        for (int i = 0; i < skinsSelectionnes.length; i++) {
+            skinsSelectionnes[i] = 0; // Ou une autre valeur par défaut si nécessaire
+        }
     }
 
     private void updateMessageJoueur() {
@@ -49,7 +53,8 @@ public class ControleurChoixSkins {
         if (joueurActuel <= nombreJoueurs) {
             updateMessageJoueur();
         } else {
-            // Tous les joueurs ont choisi leur skin, lancer le jeu
+            // Tous les joueurs ont choisi leur skin, enregistrer et lancer le jeu
+            JeuQuoridor.setSelectedSkins(skinsSelectionnes); // Enregistrer les skins sélectionnés
             try {
                 JeuQuoridor.startGame();
             } catch (Exception e) {

@@ -1,7 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.Text?>
 
-<StackPane prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dryt.quoridor.controller.ControleurChoixNbIADifficulte">
-   <!-- Contenu à ajouter plus tard -->
+<StackPane prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dryt.quoridor.controller.ControleurChoixNbIADifficulte" styleClass="menu-background">
+    <VBox spacing="50" alignment="CENTER">
+        <Text text="CHOIX DU NOMBRE D'IA" styleClass="title-text"/>
+        
+        <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
+            <Text fx:id="messageMode" text="Mode 4 joueurs humains" styleClass="menu-label"/>
+            <Text text="Nombre d'IA (0-3)" styleClass="menu-label"/>
+            
+            <HBox spacing="20" alignment="CENTER">
+                <Spinner fx:id="nbIASpinner" min="0" max="3" initialValue="0" styleClass="menu-spinner"/>
+            </HBox>
+
+            <VBox fx:id="difficulteContainer" spacing="20" alignment="CENTER" visible="false">
+                <Text text="Choisissez la difficulté des IA" styleClass="menu-label"/>
+                
+                <VBox fx:id="difficulteButtons" spacing="10" alignment="CENTER">
+                    <!-- Les boutons de difficulté seront ajoutés dynamiquement -->
+                </VBox>
+            </VBox>
+
+            <HBox spacing="30" alignment="CENTER">
+                <Button text="RETOUR" onAction="#onRetour" styleClass="back-button"/>
+                <Button fx:id="validerButton" text="VALIDER" onAction="#onValider" styleClass="validate-button"/>
+            </HBox>
+        </VBox>
+    </VBox>
 </StackPane> 
