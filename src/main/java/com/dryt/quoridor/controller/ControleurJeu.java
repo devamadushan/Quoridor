@@ -149,11 +149,13 @@ public class ControleurJeu {
 
         Joueur winner = plateau.getWinner();
         if (winner != null) {
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setHeaderText("Partie terminée");
-            alert.setContentText("Le joueur " + winner.getId() + " a gagné !");
-            alert.showAndWait();
-            JeuQuoridor.goMenu();
+            javafx.application.Platform.runLater(() -> {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setHeaderText("Partie terminée");
+                alert.setContentText("Le joueur " + winner.getId() + " a gagné !");
+                alert.showAndWait();
+                JeuQuoridor.goMenu();
+            });
         } else {
             switchPlayerTurn(); // continuer le tour suivant
         }
