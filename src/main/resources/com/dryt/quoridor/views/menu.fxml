@@ -12,9 +12,10 @@
           styleClass="menu-background">
 
     <VBox spacing="50" alignment="CENTER">
+        <Text text="QUORIDOR" styleClass="title-text"/>
         
         <HBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
-            <Button text="JOUER" onAction="#onJouer" styleClass="menu-button"/>
+            <Button text="JOUER" onAction="#onJouer" styleClass="play-button"/>
             <Button text="OPTIONS" onAction="#onOptions" styleClass="menu-button"/>
             <Button text="QUITTER" onAction="#onQuitter" styleClass="menu-button"/>
         </HBox>
