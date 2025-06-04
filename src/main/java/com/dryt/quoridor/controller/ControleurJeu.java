@@ -15,6 +15,8 @@ import com.dryt.quoridor.app.JeuQuoridor;
 import javafx.scene.shape.Rectangle;
 
 import java.util.Arrays;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 public class ControleurJeu {
 
@@ -128,6 +130,34 @@ public class ControleurJeu {
             return plateau.hasVerticalWall(wx, wy) && plateau.hasVerticalWall(wx, wy + 1);
         }
     }
+    private void runIA() {
+        System.out.println("IA " + plateau.getCurrentPlayer().getId() + " réfléchit...");
+        Action action = aiStrategy.getBestAction(plateau);
+        System.out.println("Action trouvée.");
+
+        if (action.getType() == MoveType.MOVE) {
+            plateau.moveCurrentPlayer(action.getX(), action.getY());
+        } else if (action.getType() == MoveType.WALL) {
+            if (plateau.canPlaceWall(action.getX(), action.getY(), action.getVertical())
+                    && plateau.allPlayersHaveAPathAfterWall(action.getX(), action.getY(), action.getVertical())
+                    && !plateau.isWallOverlapping(action.getX(), action.getY(), action.getVertical())
+                    && !isWallAlreadyPresent(action.getX(), action.getY(), action.getVertical())) {
+                plateau.placeWallCurrentPlayer(action.getX(), action.getY(), action.getVertical());
+                drawWall(action.getX(), action.getY(), action.getVertical());
+            }
+        }
+
+        Joueur winner = plateau.getWinner();
+        if (winner != null) {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setHeaderText("Partie terminée");
+            alert.setContentText("Le joueur " + winner.getId() + " a gagné !");
+            alert.showAndWait();
+            JeuQuoridor.goMenu();
+        } else {
+            switchPlayerTurn(); // continuer le tour suivant
+        }
+    }
 
     private void showGhostWall(int wx, int wy, boolean vertical) {
         hideGhostWall();
@@ -233,33 +263,10 @@ public class ControleurJeu {
         updateBoardState();
 
         if (plateau.getCurrentPlayer().isAI()) {
-            System.out.println("AI " + plateau.getCurrentPlayer().getId() + " looking for move");
-            Action action = aiStrategy.getBestAction(plateau);
-            System.out.println("Move found");
-
-            if (action.getType() == MoveType.MOVE) {
-                plateau.moveCurrentPlayer(action.getX(), action.getY());
-            } else if (action.getType() == MoveType.WALL) {
-                if (plateau.canPlaceWall(action.getX(), action.getY(), action.getVertical())
-                        && plateau.allPlayersHaveAPathAfterWall(action.getX(), action.getY(), action.getVertical())
-                        && !plateau.isWallOverlapping(action.getX(), action.getY(), action.getVertical())
-                        && !isWallAlreadyPresent(action.getX(), action.getY(), action.getVertical())) {
-                    plateau.placeWallCurrentPlayer(action.getX(), action.getY(), action.getVertical());
-                    drawWall(action.getX(), action.getY(), action.getVertical());
-                }
-            }
-
-            Joueur winner = plateau.getWinner();
-            if (winner != null) {
-                Alert alert = new Alert(AlertType.INFORMATION);
-                alert.setHeaderText("Partie terminée");
-                alert.setContentText("Le joueur " + winner.getId() + " a gagné !");
-                alert.showAndWait();
-                JeuQuoridor.goMenu();
-                return;
-            }
-
-            switchPlayerTurn();
+            PauseTransition pause = new PauseTransition(Duration.millis(100));
+            pause.setOnFinished(e -> runIA());
+            pause.play();
         }
     }
+
 }
