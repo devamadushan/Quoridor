@@ -3,12 +3,32 @@ package com.dryt.quoridor.controller;
 import javafx.fxml.FXML;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.text.Text;
 import com.dryt.quoridor.app.JeuQuoridor;
+import com.dryt.quoridor.utils.BackgroundManager;
+import com.dryt.quoridor.utils.UserPreferences;
 
 public class ControleurOptions {
     
     @FXML
     private ComboBox<String> resolutionComboBox;
+    
+    @FXML
+    private Button backgroundPrevButton;
+    
+    @FXML
+    private Button backgroundNextButton;
+    
+    @FXML
+    private ImageView backgroundPreview;
+    
+    @FXML
+    private Text backgroundNameLabel;
+    
+    private int currentBackgroundIndex = 0;
     
     @FXML
     public void initialize() {
@@ -25,6 +45,87 @@ public class ControleurOptions {
                 case "1280x800" -> onRes1280x800(e);
             }
         });
+        
+        initializeBackgroundSystem();
+    }
+    
+    private void initializeBackgroundSystem() {
+        String selectedBackground = UserPreferences.getSelectedBackground();
+        currentBackgroundIndex = BackgroundManager.getBackgroundIndex(selectedBackground);
+        
+        updateBackgroundPreview();
+        
+        System.out.println("��️ Background system initialized with: " + selectedBackground);
+    }
+    
+    private void updateBackgroundPreview() {
+        if (BackgroundManager.getBackgroundCount() == 0) return;
+        
+        BackgroundManager.BackgroundInfo currentBg = BackgroundManager.getBackgroundByIndex(currentBackgroundIndex);
+        
+        try {
+            String imagePath = "/com/dryt/quoridor/styles/background/" + currentBg.getFileName();
+            Image image = new Image(getClass().getResourceAsStream(imagePath));
+            backgroundPreview.setImage(image);
+            
+            backgroundPreview.setOnMouseClicked(e -> {
+                System.out.println("🖼️ Background preview clicked - cycling size mode");
+                applyBackgroundChange(currentBg.getFileName());
+            });
+            
+            backgroundNameLabel.setText(currentBg.getDisplayName());
+            
+            backgroundPrevButton.setDisable(BackgroundManager.getBackgroundCount() <= 1);
+            backgroundNextButton.setDisable(BackgroundManager.getBackgroundCount() <= 1);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors du chargement de l'aperçu du fond d'écran: " + e.getMessage());
+            backgroundNameLabel.setText("Erreur de chargement");
+        }
+    }
+    
+    @FXML
+    private void onPreviousBackground(ActionEvent event) {
+        if (BackgroundManager.getBackgroundCount() <= 1) return;
+        
+        currentBackgroundIndex--;
+        if (currentBackgroundIndex < 0) {
+            currentBackgroundIndex = BackgroundManager.getBackgroundCount() - 1;
+        }
+        
+        BackgroundManager.BackgroundInfo selectedBg = BackgroundManager.getBackgroundByIndex(currentBackgroundIndex);
+        UserPreferences.setSelectedBackground(selectedBg.getFileName());
+        updateBackgroundPreview();
+        
+        applyBackgroundChange(selectedBg.getFileName());
+        
+        System.out.println("🖼️ Fond d'écran changé vers: " + selectedBg.getDisplayName());
+    }
+    
+    @FXML
+    private void onNextBackground(ActionEvent event) {
+        if (BackgroundManager.getBackgroundCount() <= 1) return;
+        
+        currentBackgroundIndex++;
+        if (currentBackgroundIndex >= BackgroundManager.getBackgroundCount()) {
+            currentBackgroundIndex = 0;
+        }
+        
+        BackgroundManager.BackgroundInfo selectedBg = BackgroundManager.getBackgroundByIndex(currentBackgroundIndex);
+        UserPreferences.setSelectedBackground(selectedBg.getFileName());
+        updateBackgroundPreview();
+        
+        applyBackgroundChange(selectedBg.getFileName());
+        
+        System.out.println("🖼️ Fond d'écran changé vers: " + selectedBg.getDisplayName());
+    }
+    
+    private void applyBackgroundChange(String backgroundFileName) {
+        try {
+            JeuQuoridor.updateGameBackground(backgroundFileName);
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors de l'application du fond d'écran: " + e.getMessage());
+        }
     }
     
     @FXML
@@ -52,15 +153,11 @@ public class ControleurOptions {
         
         if ("game".equals(previousContext)) {
             System.out.println("🔙 Returning to game menu overlay...");
-            // Go back to the game scene first
             if (JeuQuoridor.getCurrentGameScene() != null) {
                 JeuQuoridor.getPrimaryStage().setScene(JeuQuoridor.getCurrentGameScene());
-                // Ensure maximized state for consistency
                 JeuQuoridor.getPrimaryStage().setMaximized(true);
-                // Then show the menu overlay
                 JeuQuoridor.showGameMenuOverlay();
             } else {
-                // Fallback to main menu if game scene is not available
                 JeuQuoridor.goMenu();
             }
         } else {

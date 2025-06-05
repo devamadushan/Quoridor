@@ -61,13 +61,13 @@
                             <children>
                                 <!-- Conteneur brun en arrière-plan (MUST BE FIRST) -->
                                 <Pane fx:id="boardContainer" 
-                                      prefWidth="100.0" prefHeight="100.0" 
+                                      prefWidth="550.0" prefHeight="550.0" 
                                       styleClass="board-container"
                                       mouseTransparent="true"/>
                                 
                                 <!-- Plateau de jeu centré (MUST BE SECOND - ON TOP) -->
                                 <Pane fx:id="boardPane" 
-                                      prefWidth="580.0" prefHeight="580.0"
+                                      prefWidth="540.0" prefHeight="540.0"
                                       style="-fx-background-color: transparent;" />
                                       
                                 <!-- Label pour les messages d'erreur -->

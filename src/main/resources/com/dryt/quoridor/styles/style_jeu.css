@@ -1,6 +1,6 @@
 /* ----- MYSTICAL NIGHT LANDSCAPE BACKGROUND ----- */
 .root {
-    -fx-background-image: url("zudarts-lee-150831-13.jpg");
+    -fx-background-image: url("background/zudarts-lee-150831-13.jpg");
     -fx-background-size: cover;
     -fx-background-position: center center;
     -fx-background-repeat: no-repeat;

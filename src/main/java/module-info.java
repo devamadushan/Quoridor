@@ -3,6 +3,7 @@ module com.dryt.quoridor {
     requires javafx.fxml;
     requires javafx.web;
     requires javafx.media;
+    requires java.prefs;
 
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;

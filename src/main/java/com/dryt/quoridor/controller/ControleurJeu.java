@@ -5,6 +5,7 @@ import com.dryt.quoridor.ai.MinimaxAI;
 import com.dryt.quoridor.ai.MoveType;
 import com.dryt.quoridor.ai.DifficulteIA;
 import com.dryt.quoridor.utils.GameConstants;
+import com.dryt.quoridor.utils.UserPreferences;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
@@ -110,6 +111,10 @@ public class ControleurJeu {
     private double scaleFactor = 1.0;
     private static final double BASE_WINDOW_WIDTH = 1400.0;
     private static final double BASE_WINDOW_HEIGHT = 900.0;
+    
+    // Optimisation du redimensionnement
+    private PauseTransition resizeDebounceTimer;
+    private boolean isResizing = false;
 
     @FXML
     private void initialize() {
@@ -130,6 +135,9 @@ public class ControleurJeu {
             setupKeyboardShortcuts();
             setupVolumeControls();
             setupDynamicScaling();
+            
+            // Apply saved background
+            applySavedBackground();
         });
     }
     
@@ -254,9 +262,9 @@ public class ControleurJeu {
             boardPane.setMinSize(boardWidth, boardHeight);
             boardPane.setMaxSize(boardWidth, boardHeight);
             
-            // Set container size closer to game size (40px padding on each side)
-            double containerPadding = 10;
-            double containerSize = boardWidth + (2 * containerPadding); // 618px
+            // Set container size much closer to game size (minimal padding)
+            double containerPadding = 4; // Réduit de 10 à 4
+            double containerSize = boardWidth + (2 * containerPadding);
             
             boardContainer.setPrefSize(containerSize, containerSize);
             boardContainer.setMinSize(containerSize, containerSize);
@@ -294,7 +302,7 @@ public class ControleurJeu {
                 double baseX = scaledOffsetX + x * (scaledCellSize + scaledWallSize);
                 double baseY = scaledOffsetY + y * (scaledCellSize + scaledWallSize);
 
-                Button cell = new Button();
+                    Button cell = new Button();
                 cell.setPrefSize(scaledCellSize, scaledCellSize);
                 cell.setMinSize(scaledCellSize, scaledCellSize);
                 cell.setMaxSize(scaledCellSize, scaledCellSize);
@@ -312,19 +320,19 @@ public class ControleurJeu {
                     "-fx-content-display: center;" +
                     "-fx-alignment: center;");
                 
-                cell.setLayoutX(baseX);
-                cell.setLayoutY(baseY);
-                final int cx = x;
-                final int cy = y;
-                cell.setOnAction(event -> onCellClicked(cx, cy));
-                cellButtons[cx][cy] = cell;
-                boardPane.getChildren().add(cell);
+                    cell.setLayoutX(baseX);
+                    cell.setLayoutY(baseY);
+                    final int cx = x;
+                    final int cy = y;
+                    cell.setOnAction(event -> onCellClicked(cx, cy));
+                    cellButtons[cx][cy] = cell;
+                    boardPane.getChildren().add(cell);
 
-                if (x < 8 && y < 9)
+                    if (x < 8 && y < 9)
                     createWallPlaceholder(baseX + scaledCellSize, baseY + scaledCellSize / 2.0 - scaledWallSize / 2.0, x, y, true);
-                if (y < 8 && x < 9)
+                    if (y < 8 && x < 9)
                     createWallPlaceholder(baseX + scaledCellSize / 2.0 - scaledWallSize / 2.0, baseY + scaledCellSize, x, y, false);
-                if (x < 8 && y < 8)
+                    if (x < 8 && y < 8)
                     createWallPlaceholder(baseX + scaledCellSize, baseY + scaledCellSize, x, y, true);
             }
         }
@@ -589,7 +597,7 @@ public class ControleurJeu {
                 }
             } else {
                 // Fallback to default player style
-                String styleClass = "player" + joueur.getId();
+            String styleClass = "player" + joueur.getId();
                 Button cell = cellButtons[joueur.getX()][joueur.getY()];
                 cell.getStyleClass().add(styleClass);
                 
@@ -791,20 +799,39 @@ public class ControleurJeu {
         if (boardPane.getScene() != null && boardPane.getScene().getWindow() != null) {
             Stage stage = (Stage) boardPane.getScene().getWindow();
             
+            // Créer un timer de débounce pour optimiser les redimensionnements
+            resizeDebounceTimer = new PauseTransition(Duration.millis(100)); // 100ms de délai
+            resizeDebounceTimer.setOnFinished(e -> {
+                isResizing = false;
+                updateScaling();
+                System.out.println("🔄 Resize debounce completed - applying final scaling");
+            });
+            
             // Listen for width changes
             stage.widthProperty().addListener((obs, oldVal, newVal) -> {
-                updateScaling();
+                handleResize();
             });
             
             // Listen for height changes  
             stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-                updateScaling();
+                handleResize();
             });
             
             // Initial scaling update
             updateScaling();
-            System.out.println("🔄 Dynamic scaling initialized");
+            System.out.println("🔄 Dynamic scaling initialized with debounce optimization");
         }
+    }
+    
+    private void handleResize() {
+        if (!isResizing) {
+            isResizing = true;
+            System.out.println("🔄 Resize detected - starting debounce timer");
+        }
+        
+        // Redémarrer le timer de débounce à chaque redimensionnement
+        resizeDebounceTimer.stop();
+        resizeDebounceTimer.play();
     }
     
     private void updateScaling() {
@@ -877,7 +904,7 @@ public class ControleurJeu {
             boardPane.setMaxSize(boardWidth, boardHeight);
             
             // Calculer le padding en fonction de la taille de la fenêtre
-            double containerPadding = Math.max(4 * scaleFactor, 3);
+            double containerPadding = Math.max(2 * scaleFactor, 2);
             double containerSize = Math.max(boardWidth, boardHeight) + (2 * containerPadding);
             
             boardContainer.setPrefSize(containerSize, containerSize);
@@ -943,14 +970,13 @@ public class ControleurJeu {
                 labelMursRestants.setStyle("-fx-font-size: " + fontSize + "px;");
             }
             
-            // Mise à l'échelle générale de la police
-            if (boardPane.getScene().getRoot() != null) {
-                double generalFontSize = Math.max(baseFontSize * scaleFactor, baseFontSize * 0.7);
-                boardPane.getScene().getRoot().setStyle("-fx-font-size: " + generalFontSize + "px;");
-            }
-            
             System.out.println("🔄 Contrôles mis à l'échelle - Bouton: " + baseButtonSize + 
                              "px, Slider: " + baseSliderWidth + "px, Police: " + baseFontSize + "px");
+        }
+        
+        // Réappliquer le background sauvegardé seulement si ce n'est pas un redimensionnement en cours
+        if (!isResizing) {
+            applySavedBackground();
         }
     }
 
@@ -1087,6 +1113,16 @@ public class ControleurJeu {
                 errorMessageLabel.setManaged(false);
             });
             sequence.play();
+        }
+    }
+
+    private void applySavedBackground() {
+        try {
+            String selectedBackground = UserPreferences.getSelectedBackground();
+            JeuQuoridor.updateGameBackground(selectedBackground);
+            System.out.println("🖼️ Applied saved background: " + selectedBackground);
+        } catch (Exception e) {
+            System.err.println("❌ Failed to apply saved background: " + e.getMessage());
         }
     }
 }

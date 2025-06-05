@@ -5,8 +5,8 @@ public final class GameConstants {
     public static final int BOARD_SIZE = 9;
     public static final int CELL_SIZE = 70;
     public static final int WALL_SIZE = 8;
-    public static final double OFFSET_X = 80;
-    public static final double OFFSET_Y = 80;
+    public static final double OFFSET_X = 40;
+    public static final double OFFSET_Y = 40;
 
     // Nombre de murs par joueur
     public static final int WALLS_PER_PLAYER = 10;
@@ -23,10 +23,10 @@ public final class GameConstants {
     public static final String ERROR_NO_DIFFICULTE = "Erreur : Pas de difficulté trouvée pour l'IA %d";
 
     // Messages de jeu
-    public static final String MSG_WALL_CROSSING = "❌ Croisement de mur interdit.";
-    public static final String MSG_WALL_BLOCKING = "❌ Ce mur bloquerait un joueur complètement.";
-    public static final String MSG_WALL_OVERLAP = "❌ Chevauchement de mur interdit.";
-    public static final String MSG_WALL_ALREADY = "❌ Un mur est déjà présent ici.";
+    public static final String MSG_WALL_CROSSING = "Croisement de mur interdit.";
+    public static final String MSG_WALL_BLOCKING = "Ce mur bloquerait un joueur complètement.";
+    public static final String MSG_WALL_OVERLAP = "Chevauchement de mur interdit.";
+    public static final String MSG_WALL_ALREADY = "Un mur est déjà présent ici.";
     public static final String MSG_GAME_OVER = "Partie terminée";
     public static final String MSG_PLAYER_WINS = "Le joueur %d a gagné !";
     public static final String MSG_WALLS_REMAINING = "Murs restants : %d";

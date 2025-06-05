@@ -45,6 +45,8 @@ public class JeuQuoridor extends Application {
     private static ControleurJeu currentGameController = null;
     private static Scene currentGameScene = null;
 
+    private static String currentBackgroundFileName = null; // Cache pour éviter les recharges inutiles
+
     @Override
     public void start(Stage stage) throws Exception {
         primaryStage = stage;
@@ -440,6 +442,100 @@ public class JeuQuoridor extends Application {
 
     public static Scene getCurrentGameScene() {
         return currentGameScene;
+    }
+
+    public static void updateGameBackground(String backgroundFileName) {
+        try {
+            // Éviter les recharges inutiles du même background
+            if (backgroundFileName != null && backgroundFileName.equals(currentBackgroundFileName)) {
+                System.out.println("🖼️ Background already loaded: " + backgroundFileName + " - skipping update");
+                return;
+            }
+            
+            if (currentGameScene != null) {
+                // Remove existing stylesheets
+                currentGameScene.getStylesheets().clear();
+                
+                // Apply the updated stylesheet first
+                currentGameScene.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
+                
+                // Apply the dynamic background style inline with better sizing options
+                if (currentGameScene.getRoot() != null) {
+                    String backgroundUrl = JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/background/" + backgroundFileName).toExternalForm();
+                    
+                    // Déterminer automatiquement le meilleur mode de taille
+                    String backgroundSize = determineBestBackgroundSize(backgroundFileName);
+                    
+                    // Pour les GIFs, ajouter des optimisations CSS supplémentaires
+                    String optimizations = "";
+                    if (backgroundFileName.toLowerCase().endsWith(".gif")) {
+                        optimizations = "-fx-effect: null; "; // Désactiver les effets pour les GIFs
+                    }
+                    
+                    currentGameScene.getRoot().setStyle(
+                        String.format("-fx-background-image: url('%s'); " +
+                                      "-fx-background-size: %s; " +
+                                      "-fx-background-position: center center; " +
+                                      "-fx-background-repeat: no-repeat; " +
+                                      "-fx-background-color: #2B3A4A; " +
+                                      "%s",
+                                      backgroundUrl, backgroundSize, optimizations)
+                    );
+                }
+                
+                // Mettre à jour le cache
+                currentBackgroundFileName = backgroundFileName;
+                
+                System.out.println("🖼️ Game background updated to: " + backgroundFileName + " with optimal sizing");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error updating game background: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private static String determineBestBackgroundSize(String backgroundFileName) {
+        String extension = backgroundFileName.toLowerCase();
+        
+        // Calculer le ratio d'aspect de l'écran
+        double screenAspectRatio = screenWidth / screenHeight;
+        
+        if (extension.endsWith(".gif")) {
+            // Pour les GIFs pixel art, adapter selon le ratio d'écran
+            if (screenAspectRatio > 1.8) {
+                // Écrans ultra-larges (21:9)
+                return "100% auto";
+            } else if (screenAspectRatio < 1.5) {
+                // Écrans plus carrés (4:3)
+                return "auto 100%";
+            } else {
+                // Écrans standard (16:9, 16:10)
+                return "cover";
+            }
+        } else if (extension.endsWith(".png")) {
+            // Pour les PNGs, utiliser contain pour préserver la qualité
+            return "contain";
+        } else {
+            // Pour les JPGs, toujours utiliser cover pour remplir l'écran
+            return "cover";
+        }
+    }
+    
+    private static String getBaseGameCSS() {
+        // Return basic styles that shouldn't be overridden by background changes
+        return """
+            /* Preserve essential game styles */
+            .board-container {
+                -fx-background-color: rgba(20, 20, 30, 0.3);
+                -fx-border-color: rgba(100, 100, 120, 0.8);
+                -fx-border-width: 3;
+                -fx-background-radius: 15;
+                -fx-border-radius: 15;
+                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 10, 0.6, 2, 2),
+                            innershadow(gaussian, rgba(60,60,80,0.4), 6, 0.4, 0, 0);
+                -fx-opacity: 1;
+            }
+            """;
     }
 
     public static void main(String[] args) {
