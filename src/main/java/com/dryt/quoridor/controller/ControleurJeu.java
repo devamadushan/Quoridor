@@ -496,12 +496,24 @@ public class ControleurJeu {
     }
 
     private void onCellClicked(int x, int y) {
-        if (!cellButtons[x][y].getStyleClass().contains("highlight")) return;
-        if (!plateau.moveCurrentPlayer(x, y)) return;
+        System.out.println("🖱️ Cell clicked at [" + x + "," + y + "] by player " + plateau.getCurrentPlayer().getId());
+        
+        if (!cellButtons[x][y].getStyleClass().contains("highlight")) {
+            System.out.println("❌ Cell [" + x + "," + y + "] not highlighted - click ignored");
+            return;
+        }
+        
+        System.out.println("✅ Valid move to [" + x + "," + y + "] - executing move");
+        
+        if (!plateau.moveCurrentPlayer(x, y)) {
+            System.out.println("❌ Move failed for player " + plateau.getCurrentPlayer().getId());
+            return;
+        }
 
-        checkForWinner();
+        // Check for winner after the move
         Joueur winner = plateau.getWinner();
         if (winner != null) {
+            System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
             // Stop background music when game ends
             stopBackgroundMusic();
             
@@ -510,6 +522,7 @@ public class ControleurJeu {
             return;
         }
 
+        // Only switch turns if no winner
         switchPlayerTurn();
     }
 
@@ -626,17 +639,32 @@ public class ControleurJeu {
         if (action.getType() == MoveType.MOVE) {
             if (!plateau.moveCurrentPlayer(action.getX(), action.getY())) {
                 System.err.println(GameConstants.ERROR_INVALID_MOVE);
+                return;
             }
         } else if (action.getType() == MoveType.WALL) {
              if (!plateau.canPlaceWall(action.getX(), action.getY(), action.getVertical())
                     || !plateau.placeWallCurrentPlayer(action.getX(), action.getY(), action.getVertical())) {
                  System.err.println(GameConstants.ERROR_INVALID_WALL);
+                 return;
              } else {
                  drawWall(action.getX(), action.getY(), action.getVertical());
              }
         }
 
-        checkForWinner();
+        // Check for winner after AI move
+        Joueur winner = plateau.getWinner();
+        if (winner != null) {
+            System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
+            // Stop background music when game ends
+            stopBackgroundMusic();
+            
+            // Show custom victory popup instead of standard alert
+            showVictoryPopup(winner.getId());
+            return;
+        }
+
+        // Only switch turns if no winner
+        switchPlayerTurn();
     }
 
     private void checkForWinner() {
@@ -648,9 +676,6 @@ public class ControleurJeu {
             
             // Show custom victory popup instead of standard alert
             showVictoryPopup(winner.getId());
-            return;
-        } else {
-            switchPlayerTurn();
         }
     }
 

@@ -91,9 +91,11 @@
 
 /* ----- CURRENT PLAYER INDICATOR (SUBTLE) ----- */
 .current-player {
-    -fx-border-width: 4 !important;
+    -fx-border-width: 3 !important;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 5, 0.5, 2, 2),
-                dropshadow(gaussian, rgba(255,215,0,0.6), 8, 0.7, 0, 0) !important;
+                dropshadow(gaussian, rgba(255,215,0,0.5), 6, 0.6, 0, 0) !important;
+    -fx-scale-x: 1.05 !important;
+    -fx-scale-y: 1.05 !important;
 }
 
 .current-player.player1 {

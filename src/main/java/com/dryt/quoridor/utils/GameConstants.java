@@ -3,7 +3,7 @@ package com.dryt.quoridor.utils;
 public final class GameConstants {
     // Dimensions du plateau
     public static final int BOARD_SIZE = 9;
-    public static final int CELL_SIZE = 60;
+    public static final int CELL_SIZE = 70;
     public static final int WALL_SIZE = 8;
     public static final double OFFSET_X = 80;
     public static final double OFFSET_Y = 80;
