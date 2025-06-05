@@ -36,18 +36,80 @@ echo
 
 # Build macOS version
 echo "🍎 Building macOS installer..."
-./build-mac.sh
+echo "[1/3] Cleaning previous builds..."
+mvn clean
 
+echo "[2/3] Compiling and packaging..."
+mvn package
 if [ $? -ne 0 ]; then
-    echo "❌ macOS build failed!"
+    echo "❌ Maven package failed!"
     sed -i '' "s/<version>$NEW_VERSION<\/version>/<version>$CURRENT_VERSION<\/version>/" pom.xml
     exit 1
 fi
 
-# Prepare release with macOS files
-./prepare-release-mac.sh
+echo "[3/3] Creating macOS installer..."
+mvn jpackage:jpackage
+if [ $? -ne 0 ]; then
+    echo "❌ jpackage failed!"
+    sed -i '' "s/<version>$NEW_VERSION<\/version>/<version>$CURRENT_VERSION<\/version>/" pom.xml
+    exit 1
+fi
 
+echo "✅ macOS installer created: target/dist/Quoridor-$NEW_VERSION.dmg"
+
+# Prepare release files
 echo
+echo "📦 Preparing release files..."
+
+# Create release directory
+if [ -d "release" ]; then
+    rm -rf "release"
+fi
+mkdir "release"
+
+# Copy macOS installer
+cp "target/dist/Quoridor-$NEW_VERSION.dmg" "release/Quoridor-Mac.dmg"
+
+# Create resources archive
+if [ -d "src/main/resources" ]; then
+    cd src/main/resources
+    zip -r "../../../release/resources.zip" . -x "*.DS_Store"
+    cd ../../..
+    echo "✅ Resources archived successfully"
+else
+    echo "⚠️  No resources folder found, creating empty archive"
+    touch "release/resources.zip"
+fi
+
+# Add stockage folder if exists
+if [ -d "stockage" ]; then
+    echo "📂 Adding stockage folder to resources..."
+    
+    # Extract existing resources
+    if [ -f "release/resources.zip" ]; then
+        mkdir -p "release/temp"
+        cd "release/temp"
+        unzip -q "../resources.zip" 2>/dev/null || true
+        cd "../.."
+    else
+        mkdir -p "release/temp"
+    fi
+    
+    # Copy stockage folder
+    cp -r "stockage" "release/temp/"
+    
+    # Recreate archive with stockage included
+    cd "release/temp"
+    zip -r "../resources.zip" . -x "*.DS_Store"
+    cd "../.."
+    
+    # Cleanup
+    rm -rf "release/temp"
+fi
+
+# Copy installer script
+cp "download-and-play.bat" "release/download-and-play.bat"
+
 echo "✅ macOS release prepared!"
 echo
 
@@ -110,7 +172,7 @@ fi
 
 git commit -m "$COMMIT_MSG"
 git tag "v$NEW_VERSION"
-git push origin main --tags
+git push origin Fixing-bugs --tags
 
 echo
 echo "✅ ========================================="

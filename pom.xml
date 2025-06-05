@@ -6,7 +6,7 @@
 
     <groupId>com.DRYT</groupId>
     <artifactId>Quoridor</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>Quoridor</name>
 
     <properties>
@@ -198,7 +198,7 @@
                     <vendor>DRYT</vendor>
                     <destination>target/dist</destination>
                     <input>target</input>
-                    <mainJar>Quoridor-1.0-SNAPSHOT-shaded.jar</mainJar>
+                    <mainJar>${project.artifactId}-${project.version}-shaded.jar</mainJar>
                     <javaOptions>
                         <option>-Dfile.encoding=UTF-8</option>
                     </javaOptions>
