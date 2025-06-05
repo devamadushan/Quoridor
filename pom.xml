@@ -202,19 +202,14 @@
                     <input>target</input>
                     <mainJar>${project.artifactId}-${project.version}-shaded.jar</mainJar>
                     <mainClass>com.dryt.quoridor.app.QuoridorLauncher</mainClass>
-                    <type>EXE</type>
-                    <winMenu>true</winMenu>
-                    <winShortcut>true</winShortcut>
-                    <winUpgradeUuid>58BC9A78-6F2A-4B85-9E6B-7A8F9C3D4E2F</winUpgradeUuid>
                     <javaOptions>
                         <option>-Dfile.encoding=UTF-8</option>
                         <option>-Dprism.verbose=false</option>
-                        <option>-Dprism.forceGPU=true</option>
+                        <option>-Djavafx.animation.fullspeed=true</option>
+                        <option>-Xms512m</option>
                         <option>-Xmx1024m</option>
+                        <option>-Dprism.order=es2,sw</option>
                     </javaOptions>
-                    <arguments>
-                        <argument>--javafx-fallback-mode</argument>
-                    </arguments>
                 </configuration>
                 <executions>
                     <execution>
