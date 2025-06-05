@@ -333,11 +333,16 @@ public class Plateau {
 
     public Joueur getWinner() {
         for (Joueur j : joueurs) {
+            boolean isWinner = false;
             switch (j.getId()) {
-                case 1 -> { if (j.getY() == 8) return j; }
-                case 2 -> { if (j.getY() == 0) return j; }
-                case 3 -> { if (j.getX() == 8) return j; }
-                case 4 -> { if (j.getX() == 0) return j; }
+                case 1 -> isWinner = j.getY() == 8;
+                case 2 -> isWinner = j.getY() == 0;
+                case 3 -> isWinner = j.getX() == 8;
+                case 4 -> isWinner = j.getX() == 0;
+            }
+            if (isWinner) {
+                System.out.println("🎯 Joueur " + j.getId() + " a gagné ! Position: (" + j.getX() + "," + j.getY() + ")");
+                return j;
             }
         }
         return null;

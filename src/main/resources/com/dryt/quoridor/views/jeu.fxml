@@ -45,7 +45,7 @@
             <padding>
                 <Insets top="15" bottom="15" left="30" right="30"/>
             </padding>
-        </HBox>
+        </VBox>
     </top>
 
     <!-- Zone centrale pour le plateau de jeu -->

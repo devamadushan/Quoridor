@@ -765,3 +765,10 @@
     -fx-scale-y: 0.95;
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.6), 5, 0.6, 0, 0);
 }
+
+#labelMursRestants {
+    -fx-font-size: 1.4em;
+    -fx-text-fill: #F5DEB3;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);
+}

@@ -289,13 +289,21 @@ public class ControleurJeu {
 
                 Button cell = new Button();
                 cell.setPrefSize(scaledCellSize, scaledCellSize);
+                cell.setMinSize(scaledCellSize, scaledCellSize);
+                cell.setMaxSize(scaledCellSize, scaledCellSize);
                 
-                // Apply checkerboard pattern: alternating colors based on position
+                // Appliquer le style de la cellule
                 if ((x + y) % 2 == 0) {
                     cell.getStyleClass().add("cell");        // Light cells
                 } else {
                     cell.getStyleClass().add("cell-dark");   // Dark cells
                 }
+                
+                // Centrer le contenu de la cellule
+                cell.setStyle(cell.getStyle() + 
+                    "-fx-padding: 0;" +
+                    "-fx-content-display: center;" +
+                    "-fx-alignment: center;");
                 
                 cell.setLayoutX(baseX);
                 cell.setLayoutY(baseY);
@@ -491,6 +499,7 @@ public class ControleurJeu {
         if (!cellButtons[x][y].getStyleClass().contains("highlight")) return;
         if (!plateau.moveCurrentPlayer(x, y)) return;
 
+        checkForWinner();
         Joueur winner = plateau.getWinner();
         if (winner != null) {
             // Stop background music when game ends
@@ -524,7 +533,17 @@ public class ControleurJeu {
             if (playerIndex >= 0 && playerIndex < selectedSkins.length) {
                 int skinId = selectedSkins[playerIndex];
                 String styleClass = "player" + skinId;
-                cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
+                Button cell = cellButtons[joueur.getX()][joueur.getY()];
+                cell.getStyleClass().add(styleClass);
+                
+                // Ajuster la taille de l'icône en fonction de la taille de la cellule
+                double cellSize = GameConstants.CELL_SIZE * scaleFactor;
+                double iconSize = cellSize * 0.8; // 80% de la taille de la cellule
+                cell.setStyle(cell.getStyle() + 
+                    String.format("-fx-background-size: %fpx %fpx;", iconSize, iconSize) +
+                    "-fx-background-position: center;" +
+                    "-fx-background-repeat: no-repeat;");
+                
                 System.out.println("🎭 Added " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
                 
                 // Add current player indicator if it's this player's turn
@@ -535,7 +554,17 @@ public class ControleurJeu {
             } else {
                 // Fallback to default player style
                 String styleClass = "player" + joueur.getId();
-                cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
+                Button cell = cellButtons[joueur.getX()][joueur.getY()];
+                cell.getStyleClass().add(styleClass);
+                
+                // Ajuster la taille de l'icône en fonction de la taille de la cellule
+                double cellSize = GameConstants.CELL_SIZE * scaleFactor;
+                double iconSize = cellSize * 0.8; // 80% de la taille de la cellule
+                cell.setStyle(cell.getStyle() + 
+                    String.format("-fx-background-size: %fpx %fpx;", iconSize, iconSize) +
+                    "-fx-background-position: center;" +
+                    "-fx-background-repeat: no-repeat;");
+                
                 System.out.println("🎭 Added fallback " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
                 
                 // Add current player indicator if it's this player's turn
@@ -554,7 +583,7 @@ public class ControleurJeu {
             System.out.println("✨ Added highlight to cell [" + move[0] + "," + move[1] + "]");
         }
 
-        // Update walls remaining display for all players (IMPROVED FROM INTERFACE VERSION)
+        // Update walls remaining display for all players
         StringBuilder wallInfo = new StringBuilder();
         
         // Sort players by ID to ensure consistent order (J1, J2, J3, J4)
@@ -565,10 +594,9 @@ public class ControleurJeu {
             Joueur joueur = sortedPlayers.get(i);
             
             if (i > 0) {
-                wallInfo.append("    ");  // Space separator for same line
+                wallInfo.append("\n");
             }
             
-            // Highlight current player with arrows
             if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
                 wallInfo.append("► ");
             }
@@ -608,8 +636,13 @@ public class ControleurJeu {
              }
         }
 
+        checkForWinner();
+    }
+
+    private void checkForWinner() {
         Joueur winner = plateau.getWinner();
         if (winner != null) {
+            System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
             // Stop background music when game ends
             stopBackgroundMusic();
             
@@ -711,25 +744,56 @@ public class ControleurJeu {
             double currentWidth = stage.getWidth();
             double currentHeight = stage.getHeight();
             
-            // Calculate scale factor based on smaller ratio to maintain aspect ratio
-            double widthRatio = currentWidth / BASE_WINDOW_WIDTH;
-            double heightRatio = currentHeight / BASE_WINDOW_HEIGHT;
+            // Calculer le ratio d'aspect de la fenêtre
+            double aspectRatio = currentWidth / currentHeight;
+            
+            // Calculer le facteur d'échelle en fonction de la taille de la fenêtre
+            double availableWidth = currentWidth * 0.75; // 75% de la largeur de la fenêtre
+            double availableHeight = currentHeight * 0.75; // 75% de la hauteur de la fenêtre
+            
+            // Calculer la taille de base du plateau
+            double baseBoardWidth = 2 * GameConstants.OFFSET_X + 9 * GameConstants.CELL_SIZE + 8 * GameConstants.WALL_SIZE;
+            double baseBoardHeight = 2 * GameConstants.OFFSET_Y + 9 * GameConstants.CELL_SIZE + 8 * GameConstants.WALL_SIZE;
+            
+            // Calculer les facteurs d'échelle pour la largeur et la hauteur
+            double widthRatio = availableWidth / baseBoardWidth;
+            double heightRatio = availableHeight / baseBoardHeight;
+            
+            // Utiliser le plus petit des deux ratios pour maintenir les proportions
             scaleFactor = Math.min(widthRatio, heightRatio);
             
-            // Minimum scale to keep readable
-            scaleFactor = Math.max(scaleFactor, 0.5);
+            // Ajuster les limites en fonction de la résolution
+            if (currentWidth <= 800 || currentHeight <= 600) {
+                // Pour les petites résolutions (800x600 et moins)
+                scaleFactor = Math.max(scaleFactor, 0.2);
+                scaleFactor = Math.min(scaleFactor, 0.5);
+            } else if (currentWidth >= 1920) {
+                // Pour les grandes résolutions (1920x1080)
+                scaleFactor = Math.max(scaleFactor, 0.5);
+                scaleFactor = Math.min(scaleFactor, 0.8);
+            } else if (currentWidth >= 1280) {
+                // Pour les résolutions moyennes (1280x800)
+                scaleFactor = Math.max(scaleFactor, 0.4);
+                scaleFactor = Math.min(scaleFactor, 0.7);
+            } else {
+                // Pour les autres résolutions
+                scaleFactor = Math.max(scaleFactor, 0.3);
+                scaleFactor = Math.min(scaleFactor, 0.6);
+            }
             
-            System.out.println("🔄 Scale factor updated: " + scaleFactor + " (Window: " + currentWidth + "x" + currentHeight + ")");
+            System.out.println("🔄 Facteur d'échelle mis à jour: " + scaleFactor + 
+                             " (Fenêtre: " + currentWidth + "x" + currentHeight + 
+                             ", Ratio: " + aspectRatio + ")");
             
-            // Apply scaling to game elements
+            // Appliquer la mise à l'échelle aux éléments du jeu
             applyScaling();
         }
     }
     
     private void applyScaling() {
-        // Scale board container
+        // Mise à l'échelle du conteneur du plateau
         if (boardContainer != null) {
-            // Calculate scaled board size
+            // Calculer la taille du plateau mise à l'échelle
             double scaledCellSize = GameConstants.CELL_SIZE * scaleFactor;
             double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
             double scaledOffsetX = GameConstants.OFFSET_X * scaleFactor;
@@ -738,44 +802,84 @@ public class ControleurJeu {
             double boardWidth = 2 * scaledOffsetX + 9 * scaledCellSize + 8 * scaledWallSize;
             double boardHeight = 2 * scaledOffsetY + 9 * scaledCellSize + 8 * scaledWallSize;
             
+            // Mettre à jour la taille du plateau
             boardPane.setPrefSize(boardWidth, boardHeight);
             boardPane.setMinSize(boardWidth, boardHeight);
             boardPane.setMaxSize(boardWidth, boardHeight);
             
-            double containerPadding = 10 * scaleFactor;
-            double containerSize = boardWidth + (2 * containerPadding);
+            // Calculer le padding en fonction de la taille de la fenêtre
+            double containerPadding = Math.max(4 * scaleFactor, 3);
+            double containerSize = Math.max(boardWidth, boardHeight) + (2 * containerPadding);
             
             boardContainer.setPrefSize(containerSize, containerSize);
             boardContainer.setMinSize(containerSize, containerSize);
             boardContainer.setMaxSize(containerSize, containerSize);
             
-            // Recreate the game board with new scaling
+            // Recréer le plateau de jeu avec la nouvelle échelle
             if (cellButtons != null && cellButtons[0] != null && cellButtons[0][0] != null) {
                 createGameBoard();
                 if (plateau != null) {
-                    updateBoardState(); // Restore game state
+                    updateBoardState();
                 }
             }
             
-            System.out.println("🔄 Applied scaling " + scaleFactor + " to board (size: " + containerSize + ")");
+            System.out.println("🔄 Mise à l'échelle " + scaleFactor + " appliquée au plateau (taille: " + containerSize + ")");
         }
         
-        // Scale volume controls
-        if (volumeButton != null) {
-            double buttonSize = 30 * scaleFactor;
-            volumeButton.setPrefSize(buttonSize, buttonSize);
-            volumeButton.setMinSize(buttonSize, buttonSize);
-        }
-        
-        if (volumeSlider != null) {
-            double sliderWidth = 100 * scaleFactor;
-            volumeSlider.setPrefWidth(sliderWidth);
-        }
-        
-        // Scale font sizes by updating root font size
-        if (boardPane.getScene() != null && boardPane.getScene().getRoot() != null) {
-            double baseFontSize = 14 * scaleFactor;
-            boardPane.getScene().getRoot().setStyle("-fx-font-size: " + baseFontSize + "px;");
+        // Mise à l'échelle des contrôles audio et du texte
+        if (boardPane.getScene() != null && boardPane.getScene().getWindow() != null) {
+            Stage stage = (Stage) boardPane.getScene().getWindow();
+            double currentWidth = stage.getWidth();
+            double currentHeight = stage.getHeight();
+            
+            // Calculer les tailles de base en fonction de la résolution
+            double baseButtonSize, baseSliderWidth, baseFontSize;
+            
+            // Calculer un facteur de résolution basé sur la surface de l'écran
+            double screenArea = currentWidth * currentHeight;
+            double resolutionFactor = Math.sqrt(screenArea) / Math.sqrt(1920 * 1080);
+            
+            // Tailles de base pour 1920x1080
+            double base1920ButtonSize = 45;
+            double base1920SliderWidth = 150;
+            double base1920FontSize = 24;
+            
+            // Ajuster les tailles en fonction du facteur de résolution
+            baseButtonSize = base1920ButtonSize * resolutionFactor;
+            baseSliderWidth = base1920SliderWidth * resolutionFactor;
+            baseFontSize = base1920FontSize * resolutionFactor;
+            
+            // Appliquer des limites minimales et maximales
+            baseButtonSize = Math.min(Math.max(baseButtonSize, 30), 60);
+            baseSliderWidth = Math.min(Math.max(baseSliderWidth, 100), 200);
+            baseFontSize = Math.min(Math.max(baseFontSize, 16), 32);
+            
+            // Appliquer la mise à l'échelle aux contrôles audio
+            if (volumeButton != null) {
+                double buttonSize = Math.max(baseButtonSize * scaleFactor, baseButtonSize * 0.7);
+                volumeButton.setPrefSize(buttonSize, buttonSize);
+                volumeButton.setMinSize(buttonSize, buttonSize);
+            }
+            
+            if (volumeSlider != null) {
+                double sliderWidth = Math.max(baseSliderWidth * scaleFactor, baseSliderWidth * 0.7);
+                volumeSlider.setPrefWidth(sliderWidth);
+            }
+            
+            // Mise à l'échelle du texte
+            if (labelMursRestants != null) {
+                double fontSize = Math.max(baseFontSize * scaleFactor, baseFontSize * 0.7);
+                labelMursRestants.setStyle("-fx-font-size: " + fontSize + "px;");
+            }
+            
+            // Mise à l'échelle générale de la police
+            if (boardPane.getScene().getRoot() != null) {
+                double generalFontSize = Math.max(baseFontSize * scaleFactor, baseFontSize * 0.7);
+                boardPane.getScene().getRoot().setStyle("-fx-font-size: " + generalFontSize + "px;");
+            }
+            
+            System.out.println("🔄 Contrôles mis à l'échelle - Bouton: " + baseButtonSize + 
+                             "px, Slider: " + baseSliderWidth + "px, Police: " + baseFontSize + "px");
         }
     }
 

@@ -399,20 +399,18 @@ public class JeuQuoridor extends Application {
         if (primaryStage != null) {
             Scene currentScene = primaryStage.getScene();
             if (currentScene != null) {
+                // Force windowed mode before changing resolution
+                primaryStage.setMaximized(false);
+                isMaximized = false;
+                
                 // Update the scene size
                 currentScene.getRoot().setStyle("-fx-pref-width: " + width + "; -fx-pref-height: " + height + ";");
                 
-                if (isMaximized) {
-                    // In maximized, we keep maximized but the content adapts to the target resolution
-                    primaryStage.setMaximized(true);
-                    System.out.println("🔧 Resolution set to: " + width + "x" + height + " (maximized)");
-                } else {
-                    // In windowed mode, change the actual window size
-                    primaryStage.setWidth(width);
-                    primaryStage.setHeight(height);
-                    centerStageOnScreen(primaryStage, width, height);
-                    System.out.println("🔧 Resolution set to: " + width + "x" + height + " (windowed)");
-                }
+                // Set the window size
+                primaryStage.setWidth(width);
+                primaryStage.setHeight(height);
+                centerStageOnScreen(primaryStage, width, height);
+                System.out.println("🔧 Resolution set to: " + width + "x" + height);
             }
         }
     }
