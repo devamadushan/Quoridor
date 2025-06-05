@@ -10,9 +10,8 @@
     <VBox spacing="50" alignment="CENTER">
         
         <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
-            <Button text="800x600" onAction="#onRes800x600" styleClass="menu-button"/>
-            <Button text="1024x1024" onAction="#onRes1024x1024" styleClass="menu-button"/>
-            <Button text="1920x1080" onAction="#onRes1920x1080" styleClass="menu-button"/>
+            <Text text="Résolution" styleClass="menu-label"/>
+            <ComboBox fx:id="resolutionComboBox" styleClass="menu-spinner"/>
             <Button text="RETOUR" onAction="#onRetour" styleClass="back-button"/>
         </VBox>
     </VBox>

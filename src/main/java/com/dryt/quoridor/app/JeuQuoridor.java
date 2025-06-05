@@ -244,6 +244,14 @@ public class JeuQuoridor extends Application {
         return difficultesIA;
     }
 
+    public static void setResolution(int width, int height) {
+        Stage stage = getPrimaryStage();
+        stage.setWidth(width);
+        stage.setHeight(height);
+        stage.setX(0);
+        stage.setY(height == 600 ? 0 : -500);
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
