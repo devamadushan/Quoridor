@@ -39,3 +39,14 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Release and Build ###
+release/
+installer/
+*.exe
+*.msi
+*.deb
+*.rpm
+*.dmg
+dependency-reduced-pom.xml
+hs_err_pid*.log
