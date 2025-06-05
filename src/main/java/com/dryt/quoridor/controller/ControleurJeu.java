@@ -495,6 +495,18 @@ public class ControleurJeu {
         System.out.println("Mur placé : " + (vertical ? "V" : "H") + " à " + wx + ", " + wy + " (scale: " + scaleFactor + ")");
     }
 
+    /**
+     * Redessine tous les murs existants avec le nouveau facteur d'échelle
+     */
+    private void redrawAllWalls() {
+        if (plateau != null) {
+            for (Mur mur : plateau.getMurs()) {
+                drawWall(mur.getX(), mur.getY(), mur.isVertical());
+            }
+            System.out.println("🧱 " + plateau.getMurs().size() + " mur(s) redessiné(s) avec l'échelle " + scaleFactor);
+        }
+    }
+
     private void onCellClicked(int x, int y) {
         System.out.println("🖱️ Cell clicked at [" + x + "," + y + "] by player " + plateau.getCurrentPlayer().getId());
         
