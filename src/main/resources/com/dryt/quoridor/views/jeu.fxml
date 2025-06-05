@@ -13,7 +13,7 @@
 
     <!-- Boutons menu et nouvelle partie en haut à droite -->
     <top>
-        <HBox alignment="CENTER_RIGHT" spacing="10">
+        <HBox alignment="CENTER_RIGHT" spacing="10" VBox.vgrow="NEVER">
             <children>
                 <!-- Contrôles audio à gauche -->
                 <HBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
@@ -77,8 +77,8 @@
                        styleClass="game-label"
                        wrapText="true"
                        textAlignment="CENTER"
-                       maxWidth="800"
-                       style="-fx-font-size: 22px; -fx-text-fill: #F5DEB3; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);"/>
+                       maxWidth="Infinity"
+                       style="-fx-font-size: 1.4em; -fx-text-fill: #F5DEB3; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);"/>
             </children>
             <padding>
                 <Insets top="30" bottom="30" left="50" right="50"/>

@@ -141,13 +141,13 @@
 .game-label {
     -fx-text-fill: #F5F5DC;
     -fx-font-weight: bold;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.2em;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 2, 0.5, 1, 1);
 }
 
 .label {
     -fx-text-fill: #F5F5DC;
-    -fx-font-size: 16px;
+    -fx-font-size: 1em;
     -fx-font-weight: bold;
 }
 
@@ -164,7 +164,7 @@
 /* ----- TOP BUTTONS (Menu and New Game) ----- */
 .menu-open-button {
     -fx-background-image: url("open_menu_40x40.png");
-    -fx-background-size: cover;
+    -fx-background-size: contain;
     -fx-background-position: center center;
     -fx-background-repeat: no-repeat;
     -fx-background-color: transparent;
@@ -194,7 +194,7 @@
 /* ----- NEW GAME TOP BUTTON (Same size as menu button) ----- */
 .new-game-top-button {
     -fx-background-image: url("new_game_40x40.png");
-    -fx-background-size: cover;
+    -fx-background-size: contain;
     -fx-background-position: center center;
     -fx-background-repeat: no-repeat;
     -fx-background-color: transparent;
@@ -321,15 +321,15 @@
     }
 }
 
-/* ----- VOLUME CONTROLS ----- */
+/* ----- VOLUME CONTROLS WITH DYNAMIC SCALING ----- */
 .volume-button {
     -fx-background-color: transparent;
     -fx-text-fill: #F5DEB3;
-    -fx-font-size: 16px;
+    -fx-font-size: 1em;
     -fx-border-color: rgba(139, 69, 19, 0.6);
     -fx-border-width: 1;
-    -fx-border-radius: 15;
-    -fx-background-radius: 15;
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
     -fx-min-width: 30;
     -fx-min-height: 30;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0.3, 1, 1);
@@ -337,14 +337,14 @@
 
 .volume-button-sound {
     -fx-background-image: url("sounds_25x25.png");
-    -fx-background-size: 25px 25px;
+    -fx-background-size: contain;
     -fx-background-position: center center;
     -fx-background-repeat: no-repeat;
-    -fx-background-color: rgba(255, 0, 0, 0.3); /* Temporary red background for debugging */
+    -fx-background-color: transparent;
     -fx-border-color: rgba(139, 69, 19, 0.6);
     -fx-border-width: 1;
-    -fx-border-radius: 15;
-    -fx-background-radius: 15;
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
     -fx-min-width: 30;
     -fx-min-height: 30;
     -fx-pref-width: 30;
@@ -354,14 +354,14 @@
 
 .volume-button-mute {
     -fx-background-image: url("mute_25x25.png");
-    -fx-background-size: 25px 25px;
+    -fx-background-size: contain;
     -fx-background-position: center center;
     -fx-background-repeat: no-repeat;
-    -fx-background-color: rgba(0, 255, 0, 0.3); /* Temporary green background for debugging */
+    -fx-background-color: transparent;
     -fx-border-color: rgba(139, 69, 19, 0.6);
     -fx-border-width: 1;
-    -fx-border-radius: 15;
-    -fx-background-radius: 15;
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
     -fx-min-width: 30;
     -fx-min-height: 30;
     -fx-pref-width: 30;
@@ -382,23 +382,23 @@
     -fx-scale-y: 0.95;
 }
 
-/* ----- VOLUME SLIDER ----- */
+/* ----- VOLUME SLIDER WITH DYNAMIC SCALING ----- */
 .slider {
     -fx-background-color: transparent;
 }
 
 .slider .track {
     -fx-background-color: rgba(139, 69, 19, 0.6);
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
+    -fx-background-radius: 0.8em;
+    -fx-border-radius: 0.8em;
     -fx-border-color: rgba(101, 67, 33, 0.8);
     -fx-border-width: 1;
 }
 
 .slider .thumb {
     -fx-background-color: #DAA520;
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
+    -fx-background-radius: 0.8em;
+    -fx-border-radius: 0.8em;
     -fx-border-color: #B8860B;
     -fx-border-width: 1;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 3, 0.4, 1, 1);

@@ -58,6 +58,11 @@ public class ControleurJeu {
     private MediaPlayer backgroundMusic;
     private boolean isMusicMuted = false;
     private double savedVolume = 0.3; // Default volume at 30%
+    
+    // Dynamic scaling
+    private double scaleFactor = 1.0;
+    private static final double BASE_WINDOW_WIDTH = 1400.0;
+    private static final double BASE_WINDOW_HEIGHT = 900.0;
 
     @FXML
     private void initialize() {
@@ -77,6 +82,7 @@ public class ControleurJeu {
             createGameBoard();
             setupKeyboardShortcuts();
             setupVolumeControls();
+            setupDynamicScaling();
         });
     }
     
@@ -230,13 +236,19 @@ public class ControleurJeu {
         // Clear existing board
         boardPane.getChildren().clear();
 
+        // Use scaled dimensions
+        double scaledCellSize = GameConstants.CELL_SIZE * scaleFactor;
+        double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
+        double scaledOffsetX = GameConstants.OFFSET_X * scaleFactor;
+        double scaledOffsetY = GameConstants.OFFSET_Y * scaleFactor;
+
         for (int y = 0; y < GameConstants.BOARD_SIZE; y++) {
             for (int x = 0; x < GameConstants.BOARD_SIZE; x++) {
-                double baseX = offsetX + x * (cellSize + wallSize);
-                double baseY = offsetY + y * (cellSize + wallSize);
+                double baseX = scaledOffsetX + x * (scaledCellSize + scaledWallSize);
+                double baseY = scaledOffsetY + y * (scaledCellSize + scaledWallSize);
 
                 Button cell = new Button();
-                cell.setPrefSize(cellSize, cellSize);
+                cell.setPrefSize(scaledCellSize, scaledCellSize);
                 
                 // Apply checkerboard pattern: alternating colors based on position
                 if ((x + y) % 2 == 0) {
@@ -254,15 +266,15 @@ public class ControleurJeu {
                 boardPane.getChildren().add(cell);
 
                 if (x < 8 && y < 9)
-                    createWallPlaceholder(baseX + cellSize, baseY + cellSize / 2.0 - wallSize / 2.0, x, y, true);
+                    createWallPlaceholder(baseX + scaledCellSize, baseY + scaledCellSize / 2.0 - scaledWallSize / 2.0, x, y, true);
                 if (y < 8 && x < 9)
-                    createWallPlaceholder(baseX + cellSize / 2.0 - wallSize / 2.0, baseY + cellSize, x, y, false);
+                    createWallPlaceholder(baseX + scaledCellSize / 2.0 - scaledWallSize / 2.0, baseY + scaledCellSize, x, y, false);
                 if (x < 8 && y < 8)
-                    createWallPlaceholder(baseX + cellSize, baseY + cellSize, x, y, true);
+                    createWallPlaceholder(baseX + scaledCellSize, baseY + scaledCellSize, x, y, true);
             }
         }
         
-        System.out.println("🎯 Board creation completed - CSS should now show alternating cell colors!");
+        System.out.println("🎯 Board creation completed with scale factor: " + scaleFactor);
     }
 
     public void setupPlateauAndDisplay(Plateau plateau) {
@@ -303,11 +315,12 @@ public class ControleurJeu {
     }
 
     private void createWallPlaceholder(double x, double y, int wx, int wy, boolean vertical) {
-        double detectorSize = wallSize * 4;
+        double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
+        double detectorSize = scaledWallSize * 4;
 
         Rectangle wallDetector = new Rectangle(detectorSize, detectorSize);
-        wallDetector.setLayoutX(x - (detectorSize - wallSize) / 4.0);
-        wallDetector.setLayoutY(y - (detectorSize - wallSize) / 4.0);
+        wallDetector.setLayoutX(x - (detectorSize - scaledWallSize) / 4.0);
+        wallDetector.setLayoutY(y - (detectorSize - scaledWallSize) / 4.0);
         wallDetector.setStyle("-fx-fill: transparent; -fx-stroke: transparent;");
 
         wallDetector.setOnMouseEntered(e -> showGhostWall(wx, wy, vertical));
@@ -367,6 +380,12 @@ public class ControleurJeu {
         ghostWall = new Rectangle();
         ghostWall.setMouseTransparent(true);
 
+        // Use scaled dimensions
+        double scaledCellSize = GameConstants.CELL_SIZE * scaleFactor;
+        double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
+        double scaledOffsetX = GameConstants.OFFSET_X * scaleFactor;
+        double scaledOffsetY = GameConstants.OFFSET_Y * scaleFactor;
+
         int effectiveWx = wx;
         int effectiveWy = wy;
         if (!vertical && wx == 8) effectiveWx = 7;
@@ -383,15 +402,15 @@ public class ControleurJeu {
                 : "-fx-fill: rgba(218, 165, 32, 0.6); -fx-stroke: #FFD700; -fx-stroke-width: 3; -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.8), 6, 0.7, 0, 0);");
 
         if (vertical) {
-            ghostWall.setWidth(wallSize);
-            ghostWall.setHeight(cellSize * 2 + wallSize);
-            ghostWall.setX(offsetX + effectiveWx * (cellSize + wallSize) + cellSize);
-            ghostWall.setY(offsetY + effectiveWy * (cellSize + wallSize));
+            ghostWall.setWidth(scaledWallSize);
+            ghostWall.setHeight(scaledCellSize * 2 + scaledWallSize);
+            ghostWall.setX(scaledOffsetX + effectiveWx * (scaledCellSize + scaledWallSize) + scaledCellSize);
+            ghostWall.setY(scaledOffsetY + effectiveWy * (scaledCellSize + scaledWallSize));
         } else {
-            ghostWall.setWidth(cellSize * 2 + wallSize);
-            ghostWall.setHeight(wallSize);
-            ghostWall.setX(offsetX + effectiveWx * (cellSize + wallSize));
-            ghostWall.setY(offsetY + effectiveWy * (cellSize + wallSize) + cellSize);
+            ghostWall.setWidth(scaledCellSize * 2 + scaledWallSize);
+            ghostWall.setHeight(scaledWallSize);
+            ghostWall.setX(scaledOffsetX + effectiveWx * (scaledCellSize + scaledWallSize));
+            ghostWall.setY(scaledOffsetY + effectiveWy * (scaledCellSize + scaledWallSize) + scaledCellSize);
         }
 
         boardPane.getChildren().add(ghostWall);
@@ -405,21 +424,27 @@ public class ControleurJeu {
     }
 
     private void drawWall(int wx, int wy, boolean vertical) {
+        // Use scaled dimensions
+        double scaledCellSize = GameConstants.CELL_SIZE * scaleFactor;
+        double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
+        double scaledOffsetX = GameConstants.OFFSET_X * scaleFactor;
+        double scaledOffsetY = GameConstants.OFFSET_Y * scaleFactor;
+
         Rectangle wallSegment = new Rectangle();
         if (vertical) {
-            wallSegment.setWidth(wallSize);
-            wallSegment.setHeight(cellSize * 2 + wallSize);
-            wallSegment.setX(offsetX + wx * (cellSize + wallSize) + cellSize);
-            wallSegment.setY(offsetY + wy * (cellSize + wallSize));
+            wallSegment.setWidth(scaledWallSize);
+            wallSegment.setHeight(scaledCellSize * 2 + scaledWallSize);
+            wallSegment.setX(scaledOffsetX + wx * (scaledCellSize + scaledWallSize) + scaledCellSize);
+            wallSegment.setY(scaledOffsetY + wy * (scaledCellSize + scaledWallSize));
         } else {
-            wallSegment.setWidth(cellSize * 2 + wallSize);
-            wallSegment.setHeight(wallSize);
-            wallSegment.setX(offsetX + wx * (cellSize + wallSize));
-            wallSegment.setY(offsetY + wy * (cellSize + wallSize) + cellSize);
+            wallSegment.setWidth(scaledCellSize * 2 + scaledWallSize);
+            wallSegment.setHeight(scaledWallSize);
+            wallSegment.setX(scaledOffsetX + wx * (scaledCellSize + scaledWallSize));
+            wallSegment.setY(scaledOffsetY + wy * (scaledCellSize + scaledWallSize) + scaledCellSize);
         }
         wallSegment.getStyleClass().add("wall-placed");
         boardPane.getChildren().add(wallSegment);
-        System.out.println("Mur placé : " + (vertical ? "V" : "H") + " à " + wx + ", " + wy);
+        System.out.println("Mur placé : " + (vertical ? "V" : "H") + " à " + wx + ", " + wy + " (scale: " + scaleFactor + ")");
     }
 
     private void onCellClicked(int x, int y) {
@@ -598,5 +623,100 @@ public class ControleurJeu {
         Stage stage = JeuQuoridor.getPrimaryStage();
         stage.setFullScreen(!stage.isFullScreen());
         System.out.println("🖥️ Fullscreen toggled: " + stage.isFullScreen());
+    }
+
+    private void setupDynamicScaling() {
+        // Add window resize listener
+        if (boardPane.getScene() != null && boardPane.getScene().getWindow() != null) {
+            Stage stage = (Stage) boardPane.getScene().getWindow();
+            
+            // Listen for width changes
+            stage.widthProperty().addListener((obs, oldVal, newVal) -> {
+                updateScaling();
+            });
+            
+            // Listen for height changes  
+            stage.heightProperty().addListener((obs, oldVal, newVal) -> {
+                updateScaling();
+            });
+            
+            // Initial scaling update
+            updateScaling();
+            System.out.println("🔄 Dynamic scaling initialized");
+        }
+    }
+    
+    private void updateScaling() {
+        if (boardPane.getScene() != null && boardPane.getScene().getWindow() != null) {
+            Stage stage = (Stage) boardPane.getScene().getWindow();
+            double currentWidth = stage.getWidth();
+            double currentHeight = stage.getHeight();
+            
+            // Calculate scale factor based on smaller ratio to maintain aspect ratio
+            double widthRatio = currentWidth / BASE_WINDOW_WIDTH;
+            double heightRatio = currentHeight / BASE_WINDOW_HEIGHT;
+            scaleFactor = Math.min(widthRatio, heightRatio);
+            
+            // Minimum scale to keep readable
+            scaleFactor = Math.max(scaleFactor, 0.5);
+            
+            System.out.println("🔄 Scale factor updated: " + scaleFactor + " (Window: " + currentWidth + "x" + currentHeight + ")");
+            
+            // Apply scaling to game elements
+            applyScaling();
+        }
+    }
+    
+    private void applyScaling() {
+        // Scale board container
+        if (boardContainer != null) {
+            // Calculate scaled board size
+            double scaledCellSize = GameConstants.CELL_SIZE * scaleFactor;
+            double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
+            double scaledOffsetX = GameConstants.OFFSET_X * scaleFactor;
+            double scaledOffsetY = GameConstants.OFFSET_Y * scaleFactor;
+            
+            double boardWidth = 2 * scaledOffsetX + 9 * scaledCellSize + 8 * scaledWallSize;
+            double boardHeight = 2 * scaledOffsetY + 9 * scaledCellSize + 8 * scaledWallSize;
+            
+            boardPane.setPrefSize(boardWidth, boardHeight);
+            boardPane.setMinSize(boardWidth, boardHeight);
+            boardPane.setMaxSize(boardWidth, boardHeight);
+            
+            double containerPadding = 10 * scaleFactor;
+            double containerSize = boardWidth + (2 * containerPadding);
+            
+            boardContainer.setPrefSize(containerSize, containerSize);
+            boardContainer.setMinSize(containerSize, containerSize);
+            boardContainer.setMaxSize(containerSize, containerSize);
+            
+            // Recreate the game board with new scaling
+            if (cellButtons != null && cellButtons[0] != null && cellButtons[0][0] != null) {
+                createGameBoard();
+                if (plateau != null) {
+                    updateBoardState(); // Restore game state
+                }
+            }
+            
+            System.out.println("🔄 Applied scaling " + scaleFactor + " to board (size: " + containerSize + ")");
+        }
+        
+        // Scale volume controls
+        if (volumeButton != null) {
+            double buttonSize = 30 * scaleFactor;
+            volumeButton.setPrefSize(buttonSize, buttonSize);
+            volumeButton.setMinSize(buttonSize, buttonSize);
+        }
+        
+        if (volumeSlider != null) {
+            double sliderWidth = 100 * scaleFactor;
+            volumeSlider.setPrefWidth(sliderWidth);
+        }
+        
+        // Scale font sizes by updating root font size
+        if (boardPane.getScene() != null && boardPane.getScene().getRoot() != null) {
+            double baseFontSize = 14 * scaleFactor;
+            boardPane.getScene().getRoot().setStyle("-fx-font-size: " + baseFontSize + "px;");
+        }
     }
 }
