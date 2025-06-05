@@ -49,7 +49,7 @@ public class ControleurJeu {
             updateBoardState();
         });
 
-        aiStrategy = new MinimaxAI(4);
+        aiStrategy = new MinimaxAI(5);
     }
     
     private void setBoardContainerSize() {
