@@ -413,3 +413,10 @@
 .slider .thumb:pressed {
     -fx-background-color: #B8860B;
 }
+
+#labelMursRestants {
+    -fx-font-size: 1.4em;
+    -fx-text-fill: #F5DEB3;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);
+}

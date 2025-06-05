@@ -516,7 +516,7 @@ public class ControleurJeu {
             Joueur joueur = sortedPlayers.get(i);
             
             if (i > 0) {
-                wallInfo.append("    ");  // Space separator for same line
+                wallInfo.append("\n");  // New line separator instead of spaces
             }
             
             // Highlight current player with arrows
