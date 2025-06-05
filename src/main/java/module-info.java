@@ -1,6 +1,6 @@
 module com.dryt.quoridor {
-    requires javafx.controls;
-    requires javafx.fxml;
+    requires transitive javafx.controls;
+    requires transitive javafx.fxml;
     requires javafx.web;
     requires javafx.media;
     requires java.prefs;
