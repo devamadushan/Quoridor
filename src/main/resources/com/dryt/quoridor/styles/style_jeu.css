@@ -774,3 +774,19 @@
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);
 }
+
+.error-message {
+    -fx-font-size: 20px;
+    -fx-text-fill: #ff0000;
+    -fx-font-weight: bold;
+    -fx-padding: 15px 30px;
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 15, 0, 0, 3);
+    -fx-min-height: 50px;
+    -fx-alignment: center;
+    -fx-wrap-text: true;
+    -fx-max-width: 400px;
+    -fx-translate-y: 0;
+    -fx-translate-x: 0;
+}
