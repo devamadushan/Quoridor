@@ -10,6 +10,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Slider;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import com.dryt.quoridor.model.Plateau;
 import com.dryt.quoridor.model.Joueur;
 import com.dryt.quoridor.model.Mur;
@@ -36,6 +39,12 @@ public class ControleurJeu {
     @FXML
     private javafx.scene.control.Label labelMursRestants;
 
+    @FXML
+    private Button volumeButton;
+    
+    @FXML 
+    private Slider volumeSlider;
+
     private Plateau plateau;
     private Button[][] cellButtons;
     private final double cellSize = GameConstants.CELL_SIZE;
@@ -44,19 +53,141 @@ public class ControleurJeu {
     private final double offsetY = GameConstants.OFFSET_Y;
     private Rectangle ghostWall;
     private Map<Integer, MinimaxAI> aiStrategies;
+    
+    // Audio management
+    private MediaPlayer backgroundMusic;
+    private boolean isMusicMuted = false;
+    private double savedVolume = 0.3; // Default volume at 30%
 
     @FXML
     private void initialize() {
+        System.out.println("🎮 ControleurJeu.initialize() called");
         cellButtons = new Button[GameConstants.BOARD_SIZE][GameConstants.BOARD_SIZE];
         aiStrategies = new HashMap<>();
         
+        // Initialize audio immediately
+        System.out.println("🎵 About to initialize audio...");
+        initializeAudio();
+        
         // Wait for plateau to be set up via setupPlateauAndDisplay
         javafx.application.Platform.runLater(() -> {
+            System.out.println("🎮 Platform.runLater executing...");
             loadCSS();
             setBoardContainerSize();
             createGameBoard();
             setupKeyboardShortcuts();
+            setupVolumeControls();
         });
+    }
+    
+    private void initializeAudio() {
+        System.out.println("🎵 initializeAudio() method called");
+        try {
+            // Load the background music - properly encode the file name with spaces
+            String musicPath = getClass().getResource("/com/dryt/quoridor/sounds/Highland Hymn Bonnie Grace.mp3").toExternalForm();
+            System.out.println("🎵 Music path: " + musicPath);
+            Media music = new Media(musicPath);
+            backgroundMusic = new MediaPlayer(music);
+            
+            // Set music properties
+            backgroundMusic.setVolume(savedVolume);
+            backgroundMusic.setCycleCount(MediaPlayer.INDEFINITE); // Loop indefinitely
+            backgroundMusic.setAutoPlay(false); // Don't auto-play immediately
+            
+            System.out.println("🎵 Background music loaded successfully: " + musicPath);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Failed to load background music: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void setupVolumeControls() {
+        System.out.println("🎵 setupVolumeControls() called");
+        System.out.println("🎵 volumeButton: " + volumeButton);
+        System.out.println("🎵 volumeSlider: " + volumeSlider);
+        
+        if (volumeSlider != null) {
+            // Initialize volume slider
+            volumeSlider.setMin(0.0);
+            volumeSlider.setMax(1.0);
+            volumeSlider.setValue(savedVolume);
+            
+            // Add listener for volume changes
+            volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (backgroundMusic != null) {
+                    savedVolume = newValue.doubleValue();
+                    if (!isMusicMuted) {
+                        backgroundMusic.setVolume(savedVolume);
+                    }
+                    updateVolumeButtonIcon(); // Update icon when volume changes
+                }
+            });
+            System.out.println("🎵 Volume slider initialized");
+        } else {
+            System.out.println("❌ Volume slider is null!");
+        }
+        
+        if (volumeButton != null) {
+            // Force initial icon update
+            System.out.println("🎵 Setting up volume button with initial icon...");
+            updateVolumeButtonIcon();
+        } else {
+            System.out.println("❌ Volume button is null!");
+        }
+    }
+    
+    @FXML
+    private void onVolumeToggle() {
+        if (backgroundMusic != null) {
+            isMusicMuted = !isMusicMuted;
+            
+            if (isMusicMuted) {
+                backgroundMusic.setVolume(0.0);
+            } else {
+                backgroundMusic.setVolume(savedVolume);
+            }
+            
+            updateVolumeButtonIcon();
+            System.out.println("🎵 Volume toggled - Muted: " + isMusicMuted);
+        }
+    }
+    
+    private void updateVolumeButtonIcon() {
+        if (volumeButton != null) {
+            // Clear existing style classes
+            volumeButton.getStyleClass().removeAll("volume-button-sound", "volume-button-mute");
+            
+            if (isMusicMuted || savedVolume == 0.0) {
+                volumeButton.getStyleClass().add("volume-button-mute");
+                System.out.println("🎵 Applied mute icon");
+            } else {
+                volumeButton.getStyleClass().add("volume-button-sound");
+                System.out.println("🎵 Applied sound icon");
+            }
+        }
+    }
+    
+    private void startBackgroundMusic() {
+        if (backgroundMusic != null && !isMusicMuted) {
+            try {
+                backgroundMusic.play();
+                System.out.println("🎵 Background music started");
+            } catch (Exception e) {
+                System.err.println("❌ Failed to start background music: " + e.getMessage());
+            }
+        }
+    }
+    
+    private void stopBackgroundMusic() {
+        if (backgroundMusic != null) {
+            try {
+                backgroundMusic.stop();
+                System.out.println("🎵 Background music stopped");
+            } catch (Exception e) {
+                System.err.println("❌ Failed to stop background music: " + e.getMessage());
+            }
+        }
     }
     
     private void setBoardContainerSize() {
@@ -136,6 +267,9 @@ public class ControleurJeu {
 
     public void setupPlateauAndDisplay(Plateau plateau) {
         this.plateau = plateau;
+        
+        // Start background music when game starts
+        startBackgroundMusic();
         
         for (Joueur joueur : plateau.getJoueurs()) {
             if (joueur.isAI()) {

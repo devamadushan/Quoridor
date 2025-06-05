@@ -15,6 +15,29 @@
     <top>
         <HBox alignment="CENTER_RIGHT" spacing="10">
             <children>
+                <!-- Contrôles audio à gauche -->
+                <HBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Button fx:id="volumeButton" 
+                                text=""
+                                onAction="#onVolumeToggle"
+                                styleClass="volume-button-sound">
+                            <tooltip>
+                                <Tooltip text="Activer/Désactiver la musique"/>
+                            </tooltip>
+                        </Button>
+                        <Slider fx:id="volumeSlider"
+                                min="0.0" max="1.0" value="0.3"
+                                prefWidth="100"
+                                style="-fx-background-color: transparent;">
+                            <tooltip>
+                                <Tooltip text="Régler le volume"/>
+                            </tooltip>
+                        </Slider>
+                    </children>
+                </HBox>
+                
+                <!-- Boutons de navigation à droite -->
                 <Button text="" 
                         onAction="#onNouvellePartie"
                         styleClass="new-game-top-button"/>
