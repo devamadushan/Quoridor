@@ -88,18 +88,27 @@ public class Plateau {
         // Vérifie les limites du plateau
         if (vertical && wy >= 8) return false;
         if (!vertical && wx >= 8) return false;
+        
+        // Vérifier s'il reste des murs
+        if (currentPlayer.getWallsRemaining() <= 0) return false;
 
         // Vérifie si un mur du même type est déjà présent
         if (vertical && hasVerticalWall(wx, wy)) return false;
         if (!vertical && hasHorizontalWall(wx, wy)) return false;
 
-        // Vérifie le croisement avec un mur opposé
+        // Vérifie le croisement avec un mur opposé - aucun croisement autorisé
         if (vertical && hasHorizontalWall(wx, wy)) return false;
         if (!vertical && hasVerticalWall(wx, wy)) return false;
+
+        // Vérifie le chevauchement/superposition
+        if (isWallOverlapping(wx, wy, vertical)) return false;
 
         // Optionnel : bloquer les placements si une des deux cases est déjà bloquée (superposition)
         if (vertical && (blockedRight[wx][wy] || blockedRight[wx][wy + 1])) return false;
         if (!vertical && (blockedDown[wx][wy] || blockedDown[wx + 1][wy])) return false;
+
+        // Vérification finale : s'assurer que tous les joueurs gardent un chemin vers leur objectif
+        if (!allPlayersHaveAPathAfterWall(wx, wy, vertical)) return false;
 
         return true;
     }
@@ -267,6 +276,13 @@ public class Plateau {
 
 
     public boolean allPlayersHaveAPathAfterWall(int wx, int wy, boolean vertical) {
+        // Sauvegarder l'état initial avant simulation
+        boolean wasWallPresent = vertical ? verticalWallPositions[wx][wy] : horizontalWallPositions[wx][wy];
+        boolean wasBlockedRight1 = vertical ? blockedRight[wx][wy] : false;
+        boolean wasBlockedRight2 = vertical ? blockedRight[wx][wy + 1] : false;
+        boolean wasBlockedDown1 = !vertical ? blockedDown[wx][wy] : false;
+        boolean wasBlockedDown2 = !vertical ? blockedDown[wx + 1][wy] : false;
+        
         // Simuler l'ajout du mur
         if (vertical) {
             verticalWallPositions[wx][wy] = true;
@@ -286,15 +302,15 @@ public class Plateau {
             }
         }
 
-        // Annuler le mur simulé
+        // Restaurer l'état initial exact
         if (vertical) {
-            verticalWallPositions[wx][wy] = false;
-            blockedRight[wx][wy] = false;
-            blockedRight[wx][wy + 1] = false;
+            verticalWallPositions[wx][wy] = wasWallPresent;
+            blockedRight[wx][wy] = wasBlockedRight1;
+            blockedRight[wx][wy + 1] = wasBlockedRight2;
         } else {
-            horizontalWallPositions[wx][wy] = false;
-            blockedDown[wx][wy] = false;
-            blockedDown[wx + 1][wy] = false;
+            horizontalWallPositions[wx][wy] = wasWallPresent;
+            blockedDown[wx][wy] = wasBlockedDown1;
+            blockedDown[wx + 1][wy] = wasBlockedDown2;
         }
 
         return allHavePath;

@@ -387,25 +387,27 @@ public class ControleurJeu {
             if (!vertical && wx == 8) effectiveWx = 7;
             if (vertical && wy == 8) effectiveWy = 7;
 
-            if (isCrossingWall(effectiveWx, effectiveWy, vertical)) {
-                showErrorMessage("❌ Croisement de mur interdit");
-                return;
-            }
-            if (!plateau.allPlayersHaveAPathAfterWall(effectiveWx, effectiveWy, vertical)) {
-                showErrorMessage("❌ Ce mur bloquerait un joueur complètement");
-                return;
-            }
-            if (plateau.isWallOverlapping(effectiveWx, effectiveWy, vertical)) {
-                showErrorMessage("❌ Chevauchement de mur interdit");
-                return;
-            }
-            if (isWallAlreadyPresent(effectiveWx, effectiveWy, vertical)) {
-                showErrorMessage("❌ Un mur est déjà présent ici");
+            // Single comprehensive verification using the plateau's method
+            if (!plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)) {
+                // Determine specific error message for user feedback
+                if (plateau.getCurrentPlayer().getWallsRemaining() <= 0) {
+                    showErrorMessage("❌ Plus de murs disponibles");
+                } else if (isCrossingWall(effectiveWx, effectiveWy, vertical)) {
+                    showErrorMessage("❌ Croisement de mur interdit");
+                } else if (!plateau.allPlayersHaveAPathAfterWall(effectiveWx, effectiveWy, vertical)) {
+                    showErrorMessage("❌ Ce mur bloquerait un joueur complètement");
+                } else if (plateau.isWallOverlapping(effectiveWx, effectiveWy, vertical)) {
+                    showErrorMessage("❌ Chevauchement de mur interdit");
+                } else if (isWallAlreadyPresent(effectiveWx, effectiveWy, vertical)) {
+                    showErrorMessage("❌ Un mur est déjà présent ici");
+                } else {
+                    showErrorMessage("❌ Placement de mur invalide");
+                }
                 return;
             }
 
-            if (plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
-                    && plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
+            // If we reach here, the wall placement is valid
+            if (plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
                 drawWall(effectiveWx, effectiveWy, vertical);
                 switchPlayerTurn();
             }
@@ -424,9 +426,13 @@ public class ControleurJeu {
 
     private boolean isCrossingWall(int wx, int wy, boolean vertical) {
         if (vertical) {
-            return plateau.hasHorizontalWall(wx, wy) && plateau.hasHorizontalWall(wx + 1, wy);
+            // Pour un mur vertical, vérifier s'il y a un mur horizontal qui le croise
+            // Un mur vertical à (wx, wy) croise avec un mur horizontal à (wx, wy)
+            return plateau.hasHorizontalWall(wx, wy);
         } else {
-            return plateau.hasVerticalWall(wx, wy) && plateau.hasVerticalWall(wx, wy + 1);
+            // Pour un mur horizontal, vérifier s'il y a un mur vertical qui le croise
+            // Un mur horizontal à (wx, wy) croise avec un mur vertical à (wx, wy)
+            return plateau.hasVerticalWall(wx, wy);
         }
     }
 
@@ -446,11 +452,9 @@ public class ControleurJeu {
         if (!vertical && wx == 8) effectiveWx = 7;
         if (vertical && wy == 8) effectiveWy = 7;
 
-        boolean noWallsLeft = plateau.getCurrentPlayer().getWallsRemaining() <= 0;
-        boolean invalid = isCrossingWall(effectiveWx, effectiveWy, vertical)
-                || !plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
-                || noWallsLeft
-                || isWallAlreadyPresent(effectiveWx, effectiveWy, vertical);
+        // Use identical validation logic as click handler
+        boolean canPlace = plateau.canPlaceWall(effectiveWx, effectiveWy, vertical);
+        boolean invalid = !canPlace;
 
         ghostWall.setStyle(invalid
                 ? "-fx-fill: rgba(255, 0, 0, 0.4); -fx-stroke: red; -fx-stroke-width: 3;"
