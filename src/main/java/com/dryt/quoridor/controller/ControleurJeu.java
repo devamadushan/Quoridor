@@ -453,6 +453,9 @@ public class ControleurJeu {
 
         Joueur winner = plateau.getWinner();
         if (winner != null) {
+            // Stop background music when game ends
+            stopBackgroundMusic();
+            
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setHeaderText(GameConstants.MSG_GAME_OVER);
             alert.setContentText(String.format(GameConstants.MSG_PLAYER_WINS, winner.getId()));
@@ -558,13 +561,14 @@ public class ControleurJeu {
 
         Joueur winner = plateau.getWinner();
         if (winner != null) {
-            javafx.application.Platform.runLater(() -> {
-                Alert alert = new Alert(AlertType.INFORMATION);
-                alert.setHeaderText(GameConstants.MSG_GAME_OVER);
-                alert.setContentText(String.format(GameConstants.MSG_PLAYER_WINS, winner.getId()));
-                alert.showAndWait();
-                JeuQuoridor.goMenu();
-            });
+            // Stop background music when game ends
+            stopBackgroundMusic();
+            
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setHeaderText(GameConstants.MSG_GAME_OVER);
+            alert.setContentText(String.format(GameConstants.MSG_PLAYER_WINS, winner.getId()));
+            alert.showAndWait();
+            JeuQuoridor.goMenu();
         } else {
             switchPlayerTurn();
         }
@@ -587,14 +591,21 @@ public class ControleurJeu {
     @FXML
     private void onNouvellePartie() {
         System.out.println("🎮 Starting new game...");
+        
+        // Stop current background music before starting new game
+        stopBackgroundMusic();
+        
         JeuQuoridor.goChoixJoueurs();
     }
     
     @FXML
     private void onOpenMenu() {
         System.out.println("📋 Opening menu overlay...");
-        // TODO: Add menu overlay functionality
-        // For now, just return to main menu
+        
+        // Stop background music when returning to menu
+        stopBackgroundMusic();
+        
+        // Return to main menu
         JeuQuoridor.goMenu();
     }
 
