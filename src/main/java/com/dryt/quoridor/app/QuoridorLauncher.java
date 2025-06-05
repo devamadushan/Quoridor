@@ -10,10 +10,10 @@ public class QuoridorLauncher {
         try {
             System.out.println("🎮 Starting Quoridor Game...");
             
-            // Définir les propriétés système nécessaires pour JavaFX
-            System.setProperty("javafx.preloader", "");
-            System.setProperty("prism.order", "sw");
+            // Propriétés système optimisées pour JavaFX
             System.setProperty("file.encoding", "UTF-8");
+            System.setProperty("prism.verbose", "false"); // Désactiver les logs verbeux
+            System.setProperty("prism.forceGPU", "true");  // Forcer l'utilisation du GPU
             
             // Lancer l'application JavaFX
             JeuQuoridor.main(args);
