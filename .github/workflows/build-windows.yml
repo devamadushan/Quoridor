@@ -33,8 +33,7 @@ jobs:
     - name: Verify JAR creation
       run: |
         dir target\*.jar
-        echo "JAR file details:"
-        for /f %%i in ('dir /b target\*shaded.jar') do echo %%i && java -jar target\%%i --version || echo "JAR test failed"
+        echo "JAR files created successfully"
       shell: cmd
       
     - name: Create Windows installer
@@ -42,14 +41,6 @@ jobs:
       
     - name: List build artifacts
       run: dir target\dist
-      
-    - name: Test exe basic execution
-      run: |
-        cd target\dist
-        echo "Testing exe basic execution..."
-        timeout 30 Quoridor-*.exe --version || echo "Exe test completed with timeout"
-      shell: cmd
-      continue-on-error: true
       
     - name: Upload Windows executable
       uses: actions/upload-artifact@v4

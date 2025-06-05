@@ -239,7 +239,7 @@ public class ControleurJeu {
                 cell.setMaxSize(scaledCellSize, scaledCellSize);
                 
                 if ((x + y) % 2 == 0) {
-                    cell.getStyleClass().add("cell");        
+                    cell.getStyleClass().add("cell");
                 } else {
                     cell.getStyleClass().add("cell-dark");   
                 }
@@ -515,7 +515,7 @@ public class ControleurJeu {
                     System.out.println("Indicateur de joueur actuel ajouté au joueur " + joueur.getId());
                 }
             } else {
-                String styleClass = "player" + joueur.getId();
+            String styleClass = "player" + joueur.getId();
                 Button cell = cellButtons[joueur.getX()][joueur.getY()];
                 cell.getStyleClass().add(styleClass);
                 
