@@ -115,7 +115,6 @@ public class Plateau {
 
     public void switchPlayerTurn() {
         int index = joueurs.indexOf(currentPlayer);
-//        System.out.println("Searching for currentPlayer ID=" + currentPlayer.getId() + ", index=" + index);
         currentPlayer = joueurs.get((index + 1) % joueurs.size());
     }
 
@@ -298,7 +297,7 @@ public class Plateau {
     }
 
     public boolean placeWallCurrentPlayer(int wx, int wy, boolean vertical) {
-        if (currentPlayer.getWallsRemaining() <= 0) return false; // ✅ bloque si plus de murs
+        if (currentPlayer.getWallsRemaining() <= 0) return false; 
 
         if (vertical) {
             if (wy >= 8){ System.out.println("Wall Fails"); return false;}
@@ -312,7 +311,7 @@ public class Plateau {
             blockedDown[wx + 1][wy] = true;
         }
 
-        currentPlayer.decrementWalls(); // ✅ décrémente le compteur
+        currentPlayer.decrementWalls(); 
         mursPlaces.add(new Mur(vertical, wx, wy));
 
         return true;
@@ -402,7 +401,7 @@ public class Plateau {
                 case 4 -> isWinner = j.getX() == 0;
             }
             if (isWinner) {
-                System.out.println("🎯 Joueur " + j.getId() + " a gagné ! Position: (" + j.getX() + "," + j.getY() + ")");
+                System.out.println("Victoire du joueur " + j.getId() + " à la position (" + j.getX() + "," + j.getY() + ")");
                 return j;
             }
         }
@@ -439,7 +438,7 @@ public class Plateau {
 
     public List<int[]> getShortestPathToGoal(Joueur j) {
         boolean[][] visited = new boolean[size][size];
-        int[][][] parent = new int[size][size][2]; // To reconstruct path
+        int[][][] parent = new int[size][size][2]; 
         for (int x = 0; x < size; x++)
             for (int y = 0; y < size; y++)
                 parent[x][y] = new int[]{-1, -1};
@@ -454,7 +453,6 @@ public class Plateau {
             int[] pos = queue.poll();
             int x = pos[0], y = pos[1];
 
-            // Check if goal reached
             boolean isGoal = switch (j.getId()) {
                 case 1 -> y == 8;
                 case 2 -> y == 0;
@@ -513,31 +511,21 @@ public class Plateau {
 
     @Override
     public Plateau clone() {
-        Plateau copy = new Plateau(); // bypass constructor logic
+        Plateau copy = new Plateau();
 
-        // Copy wall positions
         copy.verticalWallPositions = deepCopy(this.verticalWallPositions);
         copy.horizontalWallPositions = deepCopy(this.horizontalWallPositions);
         copy.blockedRight = deepCopy(this.blockedRight);
         copy.blockedDown = deepCopy(this.blockedDown);
 
-        // Copy players
         copy.joueurs = new ArrayList<>();
         for (Joueur j : this.joueurs) {
             copy.joueurs.add(j.clone());
         }
 
 
-        // Copy current player
         copy.currentPlayer = copy.getJoueurById(this.currentPlayer.getId());
 
-//        System.out.println("Original Joueur IDs: ");
-//        for (Joueur j : this.joueurs) System.out.print(j.getId() + " ");
-//        System.out.println("\nCloned Joueur IDs: ");
-//        for (Joueur j : copy.joueurs) System.out.print(j.getId() + " ");
-//
-//        System.out.println("Set currentPlayer to Original: ID=" + this.currentPlayer.getId());
-//        System.out.println("Set currentPlayer to clone: ID=" + copy.getJoueurById(this.currentPlayer.getId()).getId());
 
 
         return copy;

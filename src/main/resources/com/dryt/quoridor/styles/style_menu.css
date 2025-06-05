@@ -316,7 +316,6 @@
     -fx-cursor: default;
 }
 
-/* Styles pour le sélecteur de fond d'écran */
 .background-nav-button {
     -fx-background-color: #2c582c;
     -fx-text-fill: #c1a57b;

@@ -26,14 +26,11 @@ public class BackgroundManager {
     private static final List<BackgroundInfo> AVAILABLE_BACKGROUNDS = new ArrayList<>();
     
     static {
-        // Ajouter tous les fonds d'écran disponibles
         AVAILABLE_BACKGROUNDS.add(new BackgroundInfo("zudarts-lee-150831-13.jpg", "Paysage mystique"));
         AVAILABLE_BACKGROUNDS.add(new BackgroundInfo("montagne-medievale.jpg", "Montagnes médiévales"));
         AVAILABLE_BACKGROUNDS.add(new BackgroundInfo("chateau-fantastique.jpg", "Château fantastique"));
         AVAILABLE_BACKGROUNDS.add(new BackgroundInfo("paysage-anime.gif", "Paysage animé"));
         
-        // Ajouter d'autres backgrounds ici si nécessaire :
-        // AVAILABLE_BACKGROUNDS.add(new BackgroundInfo("autre-background.jpg", "Autre thème"));
     }
     
     /**
@@ -62,7 +59,7 @@ public class BackgroundManager {
                 return i;
             }
         }
-        return 0; // retourne 0 par défaut si non trouvé
+        return 0; 
     }
     
     /**
@@ -72,7 +69,7 @@ public class BackgroundManager {
         if (index >= 0 && index < AVAILABLE_BACKGROUNDS.size()) {
             return AVAILABLE_BACKGROUNDS.get(index);
         }
-        return AVAILABLE_BACKGROUNDS.get(0); // retourne le premier par défaut
+        return AVAILABLE_BACKGROUNDS.get(0); 
     }
     
     /**
