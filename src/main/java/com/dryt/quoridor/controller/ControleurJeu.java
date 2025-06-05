@@ -387,29 +387,38 @@ public class ControleurJeu {
             if (!vertical && wx == 8) effectiveWx = 7;
             if (vertical && wy == 8) effectiveWy = 7;
 
+            // Vérifier si le mur est déjà présent
+            if (isWallAlreadyPresent(effectiveWx, effectiveWy, vertical)) {
+                showErrorMessage("❌ Un mur existe déjà à cet emplacement");
+                return;
+            }
+
+            // Vérifier si le mur croise un autre mur
             if (isCrossingWall(effectiveWx, effectiveWy, vertical)) {
                 showErrorMessage("❌ Croisement de mur interdit");
                 return;
             }
-            if (!plateau.allPlayersHaveAPathAfterWall(effectiveWx, effectiveWy, vertical)) {
-                showErrorMessage("❌ Ce mur bloquerait un joueur complètement");
-                return;
-            }
-            if (plateau.isWallOverlapping(effectiveWx, effectiveWy, vertical)) {
+
+            // Vérifier si le mur chevauche un autre mur
+            if (plateau != null && plateau.isWallOverlapping(effectiveWx, effectiveWy, vertical)) {
                 showErrorMessage("❌ Chevauchement de mur interdit");
                 return;
             }
-            if (isWallAlreadyPresent(effectiveWx, effectiveWy, vertical)) {
-                showErrorMessage("❌ Un mur est déjà présent ici");
+
+            // Vérifier si le mur bloque un joueur
+            if (plateau != null && !plateau.allPlayersHaveAPathAfterWall(effectiveWx, effectiveWy, vertical)) {
+                showErrorMessage("❌ Ce mur bloquerait un joueur");
                 return;
             }
 
+            // Si toutes les vérifications sont passées, placer le mur
             if (plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
                     && plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
                 drawWall(effectiveWx, effectiveWy, vertical);
                 switchPlayerTurn();
             }
         });
+
         boardPane.getChildren().add(wallDetector);
     }
 
@@ -424,9 +433,11 @@ public class ControleurJeu {
 
     private boolean isCrossingWall(int wx, int wy, boolean vertical) {
         if (vertical) {
-            return plateau.hasHorizontalWall(wx, wy) && plateau.hasHorizontalWall(wx + 1, wy);
+            // Pour un mur vertical, vérifier s'il y a un mur horizontal qui le croise
+            return plateau.hasHorizontalWall(wx, wy) || plateau.hasHorizontalWall(wx, wy + 1);
         } else {
-            return plateau.hasVerticalWall(wx, wy) && plateau.hasVerticalWall(wx, wy + 1);
+            // Pour un mur horizontal, vérifier s'il y a un mur vertical qui le croise
+            return plateau.hasVerticalWall(wx, wy) || plateau.hasVerticalWall(wx + 1, wy);
         }
     }
 
