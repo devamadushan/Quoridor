@@ -864,6 +864,8 @@ public class ControleurJeu {
                 createGameBoard();
                 if (plateau != null) {
                     updateBoardState();
+                    // Redessiner tous les murs existants avec la nouvelle échelle
+                    redrawAllWalls();
                 }
             }
             
