@@ -442,23 +442,24 @@
 /* ----- DARKER VICTORY OVERLAY STYLES (NEW) ----- */
 .victory-overlay-root {
     -fx-background-color: transparent;
-    /* Ensure overlay covers the entire window */
+    /* Ensure overlay root covers the entire window */
     -fx-min-width: 100%;
     -fx-min-height: 100%;
+    -fx-pref-width: 100%;
+    -fx-pref-height: 100%;
     -fx-max-width: Infinity;
     -fx-max-height: Infinity;
 }
 
 .victory-overlay-background-dark {
     -fx-background-color: rgba(0, 0, 0, 0.9);
-    /* Ensure background covers everything with darker overlay - including top bar */
+    /* Simple full coverage approach */
     -fx-min-width: 100%;
     -fx-min-height: 100%;
+    -fx-pref-width: 100%;
+    -fx-pref-height: 100%;
     -fx-max-width: Infinity;
     -fx-max-height: Infinity;
-    /* Position to cover entire screen including top area */
-    -fx-translate-y: -100;
-    -fx-translate-x: 0;
 }
 
 .victory-buttons-container {
@@ -653,23 +654,24 @@
 /* ----- MENU OVERLAY STYLES (NEW) ----- */
 .menu-overlay-root {
     -fx-background-color: transparent;
-    /* Ensure overlay covers the entire window */
+    /* Ensure overlay root covers the entire window */
     -fx-min-width: 100%;
     -fx-min-height: 100%;
+    -fx-pref-width: 100%;
+    -fx-pref-height: 100%;
     -fx-max-width: Infinity;
     -fx-max-height: Infinity;
 }
 
 .menu-overlay-background {
     -fx-background-color: rgba(0, 0, 0, 0.9);
-    /* Ensure background covers everything with darker overlay - including top bar */
+    /* Simple full coverage approach */
     -fx-min-width: 100%;
     -fx-min-height: 100%;
+    -fx-pref-width: 100%;
+    -fx-pref-height: 100%;
     -fx-max-width: Infinity;
     -fx-max-height: Infinity;
-    /* Position to cover entire screen including top area */
-    -fx-translate-y: -100;
-    -fx-translate-x: 0;
 }
 
 .menu-buttons-container {

@@ -48,6 +48,24 @@ public class ControleurOptions {
 
     @FXML
     private void onRetour(ActionEvent event) {
-        JeuQuoridor.goMenu();
+        String previousContext = JeuQuoridor.getOptionsPreviousContext();
+        
+        if ("game".equals(previousContext)) {
+            System.out.println("🔙 Returning to game menu overlay...");
+            // Go back to the game scene first
+            if (JeuQuoridor.getCurrentGameScene() != null) {
+                JeuQuoridor.getPrimaryStage().setScene(JeuQuoridor.getCurrentGameScene());
+                // Ensure maximized state for consistency
+                JeuQuoridor.getPrimaryStage().setMaximized(true);
+                // Then show the menu overlay
+                JeuQuoridor.showGameMenuOverlay();
+            } else {
+                // Fallback to main menu if game scene is not available
+                JeuQuoridor.goMenu();
+            }
+        } else {
+            System.out.println("🔙 Returning to main menu...");
+            JeuQuoridor.goMenu();
+        }
     }
 }

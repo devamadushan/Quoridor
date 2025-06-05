@@ -734,6 +734,27 @@ public class ControleurJeu {
         }
     }
 
+    /**
+     * Public method to show the menu overlay (called from outside)
+     */
+    public void showMenuOverlay() {
+        System.out.println("📋 Opening menu overlay (external call)...");
+        
+        // Show the menu overlay
+        if (menuOverlay != null) {
+            menuOverlay.setVisible(true);
+            menuOverlay.setManaged(true);
+            
+            // Bring to front
+            menuOverlay.toFront();
+            
+            System.out.println("🏠 Menu overlay displayed successfully");
+        } else {
+            System.err.println("❌ Menu overlay is null, falling back to menu");
+            JeuQuoridor.goMenu();
+        }
+    }
+
     private void setupKeyboardShortcuts() {
         if (boardPane.getScene() != null) {
             boardPane.getScene().setOnKeyPressed(e -> {
@@ -1033,8 +1054,11 @@ public class ControleurJeu {
     private void onMenuSettings() {
         System.out.println("⚙️ Menu settings button clicked");
         
-        // For now, just show a placeholder message
-        System.out.println("⚙️ Settings functionality to be implemented");
+        // Hide the menu overlay first
+        hideMenuOverlay();
+        
+        // Open options from game context
+        JeuQuoridor.goOptionsFromGame();
     }
 
     private void showErrorMessage(String message) {

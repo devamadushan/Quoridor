@@ -39,6 +39,11 @@ public class JeuQuoridor extends Application {
     private static boolean isMaximized = true; // Use maximized window instead of fullscreen
     private static double currentResolutionWidth = 1920.0; // Default game resolution
     private static double currentResolutionHeight = 1080.0;
+    
+    // Context management for options navigation
+    private static String optionsPreviousContext = "menu"; // "menu" or "game"
+    private static ControleurJeu currentGameController = null;
+    private static Scene currentGameScene = null;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -47,7 +52,7 @@ public class JeuQuoridor extends Application {
         // Detect screen resolution
         detectScreenResolution();
         
-        // Use maximized window by default
+        // Use full screen dimensions for all scenes for consistency
         double windowWidth = screenWidth;
         double windowHeight = screenHeight;
 
@@ -234,10 +239,9 @@ public class JeuQuoridor extends Application {
             }
         }
 
-        // Calculate window size based on current screen
-        double[] windowSize = calculateOptimalWindowSize();
-        double windowWidth = windowSize[0];
-        double windowHeight = windowSize[1];
+        // Use full screen dimensions for consistency
+        double windowWidth = screenWidth;
+        double windowHeight = screenHeight;
 
         URL resource = JeuQuoridor.class.getResource("/com/dryt/quoridor/views/jeu.fxml");
         if (resource == null) {
@@ -249,20 +253,20 @@ public class JeuQuoridor extends Application {
         
         // Store the controller for later use
         ControleurJeu controleur = loader.getController();
+        currentGameController = controleur;
         
         Scene sceneJeu = new Scene(gameRoot, windowWidth, windowHeight);
         sceneJeu.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
+        sceneJeu.setOnKeyPressed(e -> handleKeyPress(e));
+        
+        // Store the game scene for later use
+        currentGameScene = sceneJeu;
         
         primaryStage.setScene(sceneJeu);
         
-        if (isMaximized) {
-            primaryStage.setMaximized(true);
-            System.out.println("🎮 Game started in maximized: " + primaryStage.getWidth() + "x" + primaryStage.getHeight());
-        } else {
-            primaryStage.setMaximized(false);
-            centerStageOnScreen(primaryStage, windowWidth, windowHeight);
-            System.out.println("🎮 Game started windowed: " + windowWidth + "x" + windowHeight);
-        }
+        // Always start game in maximized mode for consistency
+        primaryStage.setMaximized(true);
+        System.out.println("🎮 Game started in maximized: " + primaryStage.getWidth() + "x" + primaryStage.getHeight());
         
         // Create plateau based on game configuration
         if (nombreJoueurs == 2) {
@@ -292,26 +296,32 @@ public class JeuQuoridor extends Application {
 
     public static void goMenu() {
         primaryStage.setScene(sceneMenu);
-        // Maintain maximized state without animation
-        if (!primaryStage.isMaximized() && isMaximized) {
-            primaryStage.setMaximized(true);
-        }
+        // Ensure maximized state for consistency
+        primaryStage.setMaximized(true);
     }
 
     public static void goOptions() {
+        optionsPreviousContext = "menu"; // Called from main menu
         primaryStage.setScene(sceneOptions);
-        // Maintain maximized state without animation  
-        if (!primaryStage.isMaximized() && isMaximized) {
-            primaryStage.setMaximized(true);
-        }
+        // Ensure maximized state for consistency
+        primaryStage.setMaximized(true);
+    }
+    
+    public static void goOptionsFromGame() {
+        optionsPreviousContext = "game"; // Called from game menu
+        primaryStage.setScene(sceneOptions);
+        // Ensure maximized state for consistency
+        primaryStage.setMaximized(true);
+    }
+    
+    public static String getOptionsPreviousContext() {
+        return optionsPreviousContext;
     }
 
     public static void goChoixJoueurs() {
         primaryStage.setScene(sceneChoixJoueurs);
-        // Maintain maximized state without animation
-        if (!primaryStage.isMaximized() && isMaximized) {
-            primaryStage.setMaximized(true);
-        }
+        // Ensure maximized state for consistency
+        primaryStage.setMaximized(true);
     }
 
     // Nouvelle méthode pour naviguer vers le choix des skins
@@ -324,10 +334,8 @@ public class JeuQuoridor extends Application {
             sceneSkins.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
             sceneSkins.setOnKeyPressed(e -> handleKeyPress(e));
             primaryStage.setScene(sceneSkins);
-            // Smooth maximized transition
-            if (isMaximized) {
-                primaryStage.setMaximized(true);
-            }
+            // Ensure maximized state for consistency
+            primaryStage.setMaximized(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -343,10 +351,8 @@ public class JeuQuoridor extends Application {
             sceneDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
             sceneDifficulte.setOnKeyPressed(e -> handleKeyPress(e));
             primaryStage.setScene(sceneDifficulte);
-            // Smooth maximized transition
-            if (isMaximized) {
-                primaryStage.setMaximized(true);
-            }
+            // Ensure maximized state for consistency
+            primaryStage.setMaximized(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -362,10 +368,8 @@ public class JeuQuoridor extends Application {
             sceneNbDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
             sceneNbDifficulte.setOnKeyPressed(e -> handleKeyPress(e));
             primaryStage.setScene(sceneNbDifficulte);
-            // Smooth maximized transition
-            if (isMaximized) {
-                primaryStage.setMaximized(true);
-            }
+            // Ensure maximized state for consistency
+            primaryStage.setMaximized(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -426,6 +430,16 @@ public class JeuQuoridor extends Application {
     
     public static boolean isMaximized() {
         return isMaximized;
+    }
+
+    public static void showGameMenuOverlay() {
+        if (currentGameController != null) {
+            currentGameController.showMenuOverlay();
+        }
+    }
+
+    public static Scene getCurrentGameScene() {
+        return currentGameScene;
     }
 
     public static void main(String[] args) {
