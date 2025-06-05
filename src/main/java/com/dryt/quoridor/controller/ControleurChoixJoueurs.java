@@ -15,19 +15,18 @@ public class ControleurChoixJoueurs {
 
     @FXML
     private void initialize() {
-        // Crée un groupe unique pour que les radios soient exclusives
+
         ToggleGroup group = new ToggleGroup();
         radio2Humains.setToggleGroup(group);
         radio1v1Bot.setToggleGroup(group);
         radio4Joueurs.setToggleGroup(group);
-        radio2Humains.setSelected(true); // Par défaut
+        radio2Humains.setSelected(true);
 
-        // Config spinner (pour le mode 4 joueurs)
+
         spinnerIA.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 3, 1));
         spinnerIA.setEditable(true);
-        spinnerIA.setDisable(true); // désactivé sauf si on coche 4 joueurs
+        spinnerIA.setDisable(true);
 
-        // Activation du spinner uniquement si 4 joueurs est sélectionné
         radio4Joueurs.setOnAction(e -> spinnerIA.setDisable(false));
         radio2Humains.setOnAction(e -> spinnerIA.setDisable(true));
         radio1v1Bot.setOnAction(e -> spinnerIA.setDisable(true));
@@ -38,12 +37,12 @@ public class ControleurChoixJoueurs {
         Plateau plateau;
 
         if (radio2Humains.isSelected()) {
-            plateau = new Plateau(21, 0); // 2 humains
+            plateau = new Plateau(21, 0); // 1 vs 1
         } else if (radio1v1Bot.isSelected()) {
-            plateau = new Plateau(22, 1); // 1 humain + 1 IA
+            plateau = new Plateau(22, 1); // 1 vs AI
         } else {
-            int nbIA = spinnerIA.getValue(); // 1 à 3
-            plateau = new Plateau(4, nbIA); // 4 joueurs avec nbIA IA
+            int nbIA = spinnerIA.getValue();    // nb IA
+            plateau = new Plateau(4, nbIA); // 4 joueurs avec nb IA
         }
 
         JeuQuoridor.setPlateau(plateau);

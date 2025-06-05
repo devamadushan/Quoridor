@@ -152,7 +152,7 @@ public class ControleurJeu {
             javafx.application.Platform.runLater(() -> {
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setHeaderText("Partie terminée");
-                alert.setContentText("Le joueur " + winner.getId() + " a gagné !");
+                alert.setContentText("Le joueur " + winner.getNom() + " a gagné !");
                 alert.showAndWait();
                 JeuQuoridor.goMenu();
             });
@@ -229,7 +229,7 @@ public class ControleurJeu {
         if (winner != null) {
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setHeaderText("Partie terminée");
-            alert.setContentText("Le joueur " + winner.getId() + " a gagné !");
+            alert.setContentText("Le joueur " + winner.getNom() + " a gagné !");
             alert.showAndWait();
             JeuQuoridor.goMenu();
             return;

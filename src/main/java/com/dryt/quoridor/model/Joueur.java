@@ -4,11 +4,13 @@ public class Joueur {
     private int id;
     private int x;
     private int y;
+    private String nom;
     private int wallsRemaining;
     private boolean isAI;
 
-    public Joueur(int id, int startX, int startY, int walls,boolean isAI) {
+    public Joueur(int id, String name , int startX, int startY, int walls,boolean isAI) {
         this.id = id;
+        this.nom = name;
         this.x = startX;
         this.y = startY;
         this.wallsRemaining = walls;
@@ -24,6 +26,11 @@ public class Joueur {
     public int getY() {
         return y;
     }
+
+    public String getNom() {
+        return nom;
+    }
+
     public void setPosition(int newX, int newY) {
         this.x = newX;
         this.y = newY;
@@ -47,7 +54,7 @@ public class Joueur {
 
     @Override
     public Joueur clone() {
-        return new Joueur(this.id, this.x, this.y, this.wallsRemaining, this.isAI);
+        return new Joueur(this.id, this.nom,this.x, this.y, this.wallsRemaining, this.isAI);
     }
 
     @Override

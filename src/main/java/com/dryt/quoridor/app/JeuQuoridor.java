@@ -9,20 +9,19 @@ import com.dryt.quoridor.model.Plateau;
 import java.net.URL;
 
 public class JeuQuoridor extends Application {
-    public static Stage primaryStage;
-    public static Scene sceneMenu;
-    public static Scene sceneOptions;
-    public static Scene sceneChoixJoueurs;
+    public static Stage primaryStage;       // la fenetre principale de l'application
+    public static Scene sceneMenu;          // la fenetre pour de l'accueil
+    public static Scene sceneOptions;       // la fenetre pour les options de reglages du fenetre
+    public static Scene sceneChoixJoueurs;  // la fenetre pour jouer
 
-    private static int nombreJoueurs = 2;
+    //private static int nombreJoueurs = 2;   // nb de joueurs
     private static Plateau plateau;
-    private static double windowX;
+    private static double windowX;  // POsition du fenetre x et y
     private static double windowY;
 
     @Override
     public void start(Stage stage) throws Exception {
         primaryStage = stage;
-
         Parent menuRoot = FXMLLoader.load(getClass().getResource("/com/dryt/quoridor/views/menu.fxml"));
         sceneMenu = new Scene(menuRoot, 1920, 1080);
 
@@ -36,14 +35,13 @@ public class JeuQuoridor extends Application {
         sceneOptions.getStylesheets().add(getClass().getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
         sceneChoixJoueurs.getStylesheets().add(getClass().getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
 
-        stage.setTitle("Jeu Quoridor");
+        stage.setTitle("TROLLIDOR");
         stage.setScene(sceneMenu);
         stage.setResizable(false);
         stage.show();
 
-        // Sauvegarder la position initiale
-       // windowX = stage.getX();
-        //windowY = stage.getY();
+        windowX = stage.getX();
+        windowY = stage.getY();
     }
 
     private static void updateWindowPosition() {
@@ -57,13 +55,13 @@ public class JeuQuoridor extends Application {
         return primaryStage;
     }
 
-    public static void setNombreJoueurs(int nb) {
-        nombreJoueurs = nb;
-    }
-
-    public static int getNombreJoueurs() {
-        return nombreJoueurs;
-    }
+//    public static void setNombreJoueurs(int nb) {
+//        nombreJoueurs = nb;
+//    }
+//
+//    public static int getNombreJoueurs() {
+//        return nombreJoueurs;
+//    }
 
     public static void setPlateau(Plateau p) {
         plateau = p;
@@ -80,28 +78,28 @@ public class JeuQuoridor extends Application {
         Scene sceneJeu = new Scene(gameRoot, primaryStage.getWidth(), primaryStage.getHeight());
         sceneJeu.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
         primaryStage.setScene(sceneJeu);
-        updateWindowPosition(); // Appliquer la position après le changement de scène
+        updateWindowPosition();
     }
 
     public static void goMenu() {
-        windowX = primaryStage.getX(); // Sauvegarder la position avant de changer de scène
+        windowX = primaryStage.getX();
         windowY = primaryStage.getY();
         primaryStage.setScene(sceneMenu);
-        updateWindowPosition(); // Appliquer la position après le changement de scène
+        updateWindowPosition();
     }
 
     public static void goOptions() {
-        windowX = primaryStage.getX(); // Sauvegarder la position avant de changer de scène
+        windowX = primaryStage.getX();
         windowY = primaryStage.getY();
         primaryStage.setScene(sceneOptions);
-        updateWindowPosition(); // Appliquer la position après le changement de scène
+        updateWindowPosition();
     }
 
     public static void goChoixJoueurs() {
-        windowX = primaryStage.getX(); // Sauvegarder la position avant de changer de scène
+        windowX = primaryStage.getX();
         windowY = primaryStage.getY();
         primaryStage.setScene(sceneChoixJoueurs);
-        updateWindowPosition(); // Appliquer la position après le changement de scène
+        updateWindowPosition();
     }
 
     public static void main(String[] args) {
