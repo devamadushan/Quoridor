@@ -41,7 +41,7 @@ public class ControleurChoixNbIADifficulte {
         });
 
         // Message initial
-        messageMode.setText("Mode 4 joueurs humains");
+        messageMode.setText("Mode 4 joueurs");
     }
     
     private void updateDifficulteButtons(int nbIA) {
