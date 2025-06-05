@@ -459,20 +459,7 @@ public class ControleurJeu {
         if (!cellButtons[x][y].getStyleClass().contains("highlight")) return;
         if (!plateau.moveCurrentPlayer(x, y)) return;
 
-        Joueur winner = plateau.getWinner();
-        if (winner != null) {
-            // Stop background music when game ends
-            stopBackgroundMusic();
-            
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setHeaderText(GameConstants.MSG_GAME_OVER);
-            alert.setContentText(String.format(GameConstants.MSG_PLAYER_WINS, winner.getId()));
-            alert.showAndWait();
-            JeuQuoridor.goMenu();
-            return;
-        }
-
-        switchPlayerTurn();
+        checkForWinner();
     }
 
     private void updateBoardState() {
@@ -586,8 +573,13 @@ public class ControleurJeu {
              }
         }
 
+        checkForWinner();
+    }
+
+    private void checkForWinner() {
         Joueur winner = plateau.getWinner();
         if (winner != null) {
+            System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
             // Stop background music when game ends
             stopBackgroundMusic();
             
