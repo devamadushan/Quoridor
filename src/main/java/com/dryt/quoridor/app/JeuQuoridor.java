@@ -461,6 +461,9 @@ public class JeuQuoridor extends Application {
         isMaximized = maximized;
         
         if (primaryStage != null) {
+            // Préserver le background actuel avant changement de résolution
+            String preserveBackground = currentBackgroundFileName;
+            
             if (maximized) {
                 // Mode dynamique : maximiser la fenêtre
                 primaryStage.setMaximized(true);
@@ -471,14 +474,22 @@ public class JeuQuoridor extends Application {
                 primaryStage.setMaximized(false);
                 primaryStage.setResizable(false); // Empêcher le redimensionnement manuel
                 
-                // Appliquer la résolution à toutes les scènes existantes
-                updateAllScenesResolution(width, height);
+                // Éviter les animations en appliquant la taille directement sans updateAllScenesResolution
+                // updateAllScenesResolution(width, height); // SUPPRIMÉ pour éviter les animations
                 
-                // Redimensionner la fenêtre
+                // Redimensionner la fenêtre de façon plus fluide
                 primaryStage.setWidth(width);
                 primaryStage.setHeight(height);
                 centerStageOnScreen(primaryStage, width, height);
                 System.out.println("🖥️ Resolution set to Fixed: " + width + "x" + height);
+            }
+            
+            // Restaurer le background après changement de résolution
+            if (preserveBackground != null && !preserveBackground.isEmpty() && currentGameScene != null) {
+                // Marquer le background comme préservé pour éviter qu'il soit overridé
+                backgroundWasPreserved = true;
+                updateGameBackground(preserveBackground);
+                System.out.println("🖼️ Background restored after resolution change: " + preserveBackground);
             }
         }
     }

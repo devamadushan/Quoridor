@@ -201,18 +201,30 @@ public class ControleurOptions {
             String savedResolution = UserPreferences.getSelectedResolution();
             
             if ("Dynamique".equals(savedResolution)) {
-                JeuQuoridor.getPrimaryStage().setMaximized(true);
+                // Mode dynamique : juste s'assurer que c'est maximisé
+                if (!JeuQuoridor.getPrimaryStage().isMaximized()) {
+                    JeuQuoridor.getPrimaryStage().setMaximized(true);
+                }
             } else {
+                // Mode résolution fixe : appliquer seulement si nécessaire
                 String[] parts = savedResolution.split("x");
                 if (parts.length == 2) {
                     double width = Double.parseDouble(parts[0]);
                     double height = Double.parseDouble(parts[1]);
-                    JeuQuoridor.setResolution(width, height, false);
+                    
+                    // Vérifier si la résolution est déjà correcte pour éviter les animations inutiles
+                    double currentWidth = JeuQuoridor.getPrimaryStage().getWidth();
+                    double currentHeight = JeuQuoridor.getPrimaryStage().getHeight();
+                    
+                    if (Math.abs(currentWidth - width) > 10 || Math.abs(currentHeight - height) > 10) {
+                        // Appliquer seulement si la différence est significative
+                        JeuQuoridor.setResolution(width, height, false);
+                    }
                 }
             }
         } catch (Exception e) {
             System.err.println("⚠️ Error applying saved resolution: " + e.getMessage());
-            JeuQuoridor.getPrimaryStage().setMaximized(true);
+            // Fallback silencieux sans forcer
         }
     }
 }
