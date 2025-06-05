@@ -78,6 +78,7 @@ public class ControleurJeu {
         wallDetector.setLayoutX(x - (detectorSize - wallSize) / 4.0);
         wallDetector.setLayoutY(y - (detectorSize - wallSize) / 4.0);
         wallDetector.setStyle("-fx-fill: transparent; -fx-stroke: transparent;");
+        // wallDetector.setStyle("-fx-fill: rgba(0, 0, 255, 0.2); -fx-stroke: blue;");
 
         wallDetector.setOnMouseEntered(e -> showGhostWall(wx, wy, vertical));
         wallDetector.setOnMouseExited(e -> hideGhostWall());
@@ -88,31 +89,40 @@ public class ControleurJeu {
             if (!vertical && wx == 8) effectiveWx = 7;
             if (vertical && wy == 8) effectiveWy = 7;
 
-            if (isCrossingWall(effectiveWx, effectiveWy, vertical)) {
-                System.out.println("❌ Croisement de mur interdit.");
+
+            if (isWallAlreadyPresent(effectiveWx, effectiveWy, vertical)) {
+                System.out.println("- Un mur est déjà présent ici.");
                 return;
             }
-            if (!plateau.allPlayersHaveAPathAfterWall(effectiveWx, effectiveWy, vertical)) {
-                System.out.println("❌ Ce mur bloquerait un joueur complètement.");
+            if (isCrossingWall(effectiveWx, effectiveWy, vertical)) {
+                System.out.println("- Croisement de mur interdit.");
                 return;
             }
             if (plateau.isWallOverlapping(effectiveWx, effectiveWy, vertical)) {
-                System.out.println("❌ Chevauchement de mur interdit.");
+                System.out.println("- Chevauchement de mur interdit.");
                 return;
             }
-            if (isWallAlreadyPresent(effectiveWx, effectiveWy, vertical)) {
-                System.out.println("❌ Un mur est déjà présent ici.");
+            if (!plateau.allPlayersHaveAPathAfterWall(effectiveWx, effectiveWy, vertical)) {
+                System.out.println("- Ce mur bloquerait un joueur complètement.");
+                return;
+            }
+            if (!plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)) {
+                System.out.println("- Placement refusé par la logique interne.");
+                return;
+            }
+            if (!plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
+                System.out.println("- Erreur : pose du mur échouée malgré validation.");
                 return;
             }
 
-            if (plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
-                    && plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
-                drawWall(effectiveWx, effectiveWy, vertical);
-                switchPlayerTurn();
-            }
+
+            drawWall(effectiveWx, effectiveWy, vertical);
+            switchPlayerTurn();
         });
+
         boardPane.getChildren().add(wallDetector);
     }
+
 
     private boolean isWallAlreadyPresent(int wx, int wy, boolean vertical) {
         for (Mur mur : plateau.getMurs()) {
@@ -157,7 +167,7 @@ public class ControleurJeu {
                 JeuQuoridor.goMenu();
             });
         } else {
-            switchPlayerTurn(); // continuer le tour suivant
+            switchPlayerTurn();
         }
     }
 

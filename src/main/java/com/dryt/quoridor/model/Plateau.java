@@ -59,15 +59,11 @@ public class Plateau {
         horizontalWallPositions = new boolean[8][8];
         blockedRight = new boolean[9][9];
         blockedDown = new boolean[9][9];
-        System.out.println("🎮 Configuration des joueurs :");
+        System.out.println("Configuration des joueurs :");
         for (Joueur j : joueurs) {
             System.out.println("Joueur " + j.getId() + " - " + (j.isAI() ? "IA" : "Humain"));
         }
     }
-
-
-
-
 
     public Joueur getJoueurById(int id) {
         for (Joueur j : joueurs) {
@@ -75,7 +71,6 @@ public class Plateau {
         }
         return null;
     }
-
 
     public List<Joueur> getJoueurs() {
         return joueurs;
@@ -86,19 +81,15 @@ public class Plateau {
     }
 
     public boolean canPlaceWall(int wx, int wy, boolean vertical) {
-        // Vérifie les limites du plateau
         if (vertical && wy >= 8) return false;
         if (!vertical && wx >= 8) return false;
 
-        // Vérifie si un mur du même type est déjà présent
         if (vertical && hasVerticalWall(wx, wy)) return false;
         if (!vertical && hasHorizontalWall(wx, wy)) return false;
 
-        // Vérifie le croisement avec un mur opposé
         if (vertical && hasHorizontalWall(wx, wy)) return false;
         if (!vertical && hasVerticalWall(wx, wy)) return false;
 
-        // Optionnel : bloquer les placements si une des deux cases est déjà bloquée (superposition)
         if (vertical && (blockedRight[wx][wy] || blockedRight[wx][wy + 1])) return false;
         if (!vertical && (blockedDown[wx][wy] || blockedDown[wx + 1][wy])) return false;
 
@@ -111,39 +102,39 @@ public class Plateau {
         currentPlayer = joueurs.get((index + 1) % joueurs.size());
     }
 
-    public boolean peutPlacerMurSansChevauchement(int wx, int wy, boolean vertical) {
-        if (wx < 0 || wy < 0 || wx >= 8 || wy >= 8) return false;
+//    public boolean peutPlacerMurSansChevauchement(int wx, int wy, boolean vertical) {
+//        if (wx < 0 || wy < 0 || wx >= 8 || wy >= 8) return false;
+//
+//        if (vertical) {
+//            if (wy >= 7) return false; // dépasse en bas
+//            return !verticalWallPositions[wx][wy] && !verticalWallPositions[wx][wy + 1];
+//        } else {
+//            if (wx >= 7) return false; // dépasse à droite
+//            return !horizontalWallPositions[wx][wy] && !horizontalWallPositions[wx + 1][wy];
+//        }
+//    }
 
-        if (vertical) {
-            if (wy >= 7) return false; // dépasse en bas
-            return !verticalWallPositions[wx][wy] && !verticalWallPositions[wx][wy + 1];
-        } else {
-            if (wx >= 7) return false; // dépasse à droite
-            return !horizontalWallPositions[wx][wy] && !horizontalWallPositions[wx + 1][wy];
-        }
-    }
-
-    public boolean isVerticalWallAt(int x, int y) {
-        return x >= 0 && x < 8 && y >= 0 && y < 8 && verticalWallPositions[x][y];
-    }
-
-    public boolean isHorizontalWallAt(int x, int y) {
-        return x >= 0 && x < 8 && y >= 0 && y < 8 && horizontalWallPositions[x][y];
-    }
-
-
-    public boolean peutPlacerMurSansCroix(int x, int y, boolean vertical) {
-        if (vertical) {
-            return !(murExiste(x - 1, y, false) || murExiste(x, y, false));
-        } else {
-            return !(murExiste(x, y - 1, true) || murExiste(x, y, true));
-        }
-    }
-
-    private boolean murExiste(int x, int y, boolean vertical) {
-        if (x < 0 || y < 0 || x >= 8 || y >= 8) return false;
-        return vertical ? verticalWallPositions[x][y] : horizontalWallPositions[x][y];
-    }
+//    public boolean isVerticalWallAt(int x, int y) {
+//        return x >= 0 && x < 8 && y >= 0 && y < 8 && verticalWallPositions[x][y];
+//    }
+//
+//    public boolean isHorizontalWallAt(int x, int y) {
+//        return x >= 0 && x < 8 && y >= 0 && y < 8 && horizontalWallPositions[x][y];
+//    }
+//
+//
+//    public boolean peutPlacerMurSansCroix(int x, int y, boolean vertical) {
+//        if (vertical) {
+//            return !(murExiste(x - 1, y, false) || murExiste(x, y, false));
+//        } else {
+//            return !(murExiste(x, y - 1, true) || murExiste(x, y, true));
+//        }
+//    }
+//
+//    private boolean murExiste(int x, int y, boolean vertical) {
+//        if (x < 0 || y < 0 || x >= 8 || y >= 8) return false;
+//        return vertical ? verticalWallPositions[x][y] : horizontalWallPositions[x][y];
+//    }
 
     public List<int[]> getPossibleMoves() {
         List<int[]> moves = new ArrayList<>();
@@ -191,8 +182,8 @@ public class Plateau {
                     if (!jumpBlocked && nnx >= 0 && nnx < size && nny >= 0 && nny < size && !isPlayerAt(nnx, nny)) {
                         moves.add(new int[]{nnx, nny}); // saut par-dessus
                     } else {
-                        // Contournement latéral seulement si un mur bloque le saut
-                        if (dir[0] == 0) { // déplacement vertical (haut ou bas)
+
+                        if (dir[0] == 0) {
                             boolean sautVersHaut = (y > ny);
                             boolean sautVersBas = (y < ny);
                             if ((sautVersHaut && blockedDown[nx][ny]) || (sautVersBas && blockedDown[x][y])) {
@@ -201,7 +192,7 @@ public class Plateau {
                                 if (nx < size - 1 && !blockedRight[nx][ny] && !isPlayerAt(nx + 1, ny))
                                     moves.add(new int[]{nx + 1, ny});
                             }
-                        } else if (dir[1] == 0) { // déplacement horizontal (gauche ou droite)
+                        } else if (dir[1] == 0) {
                             boolean sautVersGauche = (x > nx);
                             boolean sautVersDroite = (x < nx);
                             if ((sautVersGauche && blockedRight[nx][ny]) || (sautVersDroite && blockedRight[x][y])) {
@@ -245,7 +236,7 @@ public class Plateau {
     }
 
     public boolean placeWallCurrentPlayer(int wx, int wy, boolean vertical) {
-        if (currentPlayer.getWallsRemaining() <= 0) return false; // ✅ bloque si plus de murs
+        if (currentPlayer.getWallsRemaining() <= 0) return false;
 
         if (vertical) {
             if (wy >= 8){ System.out.println("Wall Fails"); return false;}
@@ -259,7 +250,7 @@ public class Plateau {
             blockedDown[wx + 1][wy] = true;
         }
 
-        currentPlayer.decrementWalls(); // ✅ décrémente le compteur
+        currentPlayer.decrementWalls();
         mursPlaces.add(new Mur(vertical, wx, wy));
 
         return true;
@@ -270,7 +261,7 @@ public class Plateau {
 
 
     public boolean allPlayersHaveAPathAfterWall(int wx, int wy, boolean vertical) {
-        // Simuler l'ajout du mur
+
         if (vertical) {
             verticalWallPositions[wx][wy] = true;
             blockedRight[wx][wy] = true;
@@ -289,7 +280,6 @@ public class Plateau {
             }
         }
 
-        // Annuler le mur simulé
         if (vertical) {
             verticalWallPositions[wx][wy] = false;
             blockedRight[wx][wy] = false;
@@ -374,7 +364,7 @@ public class Plateau {
 
     public List<int[]> getShortestPathToGoal(Joueur j) {
         boolean[][] visited = new boolean[size][size];
-        int[][][] parent = new int[size][size][2]; // To reconstruct path
+        int[][][] parent = new int[size][size][2];
         for (int x = 0; x < size; x++)
             for (int y = 0; y < size; y++)
                 parent[x][y] = new int[]{-1, -1};
@@ -389,7 +379,6 @@ public class Plateau {
             int[] pos = queue.poll();
             int x = pos[0], y = pos[1];
 
-            // Check if goal reached
             boolean isGoal = switch (j.getId()) {
                 case 1 -> y == 8;
                 case 2 -> y == 0;
@@ -448,22 +437,19 @@ public class Plateau {
 
     @Override
     public Plateau clone() {
-        Plateau copy = new Plateau(); // bypass constructor logic
+        Plateau copy = new Plateau();
 
-        // Copy wall positions
         copy.verticalWallPositions = deepCopy(this.verticalWallPositions);
         copy.horizontalWallPositions = deepCopy(this.horizontalWallPositions);
         copy.blockedRight = deepCopy(this.blockedRight);
         copy.blockedDown = deepCopy(this.blockedDown);
 
-        // Copy players
         copy.joueurs = new ArrayList<>();
         for (Joueur j : this.joueurs) {
             copy.joueurs.add(j.clone());
         }
 
 
-        // Copy current player
         copy.currentPlayer = copy.getJoueurById(this.currentPlayer.getId());
 
 //        System.out.println("Original Joueur IDs: ");
