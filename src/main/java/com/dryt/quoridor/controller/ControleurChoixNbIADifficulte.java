@@ -30,20 +30,19 @@ public class ControleurChoixNbIADifficulte {
     
     private List<DifficulteIA> difficultesSelectionnees = new ArrayList<>();
     
+    // Initialise les composants de l'interface
     @FXML
     public void initialize() {
-        // Configurer le spinner pour qu'il ne prenne que des valeurs entières
         nbIASpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 3, 0));
         
-        // Écouter les changements de valeur du spinner
         nbIASpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
             updateDifficulteButtons(newVal);
         });
 
-        // Message initial
         messageMode.setText("Mode 4 joueurs");
     }
     
+    // Met à jour l'interface selon le nombre d'IA
     private void updateDifficulteButtons(int nbIA) {
         difficulteButtons.getChildren().clear();
         difficultesSelectionnees.clear();
@@ -52,7 +51,6 @@ public class ControleurChoixNbIADifficulte {
             difficulteContainer.setVisible(true);
             messageMode.setText("Mode " + (4 - nbIA) + " joueur(s) humain(s) et " + nbIA + " IA");
             
-            // Initialiser la liste des difficultés avec MOYEN par défaut
             for (int i = 0; i < nbIA; i++) {
                 difficultesSelectionnees.add(DifficulteIA.MOYEN);
             }
@@ -84,10 +82,10 @@ public class ControleurChoixNbIADifficulte {
             messageMode.setText("Mode 4 joueurs");
         }
         
-        // Le bouton valider est toujours visible
         validerButton.setVisible(true);
     }
     
+    // Valide les choix et passe à l'écran suivant
     @FXML
     private void onValider(ActionEvent event) {
         int nbIA = nbIASpinner.getValue();
@@ -96,6 +94,7 @@ public class ControleurChoixNbIADifficulte {
         JeuQuoridor.goChoixSkins();
     }
     
+    // Retourne à l'écran précédent
     @FXML
     private void onRetour(ActionEvent event) {
         JeuQuoridor.goChoixJoueurs();

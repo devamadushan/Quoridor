@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 
 public class ControleurChoixJoueurs {
 
+    // Configure le mode 1v1 entre humains
     @FXML
     private void on1v1Humain(ActionEvent event) {
         System.out.println("Mode 1 VS 1 Humain sélectionné");
@@ -16,6 +17,7 @@ public class ControleurChoixJoueurs {
         JeuQuoridor.goChoixSkins();
     }
 
+    // Configure le mode 1v1 contre l'IA
     @FXML
     private void on1v1IA(ActionEvent event) {
         System.out.println("Mode 1 VS 1 IA sélectionné");
@@ -24,6 +26,7 @@ public class ControleurChoixJoueurs {
         JeuQuoridor.goChoixDifficulteIA();
     }
 
+    // Configure le mode 4 joueurs
     @FXML
     private void on4Joueurs(ActionEvent event) {
         System.out.println("Mode 4 Joueurs sélectionné");
@@ -31,6 +34,7 @@ public class ControleurChoixJoueurs {
         JeuQuoridor.goChoixNbIADifficulte();
     }
 
+    // Retourne au menu principal
     @FXML
     private void onRetour(ActionEvent event) {
         JeuQuoridor.goMenu();
