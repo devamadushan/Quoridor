@@ -63,46 +63,176 @@ public class JeuQuoridor extends Application {
     
     private static boolean backgroundWasPreserved = false;
 
+    // Mode sécurisé pour exécutable standalone
+    private static boolean safeMode = false;
+    private static boolean standaloneMode = false;
+
     // Initialise et démarre l'application JavaFX
     @Override
     public void start(Stage stage) throws Exception {
         primaryStage = stage;
         
+        // Détecter le mode d'exécution
+        detectExecutionMode();
+        
+        try {
         detectScreenResolution();
+        } catch (Exception e) {
+            System.err.println("Erreur détection résolution, utilisation valeurs par défaut: " + e.getMessage());
+            setDefaultResolution();
+        }
         
         double windowWidth = screenWidth;
         double windowHeight = screenHeight;
 
-        Parent menuRoot = FXMLLoader.load(getClass().getResource("/com/dryt/quoridor/views/menu.fxml"));
-        sceneMenu = new Scene(menuRoot, windowWidth, windowHeight);
+        // Chargement sécurisé des scènes
+        loadApplicationScenes(windowWidth, windowHeight);
 
-        Parent optionsRoot = FXMLLoader.load(getClass().getResource("/com/dryt/quoridor/views/options.fxml"));
-        sceneOptions = new Scene(optionsRoot, windowWidth, windowHeight);
-
-        Parent choixRoot = FXMLLoader.load(getClass().getResource("/com/dryt/quoridor/views/choix_joueurs.fxml"));
-        sceneChoixJoueurs = new Scene(choixRoot, windowWidth, windowHeight);
-
-        sceneMenu.getStylesheets().add(getClass().getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
-        sceneOptions.getStylesheets().add(getClass().getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
-        sceneChoixJoueurs.getStylesheets().add(getClass().getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
-
-        sceneMenu.setOnKeyPressed(e -> handleKeyPress(e));
-        sceneOptions.setOnKeyPressed(e -> handleKeyPress(e));
-        sceneChoixJoueurs.setOnKeyPressed(e -> handleKeyPress(e));
-
-        stage.setTitle("Jeu Quoridor");
-        stage.setScene(sceneMenu);
-        stage.setResizable(false);
+        // Configuration de la fenêtre principale
+        setupPrimaryStage(stage);
         
-        applySavedResolution();
-        
-        initializeGlobalMusic();
+        // Initialisation de la musique en mode sécurisé
+        if (!safeMode) {
+            try {
+                initializeGlobalMusic();
+            } catch (Exception e) {
+                System.err.println("Impossible d'initialiser la musique (mode sécurisé activé): " + e.getMessage());
+            }
+        }
     
         stage.show();
         
-        System.out.println("Écran détecté : " + screenWidth + "x" + screenHeight);
-        System.out.println("Jeu démarré en mode maximisé");
-        System.out.println("Appuyez sur F11 pour basculer le mode maximisé, Échap pour quitter");
+        logStartupInfo();
+    }
+    
+    /**
+     * Détecte le mode d'exécution (standalone, safe mode, etc.)
+     */
+    private void detectExecutionMode() {
+        // Vérifier les arguments de lancement
+        List<String> params = getParameters().getRaw();
+        safeMode = params.contains("--safe-mode") || params.contains("--javafx-fallback-mode");
+        
+        // Détecter le mode standalone
+        standaloneMode = "true".equals(System.getProperty("launcher.standalone")) ||
+                        System.getProperty("java.class.path", "").contains(".exe");
+        
+        if (safeMode) {
+            System.out.println("🔒 Mode sécurisé activé - fonctionnalités limitées");
+            // Désactiver certaines optimisations en mode sécurisé
+            System.setProperty("prism.forceGPU", "false");
+            System.setProperty("prism.order", "sw");
+        }
+        
+        if (standaloneMode) {
+            System.out.println("📦 Mode exécutable standalone détecté");
+        }
+    }
+    
+    /**
+     * Charge les scènes de l'application de manière sécurisée
+     */
+    private void loadApplicationScenes(double windowWidth, double windowHeight) throws Exception {
+        try {
+            Parent menuRoot = loadFXMLSafely("/com/dryt/quoridor/views/menu.fxml");
+        sceneMenu = new Scene(menuRoot, windowWidth, windowHeight);
+
+            Parent optionsRoot = loadFXMLSafely("/com/dryt/quoridor/views/options.fxml");
+        sceneOptions = new Scene(optionsRoot, windowWidth, windowHeight);
+
+            Parent choixRoot = loadFXMLSafely("/com/dryt/quoridor/views/choix_joueurs.fxml");
+        sceneChoixJoueurs = new Scene(choixRoot, windowWidth, windowHeight);
+
+            // Application des styles CSS de manière sécurisée
+            applySafeStylesheets();
+            
+            // Configuration des événements clavier
+            setupKeyboardEvents();
+            
+        } catch (Exception e) {
+            System.err.println("Erreur lors du chargement des scènes: " + e.getMessage());
+            throw new RuntimeException("Impossible de charger l'interface utilisateur", e);
+        }
+    }
+    
+    /**
+     * Charge un fichier FXML de manière sécurisée
+     */
+    private Parent loadFXMLSafely(String fxmlPath) throws Exception {
+        URL resource = getClass().getResource(fxmlPath);
+        if (resource == null) {
+            throw new RuntimeException("Ressource FXML introuvable: " + fxmlPath);
+        }
+        
+        FXMLLoader loader = new FXMLLoader(resource);
+        return loader.load();
+    }
+    
+    /**
+     * Applique les feuilles de style de manière sécurisée
+     */
+    private void applySafeStylesheets() {
+        try {
+            String menuCSS = getClass().getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm();
+            sceneMenu.getStylesheets().add(menuCSS);
+            sceneOptions.getStylesheets().add(menuCSS);
+            sceneChoixJoueurs.getStylesheets().add(menuCSS);
+        } catch (Exception e) {
+            System.err.println("Impossible de charger les styles CSS: " + e.getMessage());
+            // Continuer sans styles CSS si nécessaire
+        }
+    }
+    
+    /**
+     * Configure les événements clavier
+     */
+    private void setupKeyboardEvents() {
+        sceneMenu.setOnKeyPressed(e -> handleKeyPress(e));
+        sceneOptions.setOnKeyPressed(e -> handleKeyPress(e));
+        sceneChoixJoueurs.setOnKeyPressed(e -> handleKeyPress(e));
+    }
+    
+    /**
+     * Configure la fenêtre principale
+     */
+    private void setupPrimaryStage(Stage stage) {
+        stage.setTitle("Jeu Quoridor v1.0.2" + (standaloneMode ? " (Standalone)" : ""));
+        stage.setScene(sceneMenu);
+        stage.setResizable(false);
+        
+        // Application de la résolution sauvegardée
+        try {
+        applySavedResolution();
+        } catch (Exception e) {
+            System.err.println("Erreur application résolution: " + e.getMessage());
+            // Utiliser la résolution par défaut
+            stage.setMaximized(true);
+            isMaximized = true;
+        }
+    }
+    
+    /**
+     * Définit une résolution par défaut en cas d'erreur
+     */
+    private void setDefaultResolution() {
+        screenWidth = 1920.0;
+        screenHeight = 1080.0;
+        scaleFactorX = 1.0;
+        scaleFactorY = 1.0;
+        System.out.println("Résolution par défaut appliquée: " + screenWidth + "x" + screenHeight);
+    }
+    
+    /**
+     * Affiche les informations de démarrage
+     */
+    private void logStartupInfo() {
+        System.out.println("=== QUORIDOR DÉMARRÉ ===");
+        System.out.println("Résolution détectée: " + screenWidth + "x" + screenHeight);
+        System.out.println("Mode: " + (isMaximized ? "Maximisé" : "Fenêtré"));
+        System.out.println("Mode sécurisé: " + (safeMode ? "Activé" : "Désactivé"));
+        System.out.println("Mode standalone: " + (standaloneMode ? "Activé" : "Désactivé"));
+        System.out.println("Raccourcis: F11 (plein écran), Échap (sortir du plein écran)");
+        System.out.println("========================");
     }
     
     // Détecte la résolution de l'écran et calcule les facteurs d'échelle
@@ -243,26 +373,8 @@ public class JeuQuoridor extends Application {
     
     // Démarre une nouvelle partie avec un fond préservé
     public static void startGame(String preserveCurrentBackground) throws Exception {
-        if (nombreJoueurs == 2) {
-            if (isVsAI) {
-                System.out.println("Mode 1 VS 1 IA sélectionné");
-            } else {
-                System.out.println("Mode 1 VS 1 Humain sélectionné");
-            }
-        } else {
-            System.out.println("Mode 4 joueurs sélectionné avec " + nombreIA4Joueurs + " IA");
-        }
-
-        System.out.println("Configuration des joueurs :");
-        if (nombreJoueurs == 2) {
-            System.out.println("Joueur 1 - Humain");
-            System.out.println("Joueur 2 - " + (isVsAI ? "IA" : "Humain"));
-        } else {
-            for (int i = 1; i <= 4; i++) {
-                boolean isAI = i > (4 - nombreIA4Joueurs);
-                System.out.println("Joueur " + i + " - " + (isAI ? "IA" : "Humain"));
-            }
-        }
+        try {
+            logGameStartInfo();
 
         double windowWidth = screenWidth;
         double windowHeight = screenHeight;
@@ -279,16 +391,54 @@ public class JeuQuoridor extends Application {
         currentGameController = controleur;
         
         Scene sceneJeu = new Scene(gameRoot, windowWidth, windowHeight);
-        sceneJeu.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
-        sceneJeu.setOnKeyPressed(e -> handleKeyPress(e));
         
-        currentGameScene = sceneJeu;
+            // Application sécurisée des styles
+            applySafeGameStyles(sceneJeu);
         
+            sceneJeu.setOnKeyPressed(e -> handleKeyPress(e));
+            currentGameScene = sceneJeu;
         primaryStage.setScene(sceneJeu);
         
         applySavedResolution();
         System.out.println("Jeu démarré avec la résolution : " + primaryStage.getWidth() + "x" + primaryStage.getHeight());
         
+            // Application du fond d'écran
+            applyGameBackground(preserveCurrentBackground);
+            
+            // Création du plateau
+            createGamePlateau();
+            
+            controleur.setupPlateauAndDisplay(plateau);
+            
+            // Démarrage de la musique si pas en mode sécurisé
+            if (!safeMode) {
+                startGlobalMusic(true);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Erreur lors du démarrage du jeu: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    /**
+     * Applique les styles de jeu de manière sécurisée
+     */
+    private static void applySafeGameStyles(Scene sceneJeu) {
+        try {
+            String gameCSS = JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm();
+            sceneJeu.getStylesheets().add(gameCSS);
+        } catch (Exception e) {
+            System.err.println("Impossible de charger les styles de jeu: " + e.getMessage());
+            // Continuer sans styles si nécessaire
+        }
+    }
+    
+    /**
+     * Applique le fond d'écran du jeu
+     */
+    private static void applyGameBackground(String preserveCurrentBackground) {
         try {
             String backgroundToApply;
             if (preserveCurrentBackground != null && !preserveCurrentBackground.isEmpty()) {
@@ -307,7 +457,12 @@ public class JeuQuoridor extends Application {
         } catch (Exception e) {
             System.err.println("Impossible d'appliquer le fond : " + e.getMessage());
         }
+        }
         
+    /**
+     * Crée le plateau de jeu selon la configuration
+     */
+    private static void createGamePlateau() {
         if (nombreJoueurs == 2) {
             if (isVsAI) {
                 plateau = new Plateau(22, 1);
@@ -317,106 +472,410 @@ public class JeuQuoridor extends Application {
         } else {
             plateau = new Plateau(4, nombreIA4Joueurs);
         }
-        
-        controleur.setupPlateauAndDisplay(plateau);
-        
-        startGlobalMusic(true);
     }
     
-    // Redémarre la partie en cours
-    public static void restartCurrentGame() {
-        try {
-            System.out.println("Redémarrage de la partie en cours...");
-            
-            String preserveBackground = currentBackgroundFileName;
-            if (preserveBackground != null && !preserveBackground.isEmpty()) {
-                System.out.println("Préservation du fond actuel : " + preserveBackground);
-                startGame(preserveBackground);
+    /**
+     * Affiche les informations de démarrage du jeu
+     */
+    private static void logGameStartInfo() {
+        System.out.println("=== DÉMARRAGE DU JEU ===");
+        if (nombreJoueurs == 2) {
+            System.out.println("Mode: " + (isVsAI ? "1 VS 1 IA" : "1 VS 1 Humain"));
+        } else {
+            System.out.println("Mode: 4 joueurs avec " + nombreIA4Joueurs + " IA");
+        }
+
+        System.out.println("Configuration des joueurs :");
+        if (nombreJoueurs == 2) {
+            System.out.println("Joueur 1 - Humain");
+            System.out.println("Joueur 2 - " + (isVsAI ? "IA" : "Humain"));
             } else {
-                System.out.println("Aucun fond à préserver, utilisation du comportement par défaut");
-                startGame(null);
+            for (int i = 1; i <= 4; i++) {
+                boolean isAI = i > (4 - nombreIA4Joueurs);
+                System.out.println("Joueur " + i + " - " + (isAI ? "IA" : "Humain"));
+            }
+        }
+        System.out.println("=======================");
+    }
+
+    // Initialise la musique de fond globale - Version sécurisée
+    public static void initializeGlobalMusic() {
+        if (safeMode) {
+            System.out.println("Musique désactivée en mode sécurisé");
+            return;
+        }
+        
+        try {
+            if (globalBackgroundMusic != null) {
+                globalBackgroundMusic.stop();
+                globalBackgroundMusic.dispose();
+                System.out.println("Musique globale précédente libérée");
+            }
+            
+            String currentSong = musicPlaylist[currentSongIndex];
+            URL musicResource = JeuQuoridor.class.getResource("/com/dryt/quoridor/sounds/" + currentSong);
+            
+            if (musicResource == null) {
+                System.err.println("Fichier musical introuvable: " + currentSong);
+                return;
+            }
+            
+            String musicPath = musicResource.toExternalForm();
+            Media music = new Media(musicPath);
+            globalBackgroundMusic = new MediaPlayer(music);
+            
+            globalBackgroundMusic.setVolume(savedMusicVolume);
+            globalBackgroundMusic.setAutoPlay(false);
+            
+            globalBackgroundMusic.setOnEndOfMedia(() -> {
+                advanceToNextSong();
+            });
+            
+            globalBackgroundMusic.setOnError(() -> {
+                System.err.println("Erreur de lecture musicale: " + globalBackgroundMusic.getError());
+            });
+            
+            System.out.println("Musique de fond globale initialisée : " + currentSong);
+        } catch (Exception e) {
+            System.err.println("Échec de l'initialisation de la musique globale : " + e.getMessage());
+            // Continuer sans musique
+        }
+    }
+    
+    // Passe à la chanson suivante
+    private static void advanceToNextSong() {
+        currentSongIndex = (currentSongIndex + 1) % musicPlaylist.length;
+        System.out.println("Passage à la chanson suivante : " + musicPlaylist[currentSongIndex]);
+        
+        boolean wasPlaying = (globalBackgroundMusic != null && globalBackgroundMusic.getStatus() == MediaPlayer.Status.PLAYING);
+        initializeGlobalMusic();
+        if (wasPlaying && !isMusicMuted) {
+            globalBackgroundMusic.play();
+        }
+    }
+    
+    // Démarre la musique de fond
+    public static void startGlobalMusic() {
+        startGlobalMusic(false);
+    }
+    
+    // Démarre la musique de fond avec option nouvelle partie
+    public static void startGlobalMusic(boolean isNewGame) {
+        if (isNewGame) {
+            currentSongIndex = (currentSongIndex + 1) % musicPlaylist.length;
+            System.out.println("Nouvelle partie - changement vers : " + musicPlaylist[currentSongIndex]);
+            initializeGlobalMusic();
+        }
+        
+        if (globalBackgroundMusic != null && !isMusicMuted) {
+            try {
+                globalBackgroundMusic.play();
+                System.out.println("Musique de fond globale démarrée : " + musicPlaylist[currentSongIndex]);
+        } catch (Exception e) {
+                System.err.println("Échec du démarrage de la musique globale : " + e.getMessage());
+            }
+        }
+    }
+    
+    // Arrête la musique de fond
+    public static void stopGlobalMusic() {
+        if (globalBackgroundMusic != null) {
+            try {
+                globalBackgroundMusic.stop();
+                System.out.println("Musique de fond globale arrêtée");
+        } catch (Exception e) {
+                System.err.println("Échec de l'arrêt de la musique globale : " + e.getMessage());
+            }
+        }
+    }
+    
+    // Met en pause la musique de fond
+    public static void pauseGlobalMusic() {
+        if (globalBackgroundMusic != null) {
+            try {
+                globalBackgroundMusic.pause();
+                System.out.println("Musique de fond globale mise en pause");
+        } catch (Exception e) {
+                System.err.println("Échec de la mise en pause de la musique globale : " + e.getMessage());
+            }
+        }
+    }
+    
+    // Définit le volume de la musique
+    public static void setGlobalMusicVolume(double volume) {
+        savedMusicVolume = volume;
+        if (globalBackgroundMusic != null && !isMusicMuted) {
+            globalBackgroundMusic.setVolume(volume);
+        }
+    }
+    
+    // Bascule la sourdine de la musique
+    public static void toggleGlobalMusicMute() {
+        isMusicMuted = !isMusicMuted;
+        if (globalBackgroundMusic != null) {
+            globalBackgroundMusic.setVolume(isMusicMuted ? 0.0 : savedMusicVolume);
+        }
+        System.out.println("Musique globale en sourdine : " + isMusicMuted);
+    }
+    
+    // Retourne si la musique est en sourdine
+    public static boolean isGlobalMusicMuted() {
+        return isMusicMuted;
+    }
+    
+    // Retourne le volume de la musique
+    public static double getGlobalMusicVolume() {
+        return savedMusicVolume;
+    }
+
+    // Retourne si le fond a été préservé
+    public static boolean wasBackgroundPreserved() {
+        return backgroundWasPreserved;
+    }
+    
+    // Réinitialise le drapeau de préservation du fond
+    public static void resetBackgroundPreservedFlag() {
+        backgroundWasPreserved = false;
+    }
+
+    // Déclenche le redimensionnement du plateau
+    public static void triggerGameBoardResize() {
+        if (currentGameController != null) {
+            PauseTransition delay = new PauseTransition(Duration.millis(150));
+            delay.setOnFinished(e -> {
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        System.out.println("Déclenchement du redimensionnement du plateau après changement de résolution");
+                        currentGameController.triggerBoardResize();
+                    } catch (Exception ex) {
+                        System.err.println("Erreur lors du redimensionnement du plateau : " + ex.getMessage());
+                        ex.printStackTrace();
+                    }
+                });
+            });
+            delay.play();
+        }
+    }
+
+    // Retourne si l'application est en mode sécurisé
+    public static boolean isSafeMode() {
+        return safeMode;
+    }
+    
+    // Retourne si l'application est en mode standalone
+    public static boolean isStandaloneMode() {
+        return standaloneMode;
+    }
+
+    // Point d'entrée principal de l'application - Version améliorée
+    public static void main(String[] args) {
+        try {
+            System.out.println("🎮 Démarrage de Quoridor...");
+            
+            // Vérification des arguments spéciaux
+            boolean hasSpecialArgs = Arrays.asList(args).stream()
+                .anyMatch(arg -> arg.startsWith("--") || arg.startsWith("-"));
+            
+            if (hasSpecialArgs) {
+                System.out.println("Arguments spéciaux détectés: " + Arrays.toString(args));
+            }
+            
+            // Tentative de lancement standard JavaFX
+            launch(args);
+            
+        } catch (IllegalStateException e) {
+            if (e.getMessage() != null && e.getMessage().contains("Application launch must not be called more than once")) {
+                System.err.println("Application déjà lancée, ignoring additional launch attempt");
+                return;
+            }
+            
+            System.err.println("Erreur IllegalStateException: " + e.getMessage());
+            handleAlternativeLaunch(args);
+            
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof UnsupportedOperationException && 
+                e.getMessage() != null && e.getMessage().contains("JavaFX")) {
+                System.err.println("JavaFX non supporté dans cet environnement");
+                System.exit(1);
+            }
+            
+            System.err.println("Erreur RuntimeException lors du lancement: " + e.getMessage());
+            handleAlternativeLaunch(args);
+            
+        } catch (Exception e) {
+            System.err.println("Erreur générale lors du lancement: " + e.getMessage());
+            e.printStackTrace();
+            handleAlternativeLaunch(args);
+        }
+    }
+    
+    /**
+     * Gère les méthodes de lancement alternatives
+     */
+    private static void handleAlternativeLaunch(String[] args) {
+        try {
+            System.out.println("🔄 Tentative de lancement alternatif...");
+            
+            // Vérifier si nous pouvons créer un nouveau thread d'application
+            Thread launchThread = new Thread(() -> {
+                try {
+                    Application.launch(JeuQuoridor.class, args);
+                } catch (Exception e) {
+                    System.err.println("Échec du lancement dans nouveau thread: " + e.getMessage());
+                }
+            });
+            
+            launchThread.setDaemon(false);
+            launchThread.start();
+            launchThread.join();
+            
+        } catch (Exception e2) {
+            System.err.println("💥 Tous les méthodes de lancement ont échoué: " + e2.getMessage());
+            e2.printStackTrace();
+            
+            // Message d'erreur final pour l'utilisateur
+            showCriticalErrorMessage();
+            System.exit(1);
+        }
+    }
+    
+    /**
+     * Affiche un message d'erreur critique
+     */
+    private static void showCriticalErrorMessage() {
+        System.err.println("\n" + "=".repeat(60));
+        System.err.println("         IMPOSSIBLE DE DÉMARRER QUORIDOR");
+        System.err.println("=".repeat(60));
+        System.err.println("Le système JavaFX n'a pas pu être initialisé.");
+        System.err.println("\nSolutions possibles:");
+        System.err.println("1. Redémarrer l'application");
+        System.err.println("2. Redémarrer votre ordinateur");
+        System.err.println("3. Exécuter en tant qu'administrateur");
+        System.err.println("4. Vérifier que Java est correctement installé");
+        System.err.println("5. Mettre à jour vos pilotes graphiques");
+        System.err.println("=".repeat(60));
+        
+        // Pause pour laisser le temps de lire
+        try {
+            System.err.println("\nAppuyez sur Entrée pour fermer...");
+            System.in.read();
+        } catch (Exception ignored) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ignored2) {}
+        }
+    }
+
+    // Met à jour le fond du jeu
+    public static void updateGameBackground(String backgroundFileName) {
+        try {
+            if (backgroundFileName != null && backgroundFileName.equals(currentBackgroundFileName) && !backgroundWasPreserved) {
+                System.out.println("Fond déjà chargé : " + backgroundFileName + " - mise à jour ignorée");
+                return;
+            }
+            
+            if (currentGameScene != null) {
+                currentGameScene.getStylesheets().clear();
+                
+                currentGameScene.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
+                
+                if (currentGameScene.getRoot() != null) {
+                    String backgroundUrl = JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/background/" + backgroundFileName).toExternalForm();
+                    
+                    String backgroundSize = determineBestBackgroundSize(backgroundFileName);
+                    
+                    String optimizations = "";
+                    if (backgroundFileName.toLowerCase().endsWith(".gif")) {
+                        optimizations = "-fx-effect: null; ";
+                    }
+                    
+                    currentGameScene.getRoot().setStyle(
+                        String.format("-fx-background-image: url('%s'); " +
+                                      "-fx-background-size: %s; " +
+                                      "-fx-background-position: center center; " +
+                                      "-fx-background-repeat: no-repeat; " +
+                                      "-fx-background-color: #2B3A4A; " +
+                                      "%s",
+                                      backgroundUrl, backgroundSize, optimizations)
+                    );
+                }
+                
+                currentBackgroundFileName = backgroundFileName;
+                
+                if (backgroundWasPreserved) {
+                    backgroundWasPreserved = false;
+                    System.out.println("Fond préservé et appliqué avec succès : " + backgroundFileName + " - drapeau réinitialisé");
+                } else {
+                    System.out.println("Fond du jeu mis à jour vers : " + backgroundFileName + " avec dimensionnement optimal");
+                }
             }
         } catch (Exception e) {
-            System.err.println("Échec du redémarrage : " + e.getMessage());
-            e.printStackTrace();
-            goMenu();
-        }
-    }
-    
-    // Retourne le fond actuel du jeu
-    public static String getCurrentGameBackground() {
-        return currentBackgroundFileName;
-    }
-
-    // Retourne au menu principal
-    public static void goMenu() {
-        primaryStage.setScene(sceneMenu);
-    }
-
-    // Ouvre les options depuis le menu
-    public static void goOptions() {
-        optionsPreviousContext = "menu";
-        primaryStage.setScene(sceneOptions);
-    }
-    
-    // Ouvre les options depuis le jeu
-    public static void goOptionsFromGame() {
-        optionsPreviousContext = "game";
-        primaryStage.setScene(sceneOptions);
-    }
-    
-    // Retourne le contexte précédent des options
-    public static String getOptionsPreviousContext() {
-        return optionsPreviousContext;
-    }
-
-    // Ouvre l'écran de choix des joueurs
-    public static void goChoixJoueurs() {
-        primaryStage.setScene(sceneChoixJoueurs);
-    }
-
-    // Ouvre l'écran de choix des skins
-    public static void goChoixSkins() {
-        try {
-            FXMLLoader loader = new FXMLLoader(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/choix_skins.fxml"));
-            Parent skinsRoot = loader.load();
-
-            Scene sceneSkins = new Scene(skinsRoot, screenWidth, screenHeight);
-            sceneSkins.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
-            sceneSkins.setOnKeyPressed(e -> handleKeyPress(e));
-            primaryStage.setScene(sceneSkins);
-        } catch (Exception e) {
+            System.err.println("Erreur lors de la mise à jour du fond : " + e.getMessage());
             e.printStackTrace();
         }
     }
-
-    // Ouvre l'écran de choix de difficulté IA
-    public static void goChoixDifficulteIA() {
-        try {
-            FXMLLoader loader = new FXMLLoader(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/choix_difficulte_ia.fxml"));
-            Parent difficulteRoot = loader.load();
-
-            Scene sceneDifficulte = new Scene(difficulteRoot, screenWidth, screenHeight);
-            sceneDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
-            sceneDifficulte.setOnKeyPressed(e -> handleKeyPress(e));
-            primaryStage.setScene(sceneDifficulte);
-        } catch (Exception e) {
-            e.printStackTrace();
+    
+    // Détermine la meilleure taille pour le fond
+    private static String determineBestBackgroundSize(String backgroundFileName) {
+        String extension = backgroundFileName.toLowerCase();
+        
+        double screenAspectRatio = screenWidth / screenHeight;
+        
+        if (extension.endsWith(".gif")) {
+            if (screenAspectRatio > 1.8) {
+                return "100% auto";
+            } else if (screenAspectRatio < 1.5) {
+                return "auto 100%";
+            } else {
+                return "cover";
+            }
+        } else if (extension.endsWith(".png")) {
+            return "contain";
+        } else {
+            return "cover";
         }
     }
+    
+    // Retourne les styles CSS de base du jeu
+    private static String getBaseGameCSS() {
+        return """
+            .board-container {
+                -fx-background-color: rgba(20, 20, 30, 0.3);
+                -fx-border-color: rgba(100, 100, 120, 0.8);
+                -fx-border-width: 3;
+                -fx-background-radius: 15;
+                -fx-border-radius: 15;
+                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 10, 0.6, 2, 2),
+                            innershadow(gaussian, rgba(60,60,80,0.4), 6, 0.4, 0, 0);
+                -fx-opacity: 1;
+            }
+            """;
+    }
 
-    // Ouvre l'écran de choix du nombre d'IA
-    public static void goChoixNbIADifficulte() {
+    // Applique la résolution sauvegardée
+    private static void applySavedResolution() {
         try {
-            FXMLLoader loader = new FXMLLoader(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/choix_nb_ia_difficulte.fxml"));
-            Parent nbDifficulteRoot = loader.load();
-
-            Scene sceneNbDifficulte = new Scene(nbDifficulteRoot, screenWidth, screenHeight);
-            sceneNbDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
-            sceneNbDifficulte.setOnKeyPressed(e -> handleKeyPress(e));
-            primaryStage.setScene(sceneNbDifficulte);
+            String savedResolution = com.dryt.quoridor.utils.UserPreferences.getSelectedResolution();
+            System.out.println("Application de la résolution sauvegardée : " + savedResolution);
+            
+            if ("Dynamique".equals(savedResolution)) {
+                primaryStage.setMaximized(true);
+                isMaximized = true;
+            } else {
+                String[] parts = savedResolution.split("x");
+                if (parts.length == 2) {
+                    double width = Double.parseDouble(parts[0]);
+                    double height = Double.parseDouble(parts[1]);
+                    setResolution(width, height, false);
+                } else {
+                    primaryStage.setMaximized(true);
+                    isMaximized = true;
+                }
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Erreur lors de l'application de la résolution sauvegardée, utilisation par défaut : " + e.getMessage());
+            primaryStage.setMaximized(true);
+            isMaximized = true;
         }
     }
 
@@ -538,282 +997,5 @@ public class JeuQuoridor extends Application {
     // Retourne la scène de jeu actuelle
     public static Scene getCurrentGameScene() {
         return currentGameScene;
-    }
-
-    // Met à jour le fond du jeu
-    public static void updateGameBackground(String backgroundFileName) {
-        try {
-            if (backgroundFileName != null && backgroundFileName.equals(currentBackgroundFileName) && !backgroundWasPreserved) {
-                System.out.println("Fond déjà chargé : " + backgroundFileName + " - mise à jour ignorée");
-                return;
-            }
-            
-            if (currentGameScene != null) {
-                currentGameScene.getStylesheets().clear();
-                
-                currentGameScene.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
-                
-                if (currentGameScene.getRoot() != null) {
-                    String backgroundUrl = JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/background/" + backgroundFileName).toExternalForm();
-                    
-                    String backgroundSize = determineBestBackgroundSize(backgroundFileName);
-                    
-                    String optimizations = "";
-                    if (backgroundFileName.toLowerCase().endsWith(".gif")) {
-                        optimizations = "-fx-effect: null; ";
-                    }
-                    
-                    currentGameScene.getRoot().setStyle(
-                        String.format("-fx-background-image: url('%s'); " +
-                                      "-fx-background-size: %s; " +
-                                      "-fx-background-position: center center; " +
-                                      "-fx-background-repeat: no-repeat; " +
-                                      "-fx-background-color: #2B3A4A; " +
-                                      "%s",
-                                      backgroundUrl, backgroundSize, optimizations)
-                    );
-                }
-                
-                currentBackgroundFileName = backgroundFileName;
-                
-                if (backgroundWasPreserved) {
-                    backgroundWasPreserved = false;
-                    System.out.println("Fond préservé et appliqué avec succès : " + backgroundFileName + " - drapeau réinitialisé");
-                } else {
-                    System.out.println("Fond du jeu mis à jour vers : " + backgroundFileName + " avec dimensionnement optimal");
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la mise à jour du fond : " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
-    // Détermine la meilleure taille pour le fond
-    private static String determineBestBackgroundSize(String backgroundFileName) {
-        String extension = backgroundFileName.toLowerCase();
-        
-        double screenAspectRatio = screenWidth / screenHeight;
-        
-        if (extension.endsWith(".gif")) {
-            if (screenAspectRatio > 1.8) {
-                return "100% auto";
-            } else if (screenAspectRatio < 1.5) {
-                return "auto 100%";
-            } else {
-                return "cover";
-            }
-        } else if (extension.endsWith(".png")) {
-            return "contain";
-        } else {
-            return "cover";
-        }
-    }
-    
-    // Retourne les styles CSS de base du jeu
-    private static String getBaseGameCSS() {
-        return """
-            .board-container {
-                -fx-background-color: rgba(20, 20, 30, 0.3);
-                -fx-border-color: rgba(100, 100, 120, 0.8);
-                -fx-border-width: 3;
-                -fx-background-radius: 15;
-                -fx-border-radius: 15;
-                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 10, 0.6, 2, 2),
-                            innershadow(gaussian, rgba(60,60,80,0.4), 6, 0.4, 0, 0);
-                -fx-opacity: 1;
-            }
-            """;
-    }
-
-    // Applique la résolution sauvegardée
-    private static void applySavedResolution() {
-        try {
-            String savedResolution = com.dryt.quoridor.utils.UserPreferences.getSelectedResolution();
-            System.out.println("Application de la résolution sauvegardée : " + savedResolution);
-            
-            if ("Dynamique".equals(savedResolution)) {
-                primaryStage.setMaximized(true);
-                isMaximized = true;
-            } else {
-                String[] parts = savedResolution.split("x");
-                if (parts.length == 2) {
-                    double width = Double.parseDouble(parts[0]);
-                    double height = Double.parseDouble(parts[1]);
-                    setResolution(width, height, false);
-                } else {
-                    primaryStage.setMaximized(true);
-                    isMaximized = true;
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Erreur lors de l'application de la résolution sauvegardée, utilisation par défaut : " + e.getMessage());
-            primaryStage.setMaximized(true);
-            isMaximized = true;
-        }
-    }
-
-    // Point d'entrée principal de l'application
-    public static void main(String[] args) {
-        try {
-            // Tentative de lancement standard JavaFX
-            launch(args);
-        } catch (Exception e) {
-            System.err.println("Erreur lors du lancement de l'application JavaFX: " + e.getMessage());
-            e.printStackTrace();
-            
-            // Tentative alternative pour les environnements jpackage
-            try {
-                System.out.println("Tentative de lancement alternatif...");
-                Application.launch(JeuQuoridor.class, args);
-            } catch (Exception e2) {
-                System.err.println("Échec du lancement alternatif: " + e2.getMessage());
-                e2.printStackTrace();
-                System.exit(1);
-            }
-        }
-    }
-
-    // Initialise la musique de fond globale
-    public static void initializeGlobalMusic() {
-        try {
-            if (globalBackgroundMusic != null) {
-                globalBackgroundMusic.stop();
-                globalBackgroundMusic.dispose();
-                System.out.println("Musique globale précédente libérée");
-            }
-            
-            String currentSong = musicPlaylist[currentSongIndex];
-            String musicPath = JeuQuoridor.class.getResource("/com/dryt/quoridor/sounds/" + currentSong).toExternalForm();
-            Media music = new Media(musicPath);
-            globalBackgroundMusic = new MediaPlayer(music);
-            
-            globalBackgroundMusic.setVolume(savedMusicVolume);
-            globalBackgroundMusic.setAutoPlay(false);
-            
-            globalBackgroundMusic.setOnEndOfMedia(() -> {
-                advanceToNextSong();
-            });
-            
-            System.out.println("Musique de fond globale initialisée : " + currentSong);
-        } catch (Exception e) {
-            System.err.println("Échec de l'initialisation de la musique globale : " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
-    // Passe à la chanson suivante
-    private static void advanceToNextSong() {
-        currentSongIndex = (currentSongIndex + 1) % musicPlaylist.length;
-        System.out.println("Passage à la chanson suivante : " + musicPlaylist[currentSongIndex]);
-        
-        boolean wasPlaying = (globalBackgroundMusic != null && globalBackgroundMusic.getStatus() == MediaPlayer.Status.PLAYING);
-        initializeGlobalMusic();
-        if (wasPlaying && !isMusicMuted) {
-            globalBackgroundMusic.play();
-        }
-    }
-    
-    // Démarre la musique de fond
-    public static void startGlobalMusic() {
-        startGlobalMusic(false);
-    }
-    
-    // Démarre la musique de fond avec option nouvelle partie
-    public static void startGlobalMusic(boolean isNewGame) {
-        if (isNewGame) {
-            currentSongIndex = (currentSongIndex + 1) % musicPlaylist.length;
-            System.out.println("Nouvelle partie - changement vers : " + musicPlaylist[currentSongIndex]);
-            initializeGlobalMusic();
-        }
-        
-        if (globalBackgroundMusic != null && !isMusicMuted) {
-            try {
-                globalBackgroundMusic.play();
-                System.out.println("Musique de fond globale démarrée : " + musicPlaylist[currentSongIndex]);
-            } catch (Exception e) {
-                System.err.println("Échec du démarrage de la musique globale : " + e.getMessage());
-            }
-        }
-    }
-    
-    // Arrête la musique de fond
-    public static void stopGlobalMusic() {
-        if (globalBackgroundMusic != null) {
-            try {
-                globalBackgroundMusic.stop();
-                System.out.println("Musique de fond globale arrêtée");
-            } catch (Exception e) {
-                System.err.println("Échec de l'arrêt de la musique globale : " + e.getMessage());
-            }
-        }
-    }
-    
-    // Met en pause la musique de fond
-    public static void pauseGlobalMusic() {
-        if (globalBackgroundMusic != null) {
-            try {
-                globalBackgroundMusic.pause();
-                System.out.println("Musique de fond globale mise en pause");
-            } catch (Exception e) {
-                System.err.println("Échec de la mise en pause de la musique globale : " + e.getMessage());
-            }
-        }
-    }
-    
-    // Définit le volume de la musique
-    public static void setGlobalMusicVolume(double volume) {
-        savedMusicVolume = volume;
-        if (globalBackgroundMusic != null && !isMusicMuted) {
-            globalBackgroundMusic.setVolume(volume);
-        }
-    }
-    
-    // Bascule la sourdine de la musique
-    public static void toggleGlobalMusicMute() {
-        isMusicMuted = !isMusicMuted;
-        if (globalBackgroundMusic != null) {
-            globalBackgroundMusic.setVolume(isMusicMuted ? 0.0 : savedMusicVolume);
-        }
-        System.out.println("Musique globale en sourdine : " + isMusicMuted);
-    }
-    
-    // Retourne si la musique est en sourdine
-    public static boolean isGlobalMusicMuted() {
-        return isMusicMuted;
-    }
-    
-    // Retourne le volume de la musique
-    public static double getGlobalMusicVolume() {
-        return savedMusicVolume;
-    }
-
-    // Retourne si le fond a été préservé
-    public static boolean wasBackgroundPreserved() {
-        return backgroundWasPreserved;
-    }
-    
-    // Réinitialise le drapeau de préservation du fond
-    public static void resetBackgroundPreservedFlag() {
-        backgroundWasPreserved = false;
-    }
-
-    // Déclenche le redimensionnement du plateau
-    public static void triggerGameBoardResize() {
-        if (currentGameController != null) {
-            PauseTransition delay = new PauseTransition(Duration.millis(150));
-            delay.setOnFinished(e -> {
-                javafx.application.Platform.runLater(() -> {
-                    try {
-                        System.out.println("Déclenchement du redimensionnement du plateau après changement de résolution");
-                        currentGameController.triggerBoardResize();
-                    } catch (Exception ex) {
-                        System.err.println("Erreur lors du redimensionnement du plateau : " + ex.getMessage());
-                        ex.printStackTrace();
-                    }
-                });
-            });
-            delay.play();
-        }
     }
 }
