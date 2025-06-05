@@ -111,15 +111,16 @@ public class ControleurJeu {
     private PauseTransition resizeDebounceTimer;
     private boolean isResizing = false;
 
+    // Initialise l'interface du jeu et ses composants
     @FXML
     private void initialize() {
-        System.out.println("🎮 ControleurJeu.initialize() called");
+        System.out.println("Initialisation du contrôleur de jeu");
         cellButtons = new Button[GameConstants.BOARD_SIZE][GameConstants.BOARD_SIZE];
         aiStrategies = new HashMap<>();
 
         // Wait for plateau to be set up via setupPlateauAndDisplay
         javafx.application.Platform.runLater(() -> {
-            System.out.println("🎮 Platform.runLater executing...");
+            System.out.println("Exécution des initialisations différées");
             loadCSS();
             setBoardContainerSize();
             createGameBoard();
@@ -132,99 +133,96 @@ public class ControleurJeu {
         });
     }
     
+    // Configure les contrôles de volume
     private void setupVolumeControls() {
-        System.out.println("🎵 setupVolumeControls() called");
-        System.out.println("🎵 volumeButton: " + volumeButton);
-        System.out.println("🎵 volumeSlider: " + volumeSlider);
+        System.out.println("Configuration des contrôles de volume");
+        System.out.println("Bouton volume : " + volumeButton);
+        System.out.println("Curseur volume : " + volumeSlider);
         
         if (volumeSlider != null) {
-            // Initialize volume slider with global music volume
             volumeSlider.setMin(0.0);
             volumeSlider.setMax(1.0);
             volumeSlider.setValue(JeuQuoridor.getGlobalMusicVolume());
             
-            // Add listener for volume changes
+            // Add listener for volume change
             volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
                 JeuQuoridor.setGlobalMusicVolume(newValue.doubleValue());
-                updateVolumeButtonIcon(); // Update icon when volume changes
+                updateVolumeButtonIcon(); 
             });
-            System.out.println("🎵 Volume slider initialized with global music");
+            System.out.println("Curseur de volume initialisé avec le volume global");
         } else {
-            System.out.println("❌ Volume slider is null!");
+            System.out.println("Erreur : Curseur de volume non initialisé");
         }
         
         if (volumeButton != null) {
-            // Force initial icon update
-            System.out.println("🎵 Setting up volume button with initial icon...");
+            System.out.println("Configuration de l'icône du bouton volume");
             updateVolumeButtonIcon();
         } else {
-            System.out.println("❌ Volume button is null!");
+            System.out.println("Erreur : Bouton de volume non initialisé");
         }
     }
     
+    // Bascule l'état du volume
     @FXML
     private void onVolumeToggle() {
         JeuQuoridor.toggleGlobalMusicMute();
         updateVolumeButtonIcon();
-        System.out.println("🎵 Volume toggled - Muted: " + JeuQuoridor.isGlobalMusicMuted());
+        System.out.println("Volume basculé - Muet : " + JeuQuoridor.isGlobalMusicMuted());
     }
     
+    // Met à jour l'icône du bouton volume
     private void updateVolumeButtonIcon() {
         if (volumeButton != null) {
-            // Clear existing style classes
             volumeButton.getStyleClass().removeAll("volume-button-sound", "volume-button-mute");
             
             if (JeuQuoridor.isGlobalMusicMuted() || JeuQuoridor.getGlobalMusicVolume() == 0.0) {
                 volumeButton.getStyleClass().add("volume-button-mute");
-                System.out.println("🎵 Applied mute icon");
+                System.out.println("Icône muet appliquée");
             } else {
                 volumeButton.getStyleClass().add("volume-button-sound");
-                System.out.println("🎵 Applied sound icon");
+                System.out.println("Icône son appliquée");
             }
         }
     }
     
+    // Définit la taille du conteneur du plateau
     private void setBoardContainerSize() {
         if (boardContainer != null) {
-            // Calculate the actual board size
             double boardWidth = 2 * offsetX + 9 * cellSize + 8 * wallSize;  // 538px
             double boardHeight = 2 * offsetY + 9 * cellSize + 8 * wallSize; // 538px
             
-            // Set board pane to exact content size
             boardPane.setPrefSize(boardWidth, boardHeight);
             boardPane.setMinSize(boardWidth, boardHeight);
             boardPane.setMaxSize(boardWidth, boardHeight);
             
-            // Set container size much closer to game size (minimal padding)
-            double containerPadding = 4; // Réduit de 10 à 4
+            double containerPadding = 4; 
             double containerSize = boardWidth + (2 * containerPadding);
             
             boardContainer.setPrefSize(containerSize, containerSize);
             boardContainer.setMinSize(containerSize, containerSize);
             boardContainer.setMaxSize(containerSize, containerSize);
             
-            System.out.println("🎯 Board pane sized to: " + boardWidth + "x" + boardHeight);
-            System.out.println("🎯 Board container sized to: " + containerSize + "x" + containerSize);
+            System.out.println("Taille du plateau : " + boardWidth + "x" + boardHeight);
+            System.out.println("Taille du conteneur : " + containerSize + "x" + containerSize);
         }
     }
     
+    // Charge les styles CSS
     private void loadCSS() {
         try {
-            // Add CSS programmatically as backup
             String cssPath = getClass().getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm();
             boardPane.getScene().getStylesheets().add(cssPath);
-            System.out.println("✅ CSS loaded: " + cssPath);
+            System.out.println("CSS chargé : " + cssPath);
         } catch (Exception e) {
-            System.out.println("❌ Failed to load CSS: " + e.getMessage());
+            System.out.println("Échec du chargement CSS : " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    // Crée le plateau de jeu
     private void createGameBoard() {
-        // Clear existing board
         boardPane.getChildren().clear();
 
-        // Use scaled dimensions
         double scaledCellSize = GameConstants.CELL_SIZE * scaleFactor;
         double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
         double scaledOffsetX = GameConstants.OFFSET_X * scaleFactor;
@@ -240,11 +238,10 @@ public class ControleurJeu {
                 cell.setMinSize(scaledCellSize, scaledCellSize);
                 cell.setMaxSize(scaledCellSize, scaledCellSize);
                 
-                // Appliquer le style de la cellule
                 if ((x + y) % 2 == 0) {
-                    cell.getStyleClass().add("cell");        // Light cells
+                    cell.getStyleClass().add("cell");        
                 } else {
-                    cell.getStyleClass().add("cell-dark");   // Dark cells
+                    cell.getStyleClass().add("cell-dark");   
                 }
                 
                 // Centrer le contenu de la cellule
@@ -270,9 +267,10 @@ public class ControleurJeu {
             }
         }
         
-        System.out.println("🎯 Board creation completed with scale factor: " + scaleFactor);
+        System.out.println("Création du plateau terminée avec facteur d'échelle : " + scaleFactor);
     }
 
+    // Configure le plateau et affiche l'interface
     public void setupPlateauAndDisplay(Plateau plateau) {
         this.plateau = plateau;
         
@@ -307,6 +305,7 @@ public class ControleurJeu {
         });
     }
 
+    // Crée un emplacement pour un mur
     private void createWallPlaceholder(double x, double y, int wx, int wy, boolean vertical) {
         double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
         double detectorSize = scaledWallSize * 4;
@@ -325,26 +324,23 @@ public class ControleurJeu {
             if (!vertical && wx == 8) effectiveWx = 7;
             if (vertical && wy == 8) effectiveWy = 7;
 
-            // Single comprehensive verification using the plateau's method
             if (!plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)) {
-                // Determine specific error message for user feedback
                 if (plateau.getCurrentPlayer().getWallsRemaining() <= 0) {
-                    showErrorMessage("❌ Plus de murs disponibles");
+                    showErrorMessage("Plus de murs disponibles");
                 } else if (isCrossingWall(effectiveWx, effectiveWy, vertical)) {
-                    showErrorMessage("❌ Croisement de mur interdit");
+                    showErrorMessage("Croisement de mur interdit");
                 } else if (!plateau.allPlayersHaveAPathAfterWall(effectiveWx, effectiveWy, vertical)) {
-                    showErrorMessage("❌ Ce mur bloquerait un joueur complètement");
+                    showErrorMessage("Ce mur bloquerait un joueur complètement");
                 } else if (plateau.isWallOverlapping(effectiveWx, effectiveWy, vertical)) {
-                    showErrorMessage("❌ Chevauchement de mur interdit");
+                    showErrorMessage("Chevauchement de mur interdit");
                 } else if (isWallAlreadyPresent(effectiveWx, effectiveWy, vertical)) {
-                    showErrorMessage("❌ Un mur est déjà présent ici");
+                    showErrorMessage("Un mur est déjà présent ici");
                 } else {
-                    showErrorMessage("❌ Placement de mur invalide");
+                    showErrorMessage("Placement de mur invalide");
                 }
                 return;
             }
 
-            // If we reach here, the wall placement is valid
             if (plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
                 drawWall(effectiveWx, effectiveWy, vertical);
                 switchPlayerTurn();
@@ -353,6 +349,7 @@ public class ControleurJeu {
         boardPane.getChildren().add(wallDetector);
     }
 
+    // Vérifie si un mur est déjà présent
     private boolean isWallAlreadyPresent(int wx, int wy, boolean vertical) {
         for (Mur mur : plateau.getMurs()) {
             if (mur.getX() == wx && mur.getY() == wy && mur.isVertical() == vertical) {
@@ -362,6 +359,7 @@ public class ControleurJeu {
         return false;
     }
 
+    // Vérifie si un mur croise un autre mur
     private boolean isCrossingWall(int wx, int wy, boolean vertical) {
         if (vertical) {
             // Pour un mur vertical, vérifier s'il y a un mur horizontal qui le croise
@@ -374,12 +372,12 @@ public class ControleurJeu {
         }
     }
 
+    // Affiche le mur fantôme lors du survol
     private void showGhostWall(int wx, int wy, boolean vertical) {
         hideGhostWall();
         ghostWall = new Rectangle();
         ghostWall.setMouseTransparent(true);
 
-        // Use scaled dimensions
         double scaledCellSize = GameConstants.CELL_SIZE * scaleFactor;
         double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
         double scaledOffsetX = GameConstants.OFFSET_X * scaleFactor;
@@ -390,7 +388,6 @@ public class ControleurJeu {
         if (!vertical && wx == 8) effectiveWx = 7;
         if (vertical && wy == 8) effectiveWy = 7;
 
-        // Use identical validation logic as click handler
         boolean canPlace = plateau.canPlaceWall(effectiveWx, effectiveWy, vertical);
         boolean invalid = !canPlace;
 
@@ -413,6 +410,7 @@ public class ControleurJeu {
         boardPane.getChildren().add(ghostWall);
     }
 
+    // Cache le mur fantôme
     private void hideGhostWall() {
         if (ghostWall != null) {
             boardPane.getChildren().remove(ghostWall);
@@ -420,8 +418,9 @@ public class ControleurJeu {
         }
     }
 
+    // Dessine un mur sur le plateau
     private void drawWall(int wx, int wy, boolean vertical) {
-        // Use scaled dimensions
+        // Use scaleddimensions
         double scaledCellSize = GameConstants.CELL_SIZE * scaleFactor;
         double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
         double scaledOffsetX = GameConstants.OFFSET_X * scaleFactor;
@@ -441,65 +440,58 @@ public class ControleurJeu {
         }
         wallSegment.getStyleClass().add("wall-placed");
         boardPane.getChildren().add(wallSegment);
-        System.out.println("Mur placé : " + (vertical ? "V" : "H") + " à " + wx + ", " + wy + " (scale: " + scaleFactor + ")");
+        System.out.println("Mur placé : " + (vertical ? "V" : "H") + " à " + wx + ", " + wy + " (échelle : " + scaleFactor + ")");
     }
 
-    /**
-     * Redessine tous les murs existants avec le nouveau facteur d'échelle
-     */
+    //Redessine tous les murs existants avec le nouveau facteur d'échelle
     private void redrawAllWalls() {
         if (plateau != null) {
             for (Mur mur : plateau.getMurs()) {
                 drawWall(mur.getX(), mur.getY(), mur.isVertical());
             }
-            System.out.println("🧱 " + plateau.getMurs().size() + " mur(s) redessiné(s) avec l'échelle " + scaleFactor);
+            System.out.println(plateau.getMurs().size() + " mur(s) redessiné(s) avec l'échelle " + scaleFactor);
         }
     }
 
+    // Gère le clic sur une cellule
     private void onCellClicked(int x, int y) {
-        System.out.println("🖱️ Cell clicked at [" + x + "," + y + "] by player " + plateau.getCurrentPlayer().getId());
+        System.out.println("Cellule cliquée à [" + x + "," + y + "] par le joueur " + plateau.getCurrentPlayer().getId());
         
         if (!cellButtons[x][y].getStyleClass().contains("highlight")) {
-            System.out.println("❌ Cell [" + x + "," + y + "] not highlighted - click ignored");
+            System.out.println("Cellule [" + x + "," + y + "] non surlignée - clic ignoré");
             return;
         }
         
-        System.out.println("✅ Valid move to [" + x + "," + y + "] - executing move");
+        System.out.println("Déplacement valide vers [" + x + "," + y + "] - exécution du mouvement");
         
         if (!plateau.moveCurrentPlayer(x, y)) {
-            System.out.println("❌ Move failed for player " + plateau.getCurrentPlayer().getId());
+            System.out.println("Échec du déplacement pour le joueur " + plateau.getCurrentPlayer().getId());
             return;
         }
 
-        // Check for winner after the move
         Joueur winner = plateau.getWinner();
         if (winner != null) {
-            System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
+            System.out.println("Partie terminée - Vainqueur : Joueur " + winner.getId());
             
-            // Show custom victory popup instead of standard alert
             showVictoryPopup(winner.getId());
             return;
         }
 
-        // Only switch turns if no winner
         switchPlayerTurn();
     }
 
+    // Met à jour l'état du plateau
     private void updateBoardState() {
-        System.out.println("🎮 Updating board state...");
+        System.out.println("Mise à jour de l'état du plateau");
         
-        // Clear only game-specific styles, preserve base cell styling
         for (int y = 0; y < 9; y++) {
             for (int x = 0; x < 9; x++) {
                 cellButtons[x][y].getStyleClass().removeAll("highlight", "player1", "player2", "player3", "player4", "current-player");
-                // Preserve "cell" or "cell-dark" classes for checkerboard pattern
             }
         }
 
-        // Get selected skins
         int[] selectedSkins = JeuQuoridor.getSelectedSkins();
 
-        // Add player styles with appropriate skins
         for (Joueur joueur : plateau.getJoueurs()) {
             int playerIndex = joueur.getId() - 1;
             if (playerIndex >= 0 && playerIndex < selectedSkins.length) {
@@ -510,55 +502,50 @@ public class ControleurJeu {
                 
                 // Ajuster la taille de l'icône en fonction de la taille de la cellule
                 double cellSize = GameConstants.CELL_SIZE * scaleFactor;
-                double iconSize = cellSize * 0.8; // 80% de la taille de la cellule
+                double iconSize = cellSize * 0.8; 
                 cell.setStyle(cell.getStyle() + 
                     String.format("-fx-background-size: %fpx %fpx;", iconSize, iconSize) +
                     "-fx-background-position: center;" +
                     "-fx-background-repeat: no-repeat;");
                 
-                System.out.println("🎭 Added " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
+                System.out.println("Style " + styleClass + " ajouté à la cellule [" + joueur.getX() + "," + joueur.getY() + "]");
                 
-                // Add current player indicator if it's this player's turn
                 if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
                     cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add("current-player");
-                    System.out.println("👑 Added current-player indicator to player " + joueur.getId());
+                    System.out.println("Indicateur de joueur actuel ajouté au joueur " + joueur.getId());
                 }
             } else {
-                // Fallback to default player style
-            String styleClass = "player" + joueur.getId();
+                String styleClass = "player" + joueur.getId();
                 Button cell = cellButtons[joueur.getX()][joueur.getY()];
                 cell.getStyleClass().add(styleClass);
                 
-                // Ajuster la taille de l'icône en fonction de la taille de la cellule
                 double cellSize = GameConstants.CELL_SIZE * scaleFactor;
-                double iconSize = cellSize * 0.8; // 80% de la taille de la cellule
+                double iconSize = cellSize * 0.8;
                 cell.setStyle(cell.getStyle() + 
                     String.format("-fx-background-size: %fpx %fpx;", iconSize, iconSize) +
                     "-fx-background-position: center;" +
                     "-fx-background-repeat: no-repeat;");
                 
-                System.out.println("🎭 Added fallback " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
+                System.out.println("Style par défaut " + styleClass + " ajouté à la cellule [" + joueur.getX() + "," + joueur.getY() + "]");
                 
-                // Add current player indicator if it's this player's turn
                 if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
                     cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add("current-player");
-                    System.out.println("👑 Added current-player indicator to player " + joueur.getId());
+                    System.out.println("Indicateur de joueur actuel ajouté au joueur " + joueur.getId());
                 }
             }
         }
 
-        // Add highlight styles for possible moves
-        System.out.println("Possible moves: ");
+        System.out.println("Mouvements possibles : ");
         for (int[] move : plateau.getPossibleMoves()) {
             System.out.println(Arrays.toString(move));
             cellButtons[move[0]][move[1]].getStyleClass().add("highlight");
-            System.out.println("✨ Added highlight to cell [" + move[0] + "," + move[1] + "]");
+            System.out.println("Surlignage ajouté à la cellule [" + move[0] + "," + move[1] + "]");
         }
 
-        // Update walls remaining display for all players
         updateWallCountDisplay();
     }
 
+    // Met à jour l'affichage du nombre de murs restants
     private void updateWallCountDisplay() {
         StringBuilder wallInfo = new StringBuilder();
         
@@ -572,11 +559,9 @@ public class ControleurJeu {
                 wallInfo.append("\n");
             }
             
-            // Utiliser une largeur fixe avec des espaces pour éviter les déplacements du layout
             String prefix = (joueur.getId() == plateau.getCurrentPlayer().getId()) ? "► " : "  ";
             String suffix = (joueur.getId() == plateau.getCurrentPlayer().getId()) ? " ◄" : "  ";
             
-            // Format fixe : "XX JY: ZZ murs WW" où XX=prefix, Y=id, ZZ=murs, WW=suffix
             wallInfo.append(String.format("%s J%d: %2d murs%s", 
                 prefix, 
                 joueur.getId(), 
@@ -587,6 +572,7 @@ public class ControleurJeu {
         labelMursRestants.setText(wallInfo.toString());
     }
 
+    // Exécute le tour de l'IA
     private void runIA() {
         Joueur currentPlayer = plateau.getCurrentPlayer();
         
@@ -613,68 +599,60 @@ public class ControleurJeu {
              }
         }
 
-        // Check for winner after AI move
         Joueur winner = plateau.getWinner();
         if (winner != null) {
-            System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
+            System.out.println("Partie terminée - Vainqueur : Joueur " + winner.getId());
             
-            // Show custom victory popup instead of standard alert
             showVictoryPopup(winner.getId());
             return;
         }
 
-        // Only switch turns if no winner
         switchPlayerTurn();
     }
 
+    // Vérifie s'il y a un vainqueur
     private void checkForWinner() {
         Joueur winner = plateau.getWinner();
         if (winner != null) {
-            System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
+            System.out.println("Partie terminée - Vainqueur : Joueur " + winner.getId());
             
-            // Show custom victory popup instead of standard alert
             showVictoryPopup(winner.getId());
         }
     }
 
+    // Change le tour du joueur
     private void switchPlayerTurn() {
         plateau.switchPlayerTurn();
         Joueur currentPlayer = plateau.getCurrentPlayer();
         updateBoardState();
 
         if (currentPlayer.isAI()) {
-            // Use appropriate AI delay
             PauseTransition pause = new PauseTransition(Duration.millis(500));
             pause.setOnFinished(e -> runIA());
             pause.play();
         }
     }
     
-    // FXML methods that were missing (restored from interface version)
+    // Ouvre le menu de pause
     @FXML
     private void onOpenMenu() {
-        System.out.println("📋 Opening menu overlay...");
+        System.out.println("Ouverture du menu de pause");
         
-        // Show the menu overlay
         if (menuOverlay != null) {
             menuOverlay.setVisible(true);
             menuOverlay.setManaged(true);
             
-            // Bring to front
             menuOverlay.toFront();
             
-            System.out.println("🏠 Menu overlay displayed successfully");
+            System.out.println("Menu de pause affiché avec succès");
         } else {
-            System.err.println("❌ Menu overlay is null, falling back to menu");
+            System.err.println("Menu de pause non initialisé, retour au menu principal");
             JeuQuoridor.goMenu();
         }
     }
 
-    /**
-     * Public method to show the menu overlay (called from outside)
-     */
     public void showMenuOverlay() {
-        System.out.println("📋 Opening menu overlay (external call)...");
+        System.out.println("Ouverture du menu de pause (appel externe)");
         
         // Show the menu overlay
         if (menuOverlay != null) {
@@ -684,13 +662,14 @@ public class ControleurJeu {
             // Bring to front
             menuOverlay.toFront();
             
-            System.out.println("🏠 Menu overlay displayed successfully");
+            System.out.println("Menu de pause affiché avec succès");
         } else {
-            System.err.println("❌ Menu overlay is null, falling back to menu");
+            System.err.println("Menu de pause non initialisé, retour au menu principal");
             JeuQuoridor.goMenu();
         }
     }
 
+    // Configure les raccourcis clavier
     private void setupKeyboardShortcuts() {
         if (boardPane.getScene() != null) {
             boardPane.getScene().setOnKeyPressed(e -> {
@@ -706,51 +685,48 @@ public class ControleurJeu {
                 }
             });
             
-            // Make sure the scene can receive key events
             boardPane.getScene().getRoot().setFocusTraversable(true);
             boardPane.getScene().getRoot().requestFocus();
         }
     }
     
+    // Bascule le mode plein écran
     private void toggleFullscreen() {
         Stage stage = JeuQuoridor.getPrimaryStage();
         stage.setFullScreen(!stage.isFullScreen());
-        System.out.println("🖥️ Fullscreen toggled: " + stage.isFullScreen());
+        System.out.println("Plein écran basculé : " + stage.isFullScreen());
     }
 
+    // Configure la mise à l'échelle dynamique
     private void setupDynamicScaling() {
-        // Add window resize listener
         if (boardPane.getScene() != null && boardPane.getScene().getWindow() != null) {
             Stage stage = (Stage) boardPane.getScene().getWindow();
             
-            // Créer un timer de débounce pour optimiser les redimensionnements
             resizeDebounceTimer = new PauseTransition(Duration.millis(100)); // 100ms de délai
             resizeDebounceTimer.setOnFinished(e -> {
                 isResizing = false;
                 updateScaling();
-                System.out.println("🔄 Resize debounce completed - applying final scaling");
+                System.out.println("Redimensionnement terminé - application de l'échelle finale");
             });
             
-            // Listen for width changes
             stage.widthProperty().addListener((obs, oldVal, newVal) -> {
                 handleResize();
             });
             
-            // Listen for height changes  
             stage.heightProperty().addListener((obs, oldVal, newVal) -> {
                 handleResize();
             });
             
-            // Initial scaling update
             updateScaling();
-            System.out.println("🔄 Dynamic scaling initialized with debounce optimization");
+            System.out.println("Mise à l'échelle dynamique initialisée avec optimisation");
         }
     }
     
+    // Gère le redimensionnement
     private void handleResize() {
         if (!isResizing) {
             isResizing = true;
-            System.out.println("🔄 Resize detected - starting debounce timer");
+            System.out.println("Redimensionnement détecté - démarrage du timer");
         }
         
         // Redémarrer le timer de débounce à chaque redimensionnement
@@ -758,60 +734,52 @@ public class ControleurJeu {
         resizeDebounceTimer.play();
     }
     
+    // Met à jour l'échelle
     private void updateScaling() {
         if (boardPane.getScene() != null && boardPane.getScene().getWindow() != null) {
             Stage stage = (Stage) boardPane.getScene().getWindow();
             double currentWidth = stage.getWidth();
             double currentHeight = stage.getHeight();
             
-            // Calculer le ratio d'aspect de la fenêtre
             double aspectRatio = currentWidth / currentHeight;
             
-            // Calculer le facteur d'échelle en fonction de la taille de la fenêtre
-            double availableWidth = currentWidth * 0.75; // 75% de la largeur de la fenêtre
-            double availableHeight = currentHeight * 0.75; // 75% de la hauteur de la fenêtre
+            double availableWidth = currentWidth * 0.75; 
+            double availableHeight = currentHeight * 0.75; 
             
-            // Calculer la taille de base du plateau
             double baseBoardWidth = 2 * GameConstants.OFFSET_X + 9 * GameConstants.CELL_SIZE + 8 * GameConstants.WALL_SIZE;
             double baseBoardHeight = 2 * GameConstants.OFFSET_Y + 9 * GameConstants.CELL_SIZE + 8 * GameConstants.WALL_SIZE;
             
-            // Calculer les facteurs d'échelle pour la largeur et la hauteur
             double widthRatio = availableWidth / baseBoardWidth;
             double heightRatio = availableHeight / baseBoardHeight;
             
-            // Utiliser le plus petit des deux ratios pour maintenir les proportions
             scaleFactor = Math.min(widthRatio, heightRatio);
             
-            // Ajuster les limites en fonction de la résolution
             if (currentWidth <= 800 || currentHeight <= 600) {
-                // Pour les petites résolutions (800x600 et moins)
                 scaleFactor = Math.max(scaleFactor, 0.2);
                 scaleFactor = Math.min(scaleFactor, 0.5);
             } else if (currentWidth >= 1920) {
-                // Pour les grandes résolutions (1920x1080)
                 scaleFactor = Math.max(scaleFactor, 0.5);
                 scaleFactor = Math.min(scaleFactor, 0.8);
             } else if (currentWidth >= 1280) {
-                // Pour les résolutions moyennes (1280x800)
                 scaleFactor = Math.max(scaleFactor, 0.4);
                 scaleFactor = Math.min(scaleFactor, 0.7);
             } else {
-                // Pour les autres résolutions
                 scaleFactor = Math.max(scaleFactor, 0.3);
                 scaleFactor = Math.min(scaleFactor, 0.6);
             }
             
-            System.out.println("🔄 Facteur d'échelle mis à jour: " + scaleFactor + 
-                             " (Fenêtre: " + currentWidth + "x" + currentHeight + 
-                             ", Ratio: " + aspectRatio + ")");
+            System.out.println("Facteur d'échelle mis à jour : " + scaleFactor + 
+                             " (Fenêtre : " + currentWidth + "x" + currentHeight + 
+                             ", Ratio : " + aspectRatio + ")");
             
             // Appliquer la mise à l'échelle aux éléments du jeu
             applyScaling();
         }
     }
     
+    // Applique la mise à l'échelle
     private void applyScaling() {
-        System.out.println("🔄 Applying scaling with factor: " + scaleFactor);
+        System.out.println("Application de l'échelle avec facteur : " + scaleFactor);
         
         // Mise à l'échelle du conteneur du plateau
         if (boardContainer != null) {
@@ -838,17 +806,17 @@ public class ControleurJeu {
             boardContainer.setMaxSize(containerSize, containerSize);
             
             // Toujours recréer le plateau de jeu avec la nouvelle échelle
-            System.out.println("🔄 Recreating game board with scale factor: " + scaleFactor);
+            System.out.println("Recréation du plateau avec facteur d'échelle : " + scaleFactor);
             createGameBoard();
             
             if (plateau != null) {
                 updateBoardState();
                 // Redessiner tous les murs existants avec la nouvelle échelle
                 redrawAllWalls();
-                System.out.println("🔄 Board state and walls updated with new scale");
+                System.out.println("État du plateau et murs mis à jour avec nouvelle échelle");
             }
             
-            System.out.println("🔄 Board scaling applied: " + scaleFactor + " (container: " + containerSize + "px)");
+            System.out.println("Mise à l'échelle du plateau appliquée : " + scaleFactor + " (conteneur : " + containerSize + "px)");
         }
         
         // Mise à l'échelle des contrôles audio et du texte
@@ -900,44 +868,41 @@ public class ControleurJeu {
                 );
             }
             
-            System.out.println("🔄 UI controls scaled - Button: " + baseButtonSize + 
-                             "px, Slider: " + baseSliderWidth + "px, Font: " + baseFontSize + "px");
+            System.out.println("Contrôles mis à l'échelle - Bouton : " + baseButtonSize + 
+                             "px, Curseur : " + baseSliderWidth + "px, Police : " + baseFontSize + "px");
         }
         
-        // Réappliquer le background sauvegardé seulement si ce n'est pas un redimensionnement en cours
         if (!isResizing) {
-            // Ne pas appliquer le background sauvegardé si un background a été préservé
             if (!JeuQuoridor.wasBackgroundPreserved()) {
                 applySavedBackground();
             } else {
-                System.out.println("🖼️ Background was preserved, skipping saved background application in updateScaling");
+                System.out.println("Arrière-plan préservé, application de l'arrière-plan sauvegardé ignorée");
             }
         }
     }
 
+    // Affiche la popup de victoire
     private void showVictoryPopup(int winnerId) {
-        System.out.println("🏆 Showing victory overlay for player " + winnerId);
+        System.out.println("Affichage de l'écran de victoire pour le joueur " + winnerId);
         
-        // Set the victory message
         if (victoryMessageLabel != null) {
             victoryMessageLabel.setText("Le joueur " + winnerId + " a gagné !");
         }
         
-        // Show the victory overlay
         if (victoryOverlay != null) {
             victoryOverlay.setVisible(true);
             victoryOverlay.setManaged(true);
             
-            // Bring to front
             victoryOverlay.toFront();
             
-            System.out.println("🏆 Victory overlay displayed successfully");
+            System.out.println("Écran de victoire affiché avec succès");
         } else {
-            System.err.println("❌ Victory overlay is null, falling back to menu");
+            System.err.println("Écran de victoire non initialisé, retour au menu principal");
             JeuQuoridor.goMenu();
         }
     }
     
+    // Cache l'écran de victoire
     private void hideVictoryOverlay() {
         if (victoryOverlay != null) {
             victoryOverlay.setVisible(false);
@@ -945,39 +910,36 @@ public class ControleurJeu {
         }
     }
     
+    // Relance la partie
     @FXML
     private void onVictoryReplay() {
-        System.out.println("🔄 Victory replay button clicked");
+        System.out.println("Bouton de relance cliqué");
         
-        // Hide the victory overlay
         hideVictoryOverlay();
         
-        // Restart the game with same parameters
         JeuQuoridor.restartCurrentGame();
     }
     
+    // Retourne au menu principal
     @FXML
     private void onVictoryMenu() {
-        System.out.println("🏠 Victory menu button clicked");
+        System.out.println("Bouton menu principal cliqué");
         
-        // Hide the victory overlay
         hideVictoryOverlay();
         
-        // Arrêter la musique globale seulement quand on retourne vraiment au menu principal
         JeuQuoridor.stopGlobalMusic();
         
-        // Return to main menu
         JeuQuoridor.goMenu();
     }
     
+    // Ouvre les paramètres
     @FXML
     private void onVictorySettings() {
-        System.out.println("⚙️ Victory settings button clicked");
-        
-        // For now, just show a placeholder message
-        System.out.println("⚙️ Settings functionality to be implemented");
+        System.out.println("Bouton paramètres cliqué");
+        System.out.println("Fonctionnalité des paramètres à implémenter");
     }
     
+    // Cache le menu de pause
     private void hideMenuOverlay() {
         if (menuOverlay != null) {
             menuOverlay.setVisible(false);
@@ -985,50 +947,47 @@ public class ControleurJeu {
         }
     }
     
+    // Reprend la partie
     @FXML
     private void onMenuResume() {
-        System.out.println("▶️ Menu resume button clicked");
+        System.out.println("Bouton reprise cliqué");
         
-        // Hide the menu overlay and return to the game
         hideMenuOverlay();
     }
     
+    // Lance une nouvelle partie
     @FXML
     private void onMenuNewGame() {
-        System.out.println("🔄 Menu restart game button clicked");
+        System.out.println("Bouton nouvelle partie cliqué");
         
-        // Hide the menu overlay
         hideMenuOverlay();
         
-        // Restart the current game with same settings
         JeuQuoridor.restartCurrentGame();
     }
     
+    // Retourne au menu principal
     @FXML
     private void onMenuHome() {
-        System.out.println("🏠 Menu home button clicked");
+        System.out.println("Bouton menu principal cliqué");
         
-        // Hide the menu overlay
         hideMenuOverlay();
         
-        // Arrêter la musique globale seulement quand on retourne vraiment au menu principal
         JeuQuoridor.stopGlobalMusic();
         
-        // Return to main menu
         JeuQuoridor.goMenu();
     }
     
+    // Ouvre les paramètres
     @FXML
     private void onMenuSettings() {
-        System.out.println("⚙️ Menu settings button clicked");
+        System.out.println("Bouton paramètres cliqué");
         
-        // Hide the menu overlay first
         hideMenuOverlay();
         
-        // Open options from game context
         JeuQuoridor.goOptionsFromGame();
     }
 
+    // Affiche un message d'erreur
     private void showErrorMessage(String message) {
         if (errorMessageLabel != null) {
             errorMessageLabel.setText(message);
@@ -1054,36 +1013,32 @@ public class ControleurJeu {
         }
     }
 
+    // Applique l'arrière-plan sauvegardé
     private void applySavedBackground() {
-        // Ne pas appliquer le background sauvegardé si un background a été préservé
         if (JeuQuoridor.wasBackgroundPreserved()) {
-            System.out.println("🖼️ Background was preserved, skipping saved background application");
+            System.out.println("Arrière-plan préservé, application ignorée");
             return;
         }
         
         try {
             String selectedBackground = UserPreferences.getSelectedBackground();
             JeuQuoridor.updateGameBackground(selectedBackground);
-            System.out.println("🖼️ Applied saved background: " + selectedBackground);
+            System.out.println("Arrière-plan appliqué : " + selectedBackground);
         } catch (Exception e) {
-            System.err.println("❌ Failed to apply saved background: " + e.getMessage());
+            System.err.println("Échec de l'application de l'arrière-plan : " + e.getMessage());
         }
     }
 
-    // Méthode publique pour déclencher le redimensionnement du plateau depuis l'extérieur
+    // Déclenche le redimensionnement du plateau
     public void triggerBoardResize() {
-        System.out.println("🎯 Board resize triggered externally - forcing complete recalculation");
+        System.out.println("Redimensionnement du plateau déclenché - recalcul complet");
         
-        // Force un recalcul complet immédiatement
         javafx.application.Platform.runLater(() -> {
             try {
-                // Reset du flag de redimensionnement pour s'assurer que tout est recalculé
                 isResizing = false;
                 
-                // Force un recalcul complet des dimensions
                 updateScaling();
                 
-                // Ensure proper layout refresh
                 if (boardPane != null) {
                     boardPane.requestLayout();
                 }
@@ -1091,9 +1046,9 @@ public class ControleurJeu {
                     boardContainer.requestLayout();
                 }
                 
-                System.out.println("🎯 Complete board resize and layout refresh completed");
+                System.out.println("Recalcul complet du plateau terminé");
             } catch (Exception e) {
-                System.err.println("❌ Error in triggerBoardResize: " + e.getMessage());
+                System.err.println("Erreur lors du redimensionnement : " + e.getMessage());
                 e.printStackTrace();
             }
         });

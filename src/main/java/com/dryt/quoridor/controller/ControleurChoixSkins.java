@@ -9,7 +9,7 @@ import com.dryt.quoridor.app.JeuQuoridor;
 public class ControleurChoixSkins {
     private int joueurActuel = 1;
     private int nombreJoueurs;
-    private int[] skinsSelectionnes = new int[4]; // Pour stocker les skins choisis par chaque joueur
+    private int[] skinsSelectionnes = new int[4]; 
 
     @FXML
     private Text messageJoueur;
@@ -23,16 +23,17 @@ public class ControleurChoixSkins {
     @FXML
     private Button skin4;
 
+    // Initialise l'interface de sélection des skins
     @FXML
     public void initialize() {
         nombreJoueurs = JeuQuoridor.getNombreJoueurs();
         updateMessageJoueur();
-         // Initialiser skinsSelectionnes avec une valeur par défaut ou 0
         for (int i = 0; i < skinsSelectionnes.length; i++) {
-            skinsSelectionnes[i] = 0; // Ou une autre valeur par défaut si nécessaire
+            skinsSelectionnes[i] = 0; 
         }
     }
 
+    // Met à jour le message pour le joueur actuel
     private void updateMessageJoueur() {
         messageJoueur.setText("Joueur " + joueurActuel + ", veuillez choisir un skin");
     }
@@ -40,7 +41,6 @@ public class ControleurChoixSkins {
     private void selectionnerSkin(int numeroSkin) {
         skinsSelectionnes[joueurActuel - 1] = numeroSkin;
         
-        // Désactiver le skin sélectionné pour les autres joueurs
         switch(numeroSkin) {
             case 1: skin1.setDisable(true); break;
             case 2: skin2.setDisable(true); break;
@@ -53,8 +53,7 @@ public class ControleurChoixSkins {
         if (joueurActuel <= nombreJoueurs) {
             updateMessageJoueur();
         } else {
-            // Tous les joueurs ont choisi leur skin, enregistrer et lancer le jeu
-            JeuQuoridor.setSelectedSkins(skinsSelectionnes); // Enregistrer les skins sélectionnés
+            JeuQuoridor.setSelectedSkins(skinsSelectionnes); 
             try {
                 JeuQuoridor.startGame();
             } catch (Exception e) {
@@ -63,30 +62,35 @@ public class ControleurChoixSkins {
         }
     }
 
+    // Sélectionne le skin 1
     @FXML
     private void onSkin1(ActionEvent event) {
         selectionnerSkin(1);
     }
 
+    // Sélectionne le skin 2
     @FXML
     private void onSkin2(ActionEvent event) {
         selectionnerSkin(2);
     }
 
+    // Sélectionne le skin 3
     @FXML
     private void onSkin3(ActionEvent event) {
         selectionnerSkin(3);
     }
 
+    // Sélectionne le skin 4
     @FXML
     private void onSkin4(ActionEvent event) {
         selectionnerSkin(4);
     }
 
+    // Retourne à l'écran précédent
     @FXML
     private void onRetour(ActionEvent event) {
         JeuQuoridor.goChoixJoueurs();
     }
 
-    // Méthodes pour gérer la sélection des skins et la validation seront ajoutées ici
+   
 } 
