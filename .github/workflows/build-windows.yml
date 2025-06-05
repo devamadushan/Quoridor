@@ -1,60 +1,63 @@
-name: Build Windows Executable
+# DISABLED - Using build-windows-simple.yml instead
+# This workflow uses jpackage which is broken for this project
 
-on:
-  workflow_dispatch:  # Permet de lancer manuellement
-  push:
-    tags:
-      - 'v*'
+# name: Build Windows Executable
 
-jobs:
-  build-windows:
-    runs-on: windows-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        
-    - name: Cache Maven dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-        
-    - name: Build with Maven
-      run: mvn clean package -q
-      
-    - name: Verify JAR creation
-      run: |
-        dir target\*.jar
-        echo "JAR files created successfully"
-      shell: cmd
-      
-    - name: Create Windows installer
-      run: mvn jpackage:jpackage -q
-      
-    - name: List build artifacts
-      run: dir target\dist
-      
-    - name: Upload Windows executable
-      uses: actions/upload-artifact@v4
-      with:
-        name: Quoridor-Windows
-        path: target/dist/Quoridor-*.exe
-        
-    - name: Create release (if tag)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          target/dist/Quoridor-*.exe
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+# on:
+#   workflow_dispatch:  # Permet de lancer manuellement
+#   push:
+#     tags:
+#       - 'v*'
+
+# jobs:
+#   build-windows:
+#     runs-on: windows-latest
+#     
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v4
+#       
+#     - name: Set up JDK 21
+#       uses: actions/setup-java@v4
+#       with:
+#         java-version: '21'
+#         distribution: 'temurin'
+#         
+#     - name: Cache Maven dependencies
+#       uses: actions/cache@v3
+#       with:
+#         path: ~/.m2
+#         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#         restore-keys: ${{ runner.os }}-m2
+#         
+#     - name: Build with Maven
+#       run: mvn clean package -q
+#       
+#     - name: Verify JAR creation
+#       run: |
+#         dir target\*.jar
+#         echo "JAR files created successfully"
+#       shell: cmd
+#       
+#     - name: Create Windows installer
+#       run: mvn jpackage:jpackage -q
+#       
+#     - name: List build artifacts
+#       run: dir target\dist
+#       
+#     - name: Upload Windows executable
+#       uses: actions/upload-artifact@v4
+#       with:
+#         name: Quoridor-Windows
+#         path: target/dist/Quoridor-*.exe
+#         
+#     - name: Create release (if tag)
+#       if: startsWith(github.ref, 'refs/tags/')
+#       uses: softprops/action-gh-release@v1
+#       with:
+#         files: |
+#           target/dist/Quoridor-*.exe
+#         draft: false
+#         prerelease: false
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
