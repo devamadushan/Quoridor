@@ -27,12 +27,19 @@ public class ControleurJeu {
 
     @FXML
     private Pane boardPane;
+    
+    @FXML
+    private Pane boardContainer;
 
     @FXML
     private javafx.scene.control.Label labelMursRestants;
 
     private Plateau plateau;
     private Button[][] cellButtons;
+    private final double cellSize = GameConstants.CELL_SIZE;
+    private final double wallSize = GameConstants.WALL_SIZE;
+    private final double offsetX = GameConstants.OFFSET_X;
+    private final double offsetY = GameConstants.OFFSET_Y;
     private Rectangle ghostWall;
     private Map<Integer, MinimaxAI> aiStrategies;
 
@@ -40,15 +47,70 @@ public class ControleurJeu {
     private void initialize() {
         cellButtons = new Button[GameConstants.BOARD_SIZE][GameConstants.BOARD_SIZE];
         aiStrategies = new HashMap<>();
+        
+        // Wait for plateau to be set up via setupPlateauAndDisplay
+        javafx.application.Platform.runLater(() -> {
+            loadCSS();
+            setBoardContainerSize();
+            createGameBoard();
+        });
+    }
+    
+    private void setBoardContainerSize() {
+        if (boardContainer != null) {
+            // Calculate the actual board size
+            double boardWidth = 2 * offsetX + 9 * cellSize + 8 * wallSize;  // 538px
+            double boardHeight = 2 * offsetY + 9 * cellSize + 8 * wallSize; // 538px
+            
+            // Set board pane to exact content size
+            boardPane.setPrefSize(boardWidth, boardHeight);
+            boardPane.setMinSize(boardWidth, boardHeight);
+            boardPane.setMaxSize(boardWidth, boardHeight);
+            
+            // Set container size closer to game size (40px padding on each side)
+            double containerPadding = 10;
+            double containerSize = boardWidth + (2 * containerPadding); // 618px
+            
+            boardContainer.setPrefSize(containerSize, containerSize);
+            boardContainer.setMinSize(containerSize, containerSize);
+            boardContainer.setMaxSize(containerSize, containerSize);
+            
+            System.out.println("🎯 Board pane sized to: " + boardWidth + "x" + boardHeight);
+            System.out.println("🎯 Board container sized to: " + containerSize + "x" + containerSize);
+        }
+    }
+    
+    private void loadCSS() {
+        try {
+            // Add CSS programmatically as backup
+            String cssPath = getClass().getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm();
+            boardPane.getScene().getStylesheets().add(cssPath);
+            System.out.println("✅ CSS loaded: " + cssPath);
+        } catch (Exception e) {
+            System.out.println("❌ Failed to load CSS: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void createGameBoard() {
+        // Clear existing board
+        boardPane.getChildren().clear();
 
         for (int y = 0; y < GameConstants.BOARD_SIZE; y++) {
             for (int x = 0; x < GameConstants.BOARD_SIZE; x++) {
-                double baseX = GameConstants.OFFSET_X + x * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE);
-                double baseY = GameConstants.OFFSET_Y + y * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE);
+                double baseX = offsetX + x * (cellSize + wallSize);
+                double baseY = offsetY + y * (cellSize + wallSize);
 
                 Button cell = new Button();
-                cell.setPrefSize(GameConstants.CELL_SIZE, GameConstants.CELL_SIZE);
-                cell.getStyleClass().add("cell");
+                cell.setPrefSize(cellSize, cellSize);
+                
+                // Apply checkerboard pattern: alternating colors based on position
+                if ((x + y) % 2 == 0) {
+                    cell.getStyleClass().add("cell");        // Light cells
+                } else {
+                    cell.getStyleClass().add("cell-dark");   // Dark cells
+                }
+                
                 cell.setLayoutX(baseX);
                 cell.setLayoutY(baseY);
                 final int cx = x;
@@ -58,13 +120,15 @@ public class ControleurJeu {
                 boardPane.getChildren().add(cell);
 
                 if (x < 8 && y < 9)
-                    createWallPlaceholder(baseX + GameConstants.CELL_SIZE, baseY + GameConstants.CELL_SIZE / 2.0 - GameConstants.WALL_SIZE / 2.0, x, y, true);
+                    createWallPlaceholder(baseX + cellSize, baseY + cellSize / 2.0 - wallSize / 2.0, x, y, true);
                 if (y < 8 && x < 9)
-                    createWallPlaceholder(baseX + GameConstants.CELL_SIZE / 2.0 - GameConstants.WALL_SIZE / 2.0, baseY + GameConstants.CELL_SIZE, x, y, false);
+                    createWallPlaceholder(baseX + cellSize / 2.0 - wallSize / 2.0, baseY + cellSize, x, y, false);
                 if (x < 8 && y < 8)
-                    createWallPlaceholder(baseX + GameConstants.CELL_SIZE, baseY + GameConstants.CELL_SIZE, x, y, true);
+                    createWallPlaceholder(baseX + cellSize, baseY + cellSize, x, y, true);
             }
         }
+        
+        System.out.println("🎯 Board creation completed - CSS should now show alternating cell colors!");
     }
 
     public void setupPlateauAndDisplay(Plateau plateau) {
@@ -102,11 +166,11 @@ public class ControleurJeu {
     }
 
     private void createWallPlaceholder(double x, double y, int wx, int wy, boolean vertical) {
-        double detectorSize = GameConstants.WALL_SIZE * 4;
+        double detectorSize = wallSize * 4;
 
         Rectangle wallDetector = new Rectangle(detectorSize, detectorSize);
-        wallDetector.setLayoutX(x - (detectorSize - GameConstants.WALL_SIZE) / 4.0);
-        wallDetector.setLayoutY(y - (detectorSize - GameConstants.WALL_SIZE) / 4.0);
+        wallDetector.setLayoutX(x - (detectorSize - wallSize) / 4.0);
+        wallDetector.setLayoutY(y - (detectorSize - wallSize) / 4.0);
         wallDetector.setStyle("-fx-fill: transparent; -fx-stroke: transparent;");
 
         wallDetector.setOnMouseEntered(e -> showGhostWall(wx, wy, vertical));
@@ -161,6 +225,151 @@ public class ControleurJeu {
         }
     }
 
+    private void showGhostWall(int wx, int wy, boolean vertical) {
+        hideGhostWall();
+        ghostWall = new Rectangle();
+        ghostWall.setMouseTransparent(true);
+
+        int effectiveWx = wx;
+        int effectiveWy = wy;
+        if (!vertical && wx == 8) effectiveWx = 7;
+        if (vertical && wy == 8) effectiveWy = 7;
+
+        boolean noWallsLeft = plateau.getCurrentPlayer().getWallsRemaining() <= 0;
+        boolean invalid = isCrossingWall(effectiveWx, effectiveWy, vertical)
+                || !plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
+                || noWallsLeft
+                || isWallAlreadyPresent(effectiveWx, effectiveWy, vertical);
+
+        ghostWall.setStyle(invalid
+                ? "-fx-fill: rgba(255, 0, 0, 0.4); -fx-stroke: red; -fx-stroke-width: 3;"
+                : "-fx-fill: rgba(218, 165, 32, 0.6); -fx-stroke: #FFD700; -fx-stroke-width: 3; -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.8), 6, 0.7, 0, 0);");
+
+        if (vertical) {
+            ghostWall.setWidth(wallSize);
+            ghostWall.setHeight(cellSize * 2 + wallSize);
+            ghostWall.setX(offsetX + effectiveWx * (cellSize + wallSize) + cellSize);
+            ghostWall.setY(offsetY + effectiveWy * (cellSize + wallSize));
+        } else {
+            ghostWall.setWidth(cellSize * 2 + wallSize);
+            ghostWall.setHeight(wallSize);
+            ghostWall.setX(offsetX + effectiveWx * (cellSize + wallSize));
+            ghostWall.setY(offsetY + effectiveWy * (cellSize + wallSize) + cellSize);
+        }
+
+        boardPane.getChildren().add(ghostWall);
+    }
+
+    private void hideGhostWall() {
+        if (ghostWall != null) {
+            boardPane.getChildren().remove(ghostWall);
+            ghostWall = null;
+        }
+    }
+
+    private void drawWall(int wx, int wy, boolean vertical) {
+        Rectangle wallSegment = new Rectangle();
+        if (vertical) {
+            wallSegment.setWidth(wallSize);
+            wallSegment.setHeight(cellSize * 2 + wallSize);
+            wallSegment.setX(offsetX + wx * (cellSize + wallSize) + cellSize);
+            wallSegment.setY(offsetY + wy * (cellSize + wallSize));
+        } else {
+            wallSegment.setWidth(cellSize * 2 + wallSize);
+            wallSegment.setHeight(wallSize);
+            wallSegment.setX(offsetX + wx * (cellSize + wallSize));
+            wallSegment.setY(offsetY + wy * (cellSize + wallSize) + cellSize);
+        }
+        wallSegment.getStyleClass().add("wall-placed");
+        boardPane.getChildren().add(wallSegment);
+        System.out.println("Mur placé : " + (vertical ? "V" : "H") + " à " + wx + ", " + wy);
+    }
+
+    private void onCellClicked(int x, int y) {
+        if (!cellButtons[x][y].getStyleClass().contains("highlight")) return;
+        if (!plateau.moveCurrentPlayer(x, y)) return;
+
+        Joueur winner = plateau.getWinner();
+        if (winner != null) {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setHeaderText(GameConstants.MSG_GAME_OVER);
+            alert.setContentText(String.format(GameConstants.MSG_PLAYER_WINS, winner.getId()));
+            alert.showAndWait();
+            JeuQuoridor.goMenu();
+            return;
+        }
+
+        switchPlayerTurn();
+    }
+
+    private void updateBoardState() {
+        System.out.println("🎮 Updating board state...");
+        
+        // Clear only game-specific styles, preserve base cell styling
+        for (int y = 0; y < 9; y++) {
+            for (int x = 0; x < 9; x++) {
+                cellButtons[x][y].getStyleClass().removeAll("highlight", "player1", "player2", "player3", "player4");
+                // Preserve "cell" or "cell-dark" classes for checkerboard pattern
+            }
+        }
+
+        // Get selected skins
+        int[] selectedSkins = JeuQuoridor.getSelectedSkins();
+
+        // Add player styles with appropriate skins
+        for (Joueur joueur : plateau.getJoueurs()) {
+            int playerIndex = joueur.getId() - 1;
+            if (playerIndex >= 0 && playerIndex < selectedSkins.length) {
+                int skinId = selectedSkins[playerIndex];
+                String styleClass = "player" + skinId;
+                cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
+                System.out.println("🎭 Added " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
+            } else {
+                // Fallback to default player style
+                String styleClass = "player" + joueur.getId();
+                cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
+                System.out.println("🎭 Added fallback " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
+            }
+        }
+
+        // Add highlight styles for possible moves
+        System.out.println("Possible moves: ");
+        for (int[] move : plateau.getPossibleMoves()) {
+            System.out.println(Arrays.toString(move));
+            cellButtons[move[0]][move[1]].getStyleClass().add("highlight");
+            System.out.println("✨ Added highlight to cell [" + move[0] + "," + move[1] + "]");
+        }
+
+        // Update walls remaining display for all players (IMPROVED FROM INTERFACE VERSION)
+        StringBuilder wallInfo = new StringBuilder();
+        
+        // Sort players by ID to ensure consistent order (J1, J2, J3, J4)
+        java.util.List<Joueur> sortedPlayers = new java.util.ArrayList<>(plateau.getJoueurs());
+        sortedPlayers.sort((j1, j2) -> Integer.compare(j1.getId(), j2.getId()));
+        
+        for (int i = 0; i < sortedPlayers.size(); i++) {
+            Joueur joueur = sortedPlayers.get(i);
+            
+            if (i > 0) {
+                wallInfo.append("    ");  // Space separator for same line
+            }
+            
+            // Highlight current player with arrows
+            if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
+                wallInfo.append("► ");
+            }
+            
+            wallInfo.append("J").append(joueur.getId())
+                   .append(": ").append(joueur.getWallsRemaining()).append(" murs");
+            
+            if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
+                wallInfo.append(" ◄");
+            }
+        }
+        
+        labelMursRestants.setText(wallInfo.toString());
+    }
+
     private void runIA() {
         Joueur currentPlayer = plateau.getCurrentPlayer();
         
@@ -199,136 +408,31 @@ public class ControleurJeu {
         }
     }
 
-    private void showGhostWall(int wx, int wy, boolean vertical) {
-        hideGhostWall();
-        ghostWall = new Rectangle();
-        ghostWall.setMouseTransparent(true);
-
-        int effectiveWx = wx;
-        int effectiveWy = wy;
-        if (!vertical && wx == 8) effectiveWx = 7;
-        if (vertical && wy == 8) effectiveWy = 7;
-
-        boolean noWallsLeft = plateau.getCurrentPlayer().getWallsRemaining() <= 0;
-        boolean invalid = isCrossingWall(effectiveWx, effectiveWy, vertical)
-                || !plateau.canPlaceWall(effectiveWx, effectiveWy, vertical)
-                || noWallsLeft
-                || isWallAlreadyPresent(effectiveWx, effectiveWy, vertical);
-
-        ghostWall.setStyle(invalid
-                ? "-fx-fill: rgba(255, 0, 0, 0.3); -fx-stroke: red;"
-                : "-fx-fill: rgba(0, 0, 0, 0.3); -fx-stroke: green;");
-
-        if (vertical) {
-            ghostWall.setWidth(GameConstants.WALL_SIZE);
-            ghostWall.setHeight(GameConstants.CELL_SIZE * 2 + GameConstants.WALL_SIZE);
-            ghostWall.setX(GameConstants.OFFSET_X + effectiveWx * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE) + GameConstants.CELL_SIZE);
-            ghostWall.setY(GameConstants.OFFSET_Y + effectiveWy * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE));
-        } else {
-            ghostWall.setWidth(GameConstants.CELL_SIZE * 2 + GameConstants.WALL_SIZE);
-            ghostWall.setHeight(GameConstants.WALL_SIZE);
-            ghostWall.setX(GameConstants.OFFSET_X + effectiveWx * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE));
-            ghostWall.setY(GameConstants.OFFSET_Y + effectiveWy * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE) + GameConstants.CELL_SIZE);
-        }
-
-        boardPane.getChildren().add(ghostWall);
-    }
-
-    private void hideGhostWall() {
-        if (ghostWall != null) {
-            boardPane.getChildren().remove(ghostWall);
-            ghostWall = null;
-        }
-    }
-
-    private void drawWall(int wx, int wy, boolean vertical) {
-        Rectangle wallSegment = new Rectangle();
-        if (vertical) {
-            wallSegment.setWidth(GameConstants.WALL_SIZE);
-            wallSegment.setHeight(GameConstants.CELL_SIZE * 2 + GameConstants.WALL_SIZE);
-            wallSegment.setX(GameConstants.OFFSET_X + wx * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE) + GameConstants.CELL_SIZE);
-            wallSegment.setY(GameConstants.OFFSET_Y + wy * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE));
-        } else {
-            wallSegment.setWidth(GameConstants.CELL_SIZE * 2 + GameConstants.WALL_SIZE);
-            wallSegment.setHeight(GameConstants.WALL_SIZE);
-            wallSegment.setX(GameConstants.OFFSET_X + wx * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE));
-            wallSegment.setY(GameConstants.OFFSET_Y + wy * (GameConstants.CELL_SIZE + GameConstants.WALL_SIZE) + GameConstants.CELL_SIZE);
-        }
-        wallSegment.getStyleClass().add("wall-placed");
-        boardPane.getChildren().add(wallSegment);
-    }
-
-    private void onCellClicked(int x, int y) {
-        if (!cellButtons[x][y].getStyleClass().contains("highlight")) return;
-        if (!plateau.moveCurrentPlayer(x, y)) return;
-
-        Joueur winner = plateau.getWinner();
-        if (winner != null) {
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setHeaderText("Partie terminée");
-            alert.setContentText("Le joueur " + winner.getId() + " a gagné !");
-            alert.showAndWait();
-            JeuQuoridor.goMenu();
-            return;
-        }
-
-        switchPlayerTurn();
-    }
-
-    private void updateBoardState() {
-        // Réinitialiser toutes les cases (enlève highlight et les anciens skins)
-        for (int y = 0; y < 9; y++) {
-            for (int x = 0; x < 9; x++) {
-                // Conserver les classes de base comme 'cell' si elles existent
-                boolean hasCellClass = cellButtons[x][y].getStyleClass().contains("cell");
-                cellButtons[x][y].getStyleClass().clear();
-                if (hasCellClass) {
-                    cellButtons[x][y].getStyleClass().add("cell");
-                }
-            }
-        }
-
-        // Récupérer les skins sélectionnés
-        int[] selectedSkins = JeuQuoridor.getSelectedSkins();
-
-        // Mettre à jour les positions des joueurs avec les skins appropriés
-        for (Joueur joueur : plateau.getJoueurs()) {
-            // Assurez-vous que l'ID du joueur est valide pour l'index du tableau de skins (1-basé vers 0-basé)
-            int playerIndex = joueur.getId() - 1;
-            if (playerIndex >= 0 && playerIndex < selectedSkins.length) {
-                int skinId = selectedSkins[playerIndex];
-                // Appliquer le style CSS basé sur le skin sélectionné
-                String styleClass = "player" + skinId;
-                cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
-            } else {
-                 System.err.println("Erreur: Skin non sélectionné pour le joueur ID: " + joueur.getId());
-                 // Appliquer un style par défaut ou le style basé sur l'ID du joueur si la sélection échoue
-                 String styleClass = "player" + joueur.getId();
-                 cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
-            }
-        }
-
-        // Mettre à jour les cases valides pour le joueur courant
-        for (int[] move : plateau.getPossibleMoves()) {
-            cellButtons[move[0]][move[1]].getStyleClass().add("highlight");
-        }
-
-        // Mettre à jour le label des murs restants
-        Joueur currentPlayer = plateau.getCurrentPlayer();
-        labelMursRestants.setText("Murs restants : " + currentPlayer.getWallsRemaining());
-    }
-
     private void switchPlayerTurn() {
         plateau.switchPlayerTurn();
         Joueur currentPlayer = plateau.getCurrentPlayer();
         updateBoardState();
 
         if (currentPlayer.isAI()) {
-            // Utiliser la difficulté de l'IA appropriée si nécessaire
-            PauseTransition pause = new PauseTransition(Duration.millis(500)); // Délai pour l'IA
+            // Use appropriate AI delay
+            PauseTransition pause = new PauseTransition(Duration.millis(500));
             pause.setOnFinished(e -> runIA());
             pause.play();
         }
     }
-
+    
+    // FXML methods that were missing (restored from interface version)
+    @FXML
+    private void onNouvellePartie() {
+        System.out.println("🎮 Starting new game...");
+        JeuQuoridor.goChoixJoueurs();
+    }
+    
+    @FXML
+    private void onOpenMenu() {
+        System.out.println("📋 Opening menu overlay...");
+        // TODO: Add menu overlay functionality
+        // For now, just return to main menu
+        JeuQuoridor.goMenu();
+    }
 }
