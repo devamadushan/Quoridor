@@ -166,6 +166,48 @@ public class Plateau {
                 {1, 0}     // droite (vers x+1)
         };
 
+        // D'abord, vérifier s'il y a des sauts possibles dans n'importe quelle direction
+        // Ceci détermine si les mouvements diagonaux sont interdits
+        boolean anyJumpPossible = false;
+        for (int[] dir : directions) {
+            int nx = x + dir[0];
+            int ny = y + dir[1];
+            
+            // Vérifier si la position est dans les limites du plateau
+            if (nx < 0 || nx >= size || ny < 0 || ny >= size) continue;
+
+            // Vérifier si le mouvement est bloqué par un mur
+            boolean blocked = false;
+            if (dir[0] == 1 && blockedRight[x][y]) blocked = true;        // droite
+            if (dir[0] == -1 && x > 0 && blockedRight[x - 1][y]) blocked = true;  // gauche
+            if (dir[1] == 1 && blockedDown[x][y]) blocked = true;         // bas
+            if (dir[1] == -1 && y > 0 && blockedDown[x][y - 1]) blocked = true;   // haut
+
+            if (!blocked && isPlayerAt(nx, ny)) {
+                // Il y a un joueur dans cette direction, vérifier si saut possible
+                int nnx = nx + dir[0];
+                int nny = ny + dir[1];
+
+                // Vérifier si le saut est possible (position valide et pas de joueur)
+                boolean canJump = (nnx >= 0 && nnx < size && nny >= 0 && nny < size && !isPlayerAt(nnx, nny));
+                
+                // Vérifier si le saut est bloqué par un mur
+                boolean jumpBlocked = false;
+                if (canJump) {
+                    if (dir[0] == 1 && blockedRight[nx][ny]) jumpBlocked = true;        // saut vers la droite
+                    if (dir[0] == -1 && nx > 0 && blockedRight[nx - 1][ny]) jumpBlocked = true;  // saut vers la gauche
+                    if (dir[1] == 1 && blockedDown[nx][ny]) jumpBlocked = true;         // saut vers le bas
+                    if (dir[1] == -1 && ny > 0 && blockedDown[nx][ny - 1]) jumpBlocked = true;   // saut vers le haut
+                }
+
+                if (canJump && !jumpBlocked) {
+                    anyJumpPossible = true;
+                    break; // Pas besoin de vérifier les autres directions
+                }
+            }
+        }
+
+        // Maintenant, traiter chaque direction selon les règles
         for (int[] dir : directions) {
             int nx = x + dir[0];
             int ny = y + dir[1];
@@ -182,7 +224,7 @@ public class Plateau {
 
             if (!blocked) {
                 if (isPlayerAt(nx, ny)) {
-                    // Il y a un joueur dans cette direction, essayer de sauter
+                    // Il y a un joueur dans cette direction
                     int nnx = nx + dir[0];
                     int nny = ny + dir[1];
 
@@ -199,26 +241,31 @@ public class Plateau {
                     }
 
                     if (canJump && !jumpBlocked) {
-                        // Saut par-dessus possible
+                        // Saut possible dans cette direction - ajouter seulement le saut
                         moves.add(new int[]{nnx, nny});
-                    } else {
-                        // Saut impossible, essayer le contournement latéral
-                        if (dir[1] == 0) { // déplacement horizontal (gauche ou droite)
+                    } else if (!anyJumpPossible) {
+                        // Saut impossible ET aucun autre saut possible ailleurs - diagonales autorisées
+                        if (dir[1] == 0) { // déplacement horizontal initial (gauche ou droite)
                             // Contournement vertical (haut et bas)
-                            if (ny > 0 && !blockedDown[nx][ny - 1] && !isPlayerAt(nx, ny - 1))
+                            if (ny > 0 && !blockedDown[x][y - 1] && !isPlayerAt(nx, ny - 1)) {
                                 moves.add(new int[]{nx, ny - 1}); // contournement par le haut
-                            if (ny < size - 1 && !blockedDown[nx][ny] && !isPlayerAt(nx, ny + 1))
+                            }
+                            if (ny < size - 1 && !blockedDown[x][y] && !isPlayerAt(nx, ny + 1)) {
                                 moves.add(new int[]{nx, ny + 1}); // contournement par le bas
-                        } else if (dir[0] == 0) { // déplacement vertical (haut ou bas)
+                            }
+                        } else if (dir[0] == 0) { // déplacement vertical initial (haut ou bas)
                             // Contournement horizontal (gauche et droite)
-                            if (nx > 0 && !blockedRight[nx - 1][ny] && !isPlayerAt(nx - 1, ny))
+                            if (nx > 0 && !blockedRight[x - 1][y] && !isPlayerAt(nx - 1, ny)) {
                                 moves.add(new int[]{nx - 1, ny}); // contournement par la gauche
-                            if (nx < size - 1 && !blockedRight[nx][ny] && !isPlayerAt(nx + 1, ny))
+                            }
+                            if (nx < size - 1 && !blockedRight[x][y] && !isPlayerAt(nx + 1, ny)) {
                                 moves.add(new int[]{nx + 1, ny}); // contournement par la droite
+                            }
                         }
                     }
+                    // Si anyJumpPossible = true, pas de diagonales, mais les mouvements simples restent autorisés
                 } else {
-                    // Pas de joueur, mouvement simple possible
+                    // Pas de joueur dans cette direction - mouvement simple toujours autorisé
                     moves.add(new int[]{nx, ny});
                 }
             }
