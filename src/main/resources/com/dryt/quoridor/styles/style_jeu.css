@@ -772,9 +772,18 @@
 
 #labelMursRestants {
     -fx-font-size: 1.4em;
+    -fx-font-family: "Courier New", "Monaco", "Consolas", monospace; /* Police monospace pour largeur fixe */
     -fx-text-fill: #F5DEB3;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);
+    -fx-alignment: TOP_LEFT;
+    -fx-text-alignment: LEFT;
+    -fx-padding: 15px 20px;
+    -fx-background-color: rgba(20, 20, 30, 0.6);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(100, 100, 120, 0.5);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
 }
 
 .error-message {

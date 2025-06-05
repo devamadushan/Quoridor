@@ -16,6 +16,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays; // Importation pour Arrays.copyOf
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 public class JeuQuoridor extends Application {
     public static Stage primaryStage;
@@ -46,6 +48,14 @@ public class JeuQuoridor extends Application {
     private static Scene currentGameScene = null;
 
     private static String currentBackgroundFileName = null; // Cache pour éviter les recharges inutiles
+    
+    // Global music management
+    private static MediaPlayer globalBackgroundMusic = null;
+    private static boolean isMusicMuted = false;
+    private static double savedMusicVolume = 0.3; // Default volume at 30%
+    
+    // Flag to prevent overriding preserved background
+    private static boolean backgroundWasPreserved = false;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -78,10 +88,13 @@ public class JeuQuoridor extends Application {
 
         stage.setTitle("Jeu Quoridor");
         stage.setScene(sceneMenu);
-        stage.setResizable(true);
+        stage.setResizable(false);
         
-        // Start in maximized mode
-        stage.setMaximized(true);
+        // Appliquer la résolution sauvegardée
+        applySavedResolution();
+        
+        // Initialize global music system
+        initializeGlobalMusic();
         
         stage.show();
         
@@ -218,6 +231,10 @@ public class JeuQuoridor extends Application {
     }
 
     public static void startGame() throws Exception {
+        startGame(null); // Utiliser le background sauvegardé par défaut
+    }
+    
+    public static void startGame(String preserveCurrentBackground) throws Exception {
         // 🎮 Start game with appropriate player configuration
         if (nombreJoueurs == 2) {
             if (isVsAI) {
@@ -266,9 +283,29 @@ public class JeuQuoridor extends Application {
         
         primaryStage.setScene(sceneJeu);
         
-        // Always start game in maximized mode for consistency
-        primaryStage.setMaximized(true);
-        System.out.println("🎮 Game started in maximized: " + primaryStage.getWidth() + "x" + primaryStage.getHeight());
+        // Appliquer la résolution sauvegardée au lieu de forcer maximized
+        applySavedResolution();
+        System.out.println("🎮 Game started with saved resolution: " + primaryStage.getWidth() + "x" + primaryStage.getHeight());
+        
+        // Apply background - either preserve current or use saved preference
+        try {
+            String backgroundToApply;
+            if (preserveCurrentBackground != null && !preserveCurrentBackground.isEmpty()) {
+                backgroundToApply = preserveCurrentBackground;
+                backgroundWasPreserved = true; // Marquer que le background a été préservé
+                System.out.println("🖼️ Preserving current background: " + backgroundToApply);
+            } else {
+                backgroundToApply = com.dryt.quoridor.utils.UserPreferences.getSelectedBackground();
+                backgroundWasPreserved = false; // Reset du flag
+                System.out.println("🖼️ Using saved background preference: " + backgroundToApply);
+            }
+            
+            if (backgroundToApply != null && !backgroundToApply.isEmpty()) {
+                updateGameBackground(backgroundToApply);
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Could not apply background: " + e.getMessage());
+        }
         
         // Create plateau based on game configuration
         if (nombreJoueurs == 2) {
@@ -282,12 +319,24 @@ public class JeuQuoridor extends Application {
         }
         
         controleur.setupPlateauAndDisplay(plateau);
+        
+        // Start global music when game starts
+        startGlobalMusic();
     }
     
     public static void restartCurrentGame() {
         try {
             System.out.println("🔄 Restarting current game with same parameters...");
-            startGame(); // Reuse the existing game parameters
+            
+            // Préserver le background actuel en utilisant le cache au lieu de l'extraction CSS
+            String preserveBackground = currentBackgroundFileName;
+            if (preserveBackground != null && !preserveBackground.isEmpty()) {
+                System.out.println("🖼️ Preserving current background: " + preserveBackground);
+                startGame(preserveBackground);
+            } else {
+                System.out.println("🖼️ No current background to preserve, using default behavior");
+                startGame(null);
+            }
         } catch (Exception e) {
             System.err.println("❌ Failed to restart game: " + e.getMessage());
             e.printStackTrace();
@@ -295,25 +344,29 @@ public class JeuQuoridor extends Application {
             goMenu();
         }
     }
+    
+    public static String getCurrentGameBackground() {
+        return currentBackgroundFileName;
+    }
 
     public static void goMenu() {
         primaryStage.setScene(sceneMenu);
-        // Ensure maximized state for consistency
-        primaryStage.setMaximized(true);
+        // Ne pas redimensionner - utiliser la résolution actuelle
+        // applySavedResolution(); // SUPPRIMÉ pour éviter les animations
     }
 
     public static void goOptions() {
         optionsPreviousContext = "menu"; // Called from main menu
         primaryStage.setScene(sceneOptions);
-        // Ensure maximized state for consistency
-        primaryStage.setMaximized(true);
+        // Ne pas redimensionner - utiliser la résolution actuelle
+        // applySavedResolution(); // SUPPRIMÉ pour éviter les animations
     }
     
     public static void goOptionsFromGame() {
         optionsPreviousContext = "game"; // Called from game menu
         primaryStage.setScene(sceneOptions);
-        // Ensure maximized state for consistency
-        primaryStage.setMaximized(true);
+        // Ne pas redimensionner - utiliser la résolution actuelle
+        // applySavedResolution(); // SUPPRIMÉ pour éviter les animations
     }
     
     public static String getOptionsPreviousContext() {
@@ -322,8 +375,8 @@ public class JeuQuoridor extends Application {
 
     public static void goChoixJoueurs() {
         primaryStage.setScene(sceneChoixJoueurs);
-        // Ensure maximized state for consistency
-        primaryStage.setMaximized(true);
+        // Ne pas redimensionner - utiliser la résolution actuelle
+        // applySavedResolution(); // SUPPRIMÉ pour éviter les animations
     }
 
     // Nouvelle méthode pour naviguer vers le choix des skins
@@ -336,8 +389,8 @@ public class JeuQuoridor extends Application {
             sceneSkins.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
             sceneSkins.setOnKeyPressed(e -> handleKeyPress(e));
             primaryStage.setScene(sceneSkins);
-            // Ensure maximized state for consistency
-            primaryStage.setMaximized(true);
+            // Ne pas redimensionner - utiliser la résolution actuelle
+            // applySavedResolution(); // SUPPRIMÉ pour éviter les animations
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -353,8 +406,8 @@ public class JeuQuoridor extends Application {
             sceneDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
             sceneDifficulte.setOnKeyPressed(e -> handleKeyPress(e));
             primaryStage.setScene(sceneDifficulte);
-            // Ensure maximized state for consistency
-            primaryStage.setMaximized(true);
+            // Ne pas redimensionner - utiliser la résolution actuelle
+            // applySavedResolution(); // SUPPRIMÉ pour éviter les animations
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -370,8 +423,8 @@ public class JeuQuoridor extends Application {
             sceneNbDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
             sceneNbDifficulte.setOnKeyPressed(e -> handleKeyPress(e));
             primaryStage.setScene(sceneNbDifficulte);
-            // Ensure maximized state for consistency
-            primaryStage.setMaximized(true);
+            // Ne pas redimensionner - utiliser la résolution actuelle
+            // applySavedResolution(); // SUPPRIMÉ pour éviter les animations
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -399,25 +452,59 @@ public class JeuQuoridor extends Application {
     }
 
     public static void setResolution(double width, double height) {
+        setResolution(width, height, false);
+    }
+    
+    public static void setResolution(double width, double height, boolean maximized) {
         currentResolutionWidth = width;
         currentResolutionHeight = height;
+        isMaximized = maximized;
         
         if (primaryStage != null) {
-            Scene currentScene = primaryStage.getScene();
-            if (currentScene != null) {
-                // Force windowed mode before changing resolution
+            if (maximized) {
+                // Mode dynamique : maximiser la fenêtre
+                primaryStage.setMaximized(true);
+                primaryStage.setResizable(false); // Empêcher le redimensionnement manuel
+                System.out.println("🖥️ Resolution set to Dynamic (Maximized): " + width + "x" + height);
+            } else {
+                // Mode résolution fixe : fenêtre de taille spécifique
                 primaryStage.setMaximized(false);
-                isMaximized = false;
+                primaryStage.setResizable(false); // Empêcher le redimensionnement manuel
                 
-                // Update the scene size
-                currentScene.getRoot().setStyle("-fx-pref-width: " + width + "; -fx-pref-height: " + height + ";");
+                // Appliquer la résolution à toutes les scènes existantes
+                updateAllScenesResolution(width, height);
                 
-                // Set the window size
+                // Redimensionner la fenêtre
                 primaryStage.setWidth(width);
                 primaryStage.setHeight(height);
                 centerStageOnScreen(primaryStage, width, height);
-                System.out.println("🔧 Resolution set to: " + width + "x" + height);
+                System.out.println("🖥️ Resolution set to Fixed: " + width + "x" + height);
             }
+        }
+    }
+    
+    private static void updateAllScenesResolution(double width, double height) {
+        // Mettre à jour toutes les scènes pour qu'elles aient la même résolution
+        if (sceneMenu != null) {
+            updateSceneSize(sceneMenu, width, height);
+        }
+        if (sceneOptions != null) {
+            updateSceneSize(sceneOptions, width, height);
+        }
+        if (sceneChoixJoueurs != null) {
+            updateSceneSize(sceneChoixJoueurs, width, height);
+        }
+        if (currentGameScene != null) {
+            updateSceneSize(currentGameScene, width, height);
+        }
+    }
+    
+    private static void updateSceneSize(Scene scene, double width, double height) {
+        if (scene != null && scene.getRoot() != null) {
+            scene.getRoot().setStyle(String.format(
+                "-fx-pref-width: %.0f; -fx-pref-height: %.0f; -fx-min-width: %.0f; -fx-min-height: %.0f;",
+                width, height, width, height
+            ));
         }
     }
 
@@ -446,8 +533,8 @@ public class JeuQuoridor extends Application {
 
     public static void updateGameBackground(String backgroundFileName) {
         try {
-            // Éviter les recharges inutiles du même background
-            if (backgroundFileName != null && backgroundFileName.equals(currentBackgroundFileName)) {
+            // Éviter les recharges inutiles du même background, sauf si le background a été préservé
+            if (backgroundFileName != null && backgroundFileName.equals(currentBackgroundFileName) && !backgroundWasPreserved) {
                 System.out.println("🖼️ Background already loaded: " + backgroundFileName + " - skipping update");
                 return;
             }
@@ -486,7 +573,13 @@ public class JeuQuoridor extends Application {
                 // Mettre à jour le cache
                 currentBackgroundFileName = backgroundFileName;
                 
-                System.out.println("🖼️ Game background updated to: " + backgroundFileName + " with optimal sizing");
+                // Reset the flag après application successful
+                if (backgroundWasPreserved) {
+                    backgroundWasPreserved = false;
+                    System.out.println("🖼️ Background preserved and applied successfully: " + backgroundFileName + " - flag reset");
+                } else {
+                    System.out.println("🖼️ Game background updated to: " + backgroundFileName + " with optimal sizing");
+                }
             }
         } catch (Exception e) {
             System.err.println("❌ Error updating game background: " + e.getMessage());
@@ -538,7 +631,128 @@ public class JeuQuoridor extends Application {
             """;
     }
 
+    private static void applySavedResolution() {
+        try {
+            String savedResolution = com.dryt.quoridor.utils.UserPreferences.getSelectedResolution();
+            System.out.println("🖥️ Applying saved resolution: " + savedResolution);
+            
+            if ("Dynamique".equals(savedResolution)) {
+                // Mode dynamique : maximiser la fenêtre
+                primaryStage.setMaximized(true);
+                isMaximized = true;
+            } else {
+                // Mode résolution fixe
+                String[] parts = savedResolution.split("x");
+                if (parts.length == 2) {
+                    double width = Double.parseDouble(parts[0]);
+                    double height = Double.parseDouble(parts[1]);
+                    setResolution(width, height, false);
+                } else {
+                    // Fallback vers mode dynamique si résolution invalide
+                    primaryStage.setMaximized(true);
+                    isMaximized = true;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Error applying saved resolution, using default: " + e.getMessage());
+            // Fallback vers mode dynamique
+            primaryStage.setMaximized(true);
+            isMaximized = true;
+        }
+    }
+
     public static void main(String[] args) {
         launch(args);
+    }
+
+    // Global music management methods
+    public static void initializeGlobalMusic() {
+        try {
+            // Stop and dispose existing music if any
+            if (globalBackgroundMusic != null) {
+                globalBackgroundMusic.stop();
+                globalBackgroundMusic.dispose();
+                System.out.println("🎵 Previous global music disposed");
+            }
+            
+            // Load the background music
+            String musicPath = JeuQuoridor.class.getResource("/com/dryt/quoridor/sounds/Highland Hymn Bonnie Grace.mp3").toExternalForm();
+            Media music = new Media(musicPath);
+            globalBackgroundMusic = new MediaPlayer(music);
+            
+            // Set music properties
+            globalBackgroundMusic.setVolume(savedMusicVolume);
+            globalBackgroundMusic.setCycleCount(MediaPlayer.INDEFINITE);
+            globalBackgroundMusic.setAutoPlay(false);
+            
+            System.out.println("🎵 Global background music initialized: " + musicPath);
+        } catch (Exception e) {
+            System.err.println("❌ Failed to initialize global music: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    public static void startGlobalMusic() {
+        if (globalBackgroundMusic != null && !isMusicMuted) {
+            try {
+                globalBackgroundMusic.play();
+                System.out.println("🎵 Global background music started");
+            } catch (Exception e) {
+                System.err.println("❌ Failed to start global music: " + e.getMessage());
+            }
+        }
+    }
+    
+    public static void stopGlobalMusic() {
+        if (globalBackgroundMusic != null) {
+            try {
+                globalBackgroundMusic.stop();
+                System.out.println("🎵 Global background music stopped");
+            } catch (Exception e) {
+                System.err.println("❌ Failed to stop global music: " + e.getMessage());
+            }
+        }
+    }
+    
+    public static void pauseGlobalMusic() {
+        if (globalBackgroundMusic != null) {
+            try {
+                globalBackgroundMusic.pause();
+                System.out.println("🎵 Global background music paused");
+            } catch (Exception e) {
+                System.err.println("❌ Failed to pause global music: " + e.getMessage());
+            }
+        }
+    }
+    
+    public static void setGlobalMusicVolume(double volume) {
+        savedMusicVolume = volume;
+        if (globalBackgroundMusic != null && !isMusicMuted) {
+            globalBackgroundMusic.setVolume(volume);
+        }
+    }
+    
+    public static void toggleGlobalMusicMute() {
+        isMusicMuted = !isMusicMuted;
+        if (globalBackgroundMusic != null) {
+            globalBackgroundMusic.setVolume(isMusicMuted ? 0.0 : savedMusicVolume);
+        }
+        System.out.println("🎵 Global music muted: " + isMusicMuted);
+    }
+    
+    public static boolean isGlobalMusicMuted() {
+        return isMusicMuted;
+    }
+    
+    public static double getGlobalMusicVolume() {
+        return savedMusicVolume;
+    }
+
+    public static boolean wasBackgroundPreserved() {
+        return backgroundWasPreserved;
+    }
+    
+    public static void resetBackgroundPreservedFlag() {
+        backgroundWasPreserved = false;
     }
 }

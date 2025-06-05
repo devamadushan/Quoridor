@@ -102,11 +102,6 @@ public class ControleurJeu {
     private Rectangle ghostWall;
     private Map<Integer, MinimaxAI> aiStrategies;
     
-    // Audio management
-    private MediaPlayer backgroundMusic;
-    private boolean isMusicMuted = false;
-    private double savedVolume = 0.3; // Default volume at 30%
-    
     // Dynamic scaling
     private double scaleFactor = 1.0;
     private static final double BASE_WINDOW_WIDTH = 1400.0;
@@ -121,11 +116,7 @@ public class ControleurJeu {
         System.out.println("🎮 ControleurJeu.initialize() called");
         cellButtons = new Button[GameConstants.BOARD_SIZE][GameConstants.BOARD_SIZE];
         aiStrategies = new HashMap<>();
-        
-        // Initialize audio immediately
-        System.out.println("🎵 About to initialize audio...");
-        initializeAudio();
-        
+
         // Wait for plateau to be set up via setupPlateauAndDisplay
         javafx.application.Platform.runLater(() -> {
             System.out.println("🎮 Platform.runLater executing...");
@@ -141,50 +132,23 @@ public class ControleurJeu {
         });
     }
     
-    private void initializeAudio() {
-        System.out.println("🎵 initializeAudio() method called");
-        try {
-            // Load the background music - properly encode the file name with spaces
-            String musicPath = getClass().getResource("/com/dryt/quoridor/sounds/Highland Hymn Bonnie Grace.mp3").toExternalForm();
-            System.out.println("🎵 Music path: " + musicPath);
-            Media music = new Media(musicPath);
-            backgroundMusic = new MediaPlayer(music);
-            
-            // Set music properties
-            backgroundMusic.setVolume(savedVolume);
-            backgroundMusic.setCycleCount(MediaPlayer.INDEFINITE); // Loop indefinitely
-            backgroundMusic.setAutoPlay(false); // Don't auto-play immediately
-            
-            System.out.println("🎵 Background music loaded successfully: " + musicPath);
-            
-        } catch (Exception e) {
-            System.err.println("❌ Failed to load background music: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
     private void setupVolumeControls() {
         System.out.println("🎵 setupVolumeControls() called");
         System.out.println("🎵 volumeButton: " + volumeButton);
         System.out.println("🎵 volumeSlider: " + volumeSlider);
         
         if (volumeSlider != null) {
-            // Initialize volume slider
+            // Initialize volume slider with global music volume
             volumeSlider.setMin(0.0);
             volumeSlider.setMax(1.0);
-            volumeSlider.setValue(savedVolume);
+            volumeSlider.setValue(JeuQuoridor.getGlobalMusicVolume());
             
             // Add listener for volume changes
             volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-                if (backgroundMusic != null) {
-                    savedVolume = newValue.doubleValue();
-                    if (!isMusicMuted) {
-                        backgroundMusic.setVolume(savedVolume);
-                    }
-                    updateVolumeButtonIcon(); // Update icon when volume changes
-                }
+                JeuQuoridor.setGlobalMusicVolume(newValue.doubleValue());
+                updateVolumeButtonIcon(); // Update icon when volume changes
             });
-            System.out.println("🎵 Volume slider initialized");
+            System.out.println("🎵 Volume slider initialized with global music");
         } else {
             System.out.println("❌ Volume slider is null!");
         }
@@ -200,18 +164,9 @@ public class ControleurJeu {
     
     @FXML
     private void onVolumeToggle() {
-        if (backgroundMusic != null) {
-            isMusicMuted = !isMusicMuted;
-            
-            if (isMusicMuted) {
-                backgroundMusic.setVolume(0.0);
-            } else {
-                backgroundMusic.setVolume(savedVolume);
-            }
-            
-            updateVolumeButtonIcon();
-            System.out.println("🎵 Volume toggled - Muted: " + isMusicMuted);
-        }
+        JeuQuoridor.toggleGlobalMusicMute();
+        updateVolumeButtonIcon();
+        System.out.println("🎵 Volume toggled - Muted: " + JeuQuoridor.isGlobalMusicMuted());
     }
     
     private void updateVolumeButtonIcon() {
@@ -219,34 +174,12 @@ public class ControleurJeu {
             // Clear existing style classes
             volumeButton.getStyleClass().removeAll("volume-button-sound", "volume-button-mute");
             
-            if (isMusicMuted || savedVolume == 0.0) {
+            if (JeuQuoridor.isGlobalMusicMuted() || JeuQuoridor.getGlobalMusicVolume() == 0.0) {
                 volumeButton.getStyleClass().add("volume-button-mute");
                 System.out.println("🎵 Applied mute icon");
             } else {
                 volumeButton.getStyleClass().add("volume-button-sound");
                 System.out.println("🎵 Applied sound icon");
-            }
-        }
-    }
-    
-    private void startBackgroundMusic() {
-        if (backgroundMusic != null && !isMusicMuted) {
-            try {
-                backgroundMusic.play();
-                System.out.println("🎵 Background music started");
-            } catch (Exception e) {
-                System.err.println("❌ Failed to start background music: " + e.getMessage());
-            }
-        }
-    }
-    
-    private void stopBackgroundMusic() {
-        if (backgroundMusic != null) {
-            try {
-                backgroundMusic.stop();
-                System.out.println("🎵 Background music stopped");
-            } catch (Exception e) {
-                System.err.println("❌ Failed to stop background music: " + e.getMessage());
             }
         }
     }
@@ -342,9 +275,6 @@ public class ControleurJeu {
 
     public void setupPlateauAndDisplay(Plateau plateau) {
         this.plateau = plateau;
-        
-        // Start background music when game starts
-        startBackgroundMusic();
         
         for (Joueur joueur : plateau.getJoueurs()) {
             if (joueur.isAI()) {
@@ -545,8 +475,6 @@ public class ControleurJeu {
         Joueur winner = plateau.getWinner();
         if (winner != null) {
             System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
-            // Stop background music when game ends
-            stopBackgroundMusic();
             
             // Show custom victory popup instead of standard alert
             showVictoryPopup(winner.getId());
@@ -628,9 +556,12 @@ public class ControleurJeu {
         }
 
         // Update walls remaining display for all players
+        updateWallCountDisplay();
+    }
+
+    private void updateWallCountDisplay() {
         StringBuilder wallInfo = new StringBuilder();
         
-        // Sort players by ID to ensure consistent order (J1, J2, J3, J4)
         java.util.List<Joueur> sortedPlayers = new java.util.ArrayList<>(plateau.getJoueurs());
         sortedPlayers.sort((j1, j2) -> Integer.compare(j1.getId(), j2.getId()));
         
@@ -641,16 +572,16 @@ public class ControleurJeu {
                 wallInfo.append("\n");
             }
             
-            if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
-                wallInfo.append("► ");
-            }
+            // Utiliser une largeur fixe avec des espaces pour éviter les déplacements du layout
+            String prefix = (joueur.getId() == plateau.getCurrentPlayer().getId()) ? "► " : "  ";
+            String suffix = (joueur.getId() == plateau.getCurrentPlayer().getId()) ? " ◄" : "  ";
             
-            wallInfo.append("J").append(joueur.getId())
-                   .append(": ").append(joueur.getWallsRemaining()).append(" murs");
-            
-            if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
-                wallInfo.append(" ◄");
-            }
+            // Format fixe : "XX JY: ZZ murs WW" où XX=prefix, Y=id, ZZ=murs, WW=suffix
+            wallInfo.append(String.format("%s J%d: %2d murs%s", 
+                prefix, 
+                joueur.getId(), 
+                joueur.getWallsRemaining(), 
+                suffix));
         }
         
         labelMursRestants.setText(wallInfo.toString());
@@ -686,8 +617,6 @@ public class ControleurJeu {
         Joueur winner = plateau.getWinner();
         if (winner != null) {
             System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
-            // Stop background music when game ends
-            stopBackgroundMusic();
             
             // Show custom victory popup instead of standard alert
             showVictoryPopup(winner.getId());
@@ -702,8 +631,6 @@ public class ControleurJeu {
         Joueur winner = plateau.getWinner();
         if (winner != null) {
             System.out.println("🎮 Partie terminée - Vainqueur: Joueur " + winner.getId());
-            // Stop background music when game ends
-            stopBackgroundMusic();
             
             // Show custom victory popup instead of standard alert
             showVictoryPopup(winner.getId());
@@ -727,9 +654,6 @@ public class ControleurJeu {
     @FXML
     private void onOpenMenu() {
         System.out.println("📋 Opening menu overlay...");
-        
-        // Stop background music when returning to menu
-        stopBackgroundMusic();
         
         // Show the menu overlay
         if (menuOverlay != null) {
@@ -976,7 +900,12 @@ public class ControleurJeu {
         
         // Réappliquer le background sauvegardé seulement si ce n'est pas un redimensionnement en cours
         if (!isResizing) {
-            applySavedBackground();
+            // Ne pas appliquer le background sauvegardé si un background a été préservé
+            if (!JeuQuoridor.wasBackgroundPreserved()) {
+                applySavedBackground();
+            } else {
+                System.out.println("🖼️ Background was preserved, skipping saved background application in updateScaling");
+            }
         }
     }
 
@@ -1028,6 +957,9 @@ public class ControleurJeu {
         // Hide the victory overlay
         hideVictoryOverlay();
         
+        // Arrêter la musique globale seulement quand on retourne vraiment au menu principal
+        JeuQuoridor.stopGlobalMusic();
+        
         // Return to main menu
         JeuQuoridor.goMenu();
     }
@@ -1053,9 +985,6 @@ public class ControleurJeu {
         
         // Hide the menu overlay and return to the game
         hideMenuOverlay();
-        
-        // Restart background music if it was playing
-        startBackgroundMusic();
     }
     
     @FXML
@@ -1075,6 +1004,9 @@ public class ControleurJeu {
         
         // Hide the menu overlay
         hideMenuOverlay();
+        
+        // Arrêter la musique globale seulement quand on retourne vraiment au menu principal
+        JeuQuoridor.stopGlobalMusic();
         
         // Return to main menu
         JeuQuoridor.goMenu();
@@ -1117,6 +1049,12 @@ public class ControleurJeu {
     }
 
     private void applySavedBackground() {
+        // Ne pas appliquer le background sauvegardé si un background a été préservé
+        if (JeuQuoridor.wasBackgroundPreserved()) {
+            System.out.println("🖼️ Background was preserved, skipping saved background application");
+            return;
+        }
+        
         try {
             String selectedBackground = UserPreferences.getSelectedBackground();
             JeuQuoridor.updateGameBackground(selectedBackground);

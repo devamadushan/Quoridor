@@ -32,21 +32,70 @@ public class ControleurOptions {
     
     @FXML
     public void initialize() {
-        resolutionComboBox.getItems().addAll("800x600", "1024x1024", "1920x1080","1280x800");
-        resolutionComboBox.setValue("1920x1080"); // Valeur par défaut
+        // Ajouter les résolutions dans l'ordre croissant, plus l'option dynamique
+        resolutionComboBox.getItems().addAll(
+            "800x600", 
+            "1024x768", 
+            "1280x720", 
+            "1280x800", 
+            "1366x768", 
+            "1440x900", 
+            "1680x1050", 
+            "1920x1080", 
+            "2560x1440", 
+            "Dynamique"
+        );
+        
+        // Déterminer la résolution par défaut (celle de l'écran ou la sauvegardée)
+        String defaultResolution = determineDefaultResolution();
+        resolutionComboBox.setValue(defaultResolution);
         resolutionComboBox.setStyle("-fx-text-fill: #c1a57b; -fx-font-size: 20px; -fx-font-weight: bold;");
         
         resolutionComboBox.setOnAction(e -> {
             String resolution = resolutionComboBox.getValue();
-            switch (resolution) {
-                case "800x600" -> onRes800x600(e);
-                case "1024x1024" -> onRes1024x1024(e);
-                case "1920x1080" -> onRes1920x1080(e);
-                case "1280x800" -> onRes1280x800(e);
-            }
+            applyResolution(resolution);
         });
         
         initializeBackgroundSystem();
+    }
+    
+    private String determineDefaultResolution() {
+        // Récupérer la résolution sauvegardée
+        String savedResolution = UserPreferences.getSelectedResolution();
+        
+        // Vérifier si la résolution sauvegardée est valide
+        if (resolutionComboBox.getItems().contains(savedResolution)) {
+            return savedResolution;
+        }
+        
+        // Sinon, utiliser "Dynamique" par défaut
+        return "Dynamique";
+    }
+    
+    private void applyResolution(String resolution) {
+        System.out.println("🖥️ Changing resolution to: " + resolution);
+        
+        // Sauvegarder la préférence
+        UserPreferences.setSelectedResolution(resolution);
+        
+        if ("Dynamique".equals(resolution)) {
+            // Mode dynamique : utiliser la taille de l'écran
+            double screenWidth = JeuQuoridor.getScreenWidth();
+            double screenHeight = JeuQuoridor.getScreenHeight();
+            JeuQuoridor.setResolution(screenWidth, screenHeight, true); // true pour mode maximisé
+        } else {
+            // Mode résolution fixe
+            String[] parts = resolution.split("x");
+            if (parts.length == 2) {
+                try {
+                    double width = Double.parseDouble(parts[0]);
+                    double height = Double.parseDouble(parts[1]);
+                    JeuQuoridor.setResolution(width, height, false); // false pour mode fenêtré
+                } catch (NumberFormatException e) {
+                    System.err.println("❌ Résolution invalide: " + resolution);
+                }
+            }
+        }
     }
     
     private void initializeBackgroundSystem() {
@@ -127,25 +176,6 @@ public class ControleurOptions {
             System.err.println("❌ Erreur lors de l'application du fond d'écran: " + e.getMessage());
         }
     }
-    
-    @FXML
-    private void onRes800x600(ActionEvent event) {
-        JeuQuoridor.setResolution(800, 600);
-    }
-    
-    @FXML
-    private void onRes1024x1024(ActionEvent event) {
-        JeuQuoridor.setResolution(1024, 1024);
-    }
-    
-    @FXML
-    private void onRes1920x1080(ActionEvent event) {
-        JeuQuoridor.setResolution(1920, 1080);
-    }
-    @FXML
-    private void onRes1280x800(ActionEvent event) {
-        JeuQuoridor.setResolution(1280 , 800);
-    }
 
     @FXML
     private void onRetour(ActionEvent event) {
@@ -155,7 +185,7 @@ public class ControleurOptions {
             System.out.println("🔙 Returning to game menu overlay...");
             if (JeuQuoridor.getCurrentGameScene() != null) {
                 JeuQuoridor.getPrimaryStage().setScene(JeuQuoridor.getCurrentGameScene());
-                JeuQuoridor.getPrimaryStage().setMaximized(true);
+                applySavedResolutionToCurrentScene();
                 JeuQuoridor.showGameMenuOverlay();
             } else {
                 JeuQuoridor.goMenu();
@@ -163,6 +193,26 @@ public class ControleurOptions {
         } else {
             System.out.println("🔙 Returning to main menu...");
             JeuQuoridor.goMenu();
+        }
+    }
+    
+    private void applySavedResolutionToCurrentScene() {
+        try {
+            String savedResolution = UserPreferences.getSelectedResolution();
+            
+            if ("Dynamique".equals(savedResolution)) {
+                JeuQuoridor.getPrimaryStage().setMaximized(true);
+            } else {
+                String[] parts = savedResolution.split("x");
+                if (parts.length == 2) {
+                    double width = Double.parseDouble(parts[0]);
+                    double height = Double.parseDouble(parts[1]);
+                    JeuQuoridor.setResolution(width, height, false);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Error applying saved resolution: " + e.getMessage());
+            JeuQuoridor.getPrimaryStage().setMaximized(true);
         }
     }
 }
