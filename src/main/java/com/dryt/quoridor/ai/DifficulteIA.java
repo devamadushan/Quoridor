@@ -14,8 +14,4 @@ public enum DifficulteIA {
     public int getProfondeur() {
         return profondeur;
     }
-
-    public static MinimaxAI createAI(DifficulteIA difficulte) {
-        return new MinimaxAI(difficulte.getProfondeur());
-    }
 } 

@@ -3,11 +3,7 @@ package com.dryt.quoridor.ai;
 import com.dryt.quoridor.model.Joueur;
 import com.dryt.quoridor.model.Plateau;
 
-public class
-
-Action {
-
-
+public class Action {
     private final MoveType type;
     private final int x, y;
     private final boolean vertical;
@@ -36,12 +32,12 @@ Action {
         Joueur current = plateau.getCurrentPlayer();
         current.setPosition(oldX, oldY);
         while (current.getWallsRemaining() < oldWalls) {
-            current.incrementWalls(); // Assumes you have this method; if not, reset directly
+            current.incrementWalls();
         }
 
         if (type == MoveType.WALL) {
             if (vertical) {
-                plateau.removeVerticalWall(x, y); // Add these helper methods if not present
+                plateau.removeVerticalWall(x, y);
             } else {
                 plateau.removeHorizontalWall(x, y);
             }

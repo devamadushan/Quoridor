@@ -8,9 +8,7 @@
             prefWidth="1024.0" prefHeight="1024.0"
             styleClass="menu-background">
 
-    <VBox spacing="50" alignment="CENTER">
-         <Text text="CHOIX DES JOUEURS" styleClass="title-text"/>
-        
+    <VBox spacing="50" alignment="CENTER">        
         <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
             <Button text="1 VS 1 (HUMAINS)" onAction="#on1v1Humain" styleClass="menu-button"/>
             <Button text="1 VS 1 IA" onAction="#on1v1IA" styleClass="menu-button"/>

@@ -9,12 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 public class MinimaxAI {
-
     private final int maxDepth;
 
     public MinimaxAI(int maxDepth) {
-
-        if (maxDepth % 2 != 0 ) {
+        if (maxDepth % 2 != 0) {
             maxDepth++;
         }
         this.maxDepth = maxDepth;
@@ -27,7 +25,7 @@ public class MinimaxAI {
         }
 
         List<int[]> path = plateau.getShortestPathToGoal(plateau.getCurrentPlayer());
-        if (path.size() >= 2) { // path[0] is current position, path[1] is next move
+        if (path.size() >= 2) {
             int[] next = path.get(1);
             return Action.move(next[0], next[1]);
         }
@@ -45,8 +43,6 @@ public class MinimaxAI {
         }
 
         List<Action> actions = generateAllActions(plateau);
-
-        ;
 
         Action bestAction = null;
         int bestScore = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
@@ -84,7 +80,6 @@ public class MinimaxAI {
         Joueur current = plateau.getCurrentPlayer();
         int currentDist = estimateDistance(plateau, current);
 
-        // Pawn moves as before
         for (int[] move : plateau.getPossibleMoves()) {
             Plateau cloned = plateau.clone();
             cloned.moveCurrentPlayer(move[0], move[1]);
@@ -96,7 +91,6 @@ public class MinimaxAI {
             }
         }
 
-        // Wall moves: only allow if it doesn't increase AI's own shortest path
         if (current.getWallsRemaining() > 0) {
             for (Joueur j : plateau.getJoueurs()) {
                 int px = j.getX(), py = j.getY();
@@ -110,7 +104,7 @@ public class MinimaxAI {
                                 Plateau cloned = plateau.clone();
                                 cloned.placeWallCurrentPlayer(wx, wy, vertical);
                                 int newDist = estimateDistance(cloned, current);
-                                if (newDist == currentDist) { // Only allow if path length is unchanged
+                                if (newDist == currentDist) {
                                     wallMoves.add(Action.wall(wx, wy, vertical));
                                 }
                             }
