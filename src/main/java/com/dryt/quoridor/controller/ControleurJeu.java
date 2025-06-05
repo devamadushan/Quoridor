@@ -25,6 +25,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.control.Label;
+import javafx.animation.PauseTransition;
+import javafx.animation.FadeTransition;
+import javafx.animation.SequentialTransition;
+import javafx.util.Duration;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -84,6 +88,9 @@ public class ControleurJeu {
 
     @FXML
     private Button menuSettingsButton;
+
+    @FXML
+    private Label errorMessageLabel;
 
     private Plateau plateau;
     private Button[][] cellButtons;
@@ -381,19 +388,19 @@ public class ControleurJeu {
             if (vertical && wy == 8) effectiveWy = 7;
 
             if (isCrossingWall(effectiveWx, effectiveWy, vertical)) {
-                System.out.println(GameConstants.MSG_WALL_CROSSING);
+                showErrorMessage("❌ Croisement de mur interdit");
                 return;
             }
             if (!plateau.allPlayersHaveAPathAfterWall(effectiveWx, effectiveWy, vertical)) {
-                System.out.println(GameConstants.MSG_WALL_BLOCKING);
+                showErrorMessage("❌ Ce mur bloquerait un joueur complètement");
                 return;
             }
             if (plateau.isWallOverlapping(effectiveWx, effectiveWy, vertical)) {
-                System.out.println(GameConstants.MSG_WALL_OVERLAP);
+                showErrorMessage("❌ Chevauchement de mur interdit");
                 return;
             }
             if (isWallAlreadyPresent(effectiveWx, effectiveWy, vertical)) {
-                System.out.println(GameConstants.MSG_WALL_ALREADY);
+                showErrorMessage("❌ Un mur est déjà présent ici");
                 return;
             }
 
@@ -1026,5 +1033,30 @@ public class ControleurJeu {
         
         // For now, just show a placeholder message
         System.out.println("⚙️ Settings functionality to be implemented");
+    }
+
+    private void showErrorMessage(String message) {
+        if (errorMessageLabel != null) {
+            errorMessageLabel.setText(message);
+            errorMessageLabel.setVisible(true);
+            errorMessageLabel.setManaged(true);
+            errorMessageLabel.setOpacity(1.0);
+            
+            // Créer une transition de fondu
+            FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.3), errorMessageLabel);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+            
+            // Créer une transition pour le délai
+            PauseTransition delay = new PauseTransition(Duration.seconds(0.7));
+            
+            // Créer une séquence de transitions
+            SequentialTransition sequence = new SequentialTransition(delay, fadeOut);
+            sequence.setOnFinished(event -> {
+                errorMessageLabel.setVisible(false);
+                errorMessageLabel.setManaged(false);
+            });
+            sequence.play();
+        }
     }
 }
