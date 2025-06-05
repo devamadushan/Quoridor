@@ -68,7 +68,7 @@ public class ControleurJeu {
             updateBoardState();
         });
 
-        aiStrategy = new MinimaxAI(6);
+        aiStrategy = new MinimaxAI(2);
     }
 
     private void createWallPlaceholder(double x, double y, int wx, int wy, boolean vertical) {
