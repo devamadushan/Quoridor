@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Arrays; // Importation pour Arrays.copyOf
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 public class JeuQuoridor extends Application {
     public static Stage primaryStage;
@@ -53,6 +55,14 @@ public class JeuQuoridor extends Application {
     private static MediaPlayer globalBackgroundMusic = null;
     private static boolean isMusicMuted = false;
     private static double savedMusicVolume = 0.3; // Default volume at 30%
+    
+    // Playlist management
+    private static String[] musicPlaylist = {
+        "Highland Hymn Bonnie Grace.mp3",
+        "Fresh Findings.mp3", 
+        "Fantasy Music Goblinized.mp3"
+    };
+    private static int currentSongIndex = 0;
     
     // Flag to prevent overriding preserved background
     private static boolean backgroundWasPreserved = false;
@@ -321,7 +331,7 @@ public class JeuQuoridor extends Application {
         controleur.setupPlateauAndDisplay(plateau);
         
         // Start global music when game starts
-        startGlobalMusic();
+        startGlobalMusic(true);
     }
     
     public static void restartCurrentGame() {
@@ -490,6 +500,12 @@ public class JeuQuoridor extends Application {
                 backgroundWasPreserved = true;
                 updateGameBackground(preserveBackground);
                 System.out.println("🖼️ Background restored after resolution change: " + preserveBackground);
+            }
+            
+            // Si on est en cours de jeu, déclencher le redimensionnement du plateau
+            if (currentGameController != null && currentGameScene != null) {
+                triggerGameBoardResize();
+                System.out.println("🎯 Game board resize triggered for new resolution");
             }
         }
     }
@@ -686,28 +702,57 @@ public class JeuQuoridor extends Application {
                 System.out.println("🎵 Previous global music disposed");
             }
             
-            // Load the background music
-            String musicPath = JeuQuoridor.class.getResource("/com/dryt/quoridor/sounds/Highland Hymn Bonnie Grace.mp3").toExternalForm();
+            // Load the current song from playlist
+            String currentSong = musicPlaylist[currentSongIndex];
+            String musicPath = JeuQuoridor.class.getResource("/com/dryt/quoridor/sounds/" + currentSong).toExternalForm();
             Media music = new Media(musicPath);
             globalBackgroundMusic = new MediaPlayer(music);
             
             // Set music properties
             globalBackgroundMusic.setVolume(savedMusicVolume);
-            globalBackgroundMusic.setCycleCount(MediaPlayer.INDEFINITE);
             globalBackgroundMusic.setAutoPlay(false);
             
-            System.out.println("🎵 Global background music initialized: " + musicPath);
+            // Set up auto-advance to next song when current song ends
+            globalBackgroundMusic.setOnEndOfMedia(() -> {
+                advanceToNextSong();
+            });
+            
+            System.out.println("🎵 Global background music initialized: " + currentSong);
         } catch (Exception e) {
             System.err.println("❌ Failed to initialize global music: " + e.getMessage());
             e.printStackTrace();
         }
     }
     
+    private static void advanceToNextSong() {
+        // Move to next song in playlist
+        currentSongIndex = (currentSongIndex + 1) % musicPlaylist.length;
+        System.out.println("🎵 Advancing to next song: " + musicPlaylist[currentSongIndex]);
+        
+        // Reinitialize with new song and continue playing
+        boolean wasPlaying = (globalBackgroundMusic != null && globalBackgroundMusic.getStatus() == MediaPlayer.Status.PLAYING);
+        initializeGlobalMusic();
+        if (wasPlaying && !isMusicMuted) {
+            globalBackgroundMusic.play();
+        }
+    }
+    
     public static void startGlobalMusic() {
+        startGlobalMusic(false);
+    }
+    
+    public static void startGlobalMusic(boolean isNewGame) {
+        // If it's a new game, advance to next song
+        if (isNewGame) {
+            currentSongIndex = (currentSongIndex + 1) % musicPlaylist.length;
+            System.out.println("🎵 New game - switching to: " + musicPlaylist[currentSongIndex]);
+            initializeGlobalMusic();
+        }
+        
         if (globalBackgroundMusic != null && !isMusicMuted) {
             try {
                 globalBackgroundMusic.play();
-                System.out.println("🎵 Global background music started");
+                System.out.println("🎵 Global background music started: " + musicPlaylist[currentSongIndex]);
             } catch (Exception e) {
                 System.err.println("❌ Failed to start global music: " + e.getMessage());
             }
@@ -765,5 +810,26 @@ public class JeuQuoridor extends Application {
     
     public static void resetBackgroundPreservedFlag() {
         backgroundWasPreserved = false;
+    }
+
+    public static void triggerGameBoardResize() {
+        // Déclencher le redimensionnement du plateau de jeu via le contrôleur
+        if (currentGameController != null) {
+            // Attendre un petit délai pour s'assurer que le redimensionnement de la fenêtre est terminé
+            PauseTransition delay = new PauseTransition(Duration.millis(150));
+            delay.setOnFinished(e -> {
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        System.out.println("🎯 Triggering board resize after resolution change");
+                        // Appeler la méthode publique du contrôleur pour déclencher le redimensionnement
+                        currentGameController.triggerBoardResize();
+                    } catch (Exception ex) {
+                        System.err.println("⚠️ Error triggering game board resize: " + ex.getMessage());
+                        ex.printStackTrace();
+                    }
+                });
+            });
+            delay.play();
+        }
     }
 }

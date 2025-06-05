@@ -32,7 +32,14 @@ public class ControleurOptions {
     
     @FXML
     public void initialize() {
-        // Ajouter les résolutions dans l'ordre croissant, plus l'option dynamique
+        // Détecter la résolution d'écran de l'utilisateur
+        double screenWidth = JeuQuoridor.getScreenWidth();
+        double screenHeight = JeuQuoridor.getScreenHeight();
+        String detectedResolution = (int)screenWidth + "x" + (int)screenHeight;
+        
+        System.out.println("🖥️ Detected screen resolution: " + detectedResolution);
+        
+        // Ajouter les résolutions dans l'ordre croissant, plus la résolution détectée
         resolutionComboBox.getItems().addAll(
             "800x600", 
             "1024x768", 
@@ -42,9 +49,29 @@ public class ControleurOptions {
             "1440x900", 
             "1680x1050", 
             "1920x1080", 
-            "2560x1440", 
-            "Dynamique"
+            "2560x1440"
         );
+        
+        // Ajouter la résolution détectée si elle n'est pas déjà dans la liste
+        if (!resolutionComboBox.getItems().contains(detectedResolution)) {
+            // Trouver la position correcte pour l'insérer (ordre croissant)
+            boolean inserted = false;
+            for (int i = 0; i < resolutionComboBox.getItems().size(); i++) {
+                String existingRes = resolutionComboBox.getItems().get(i);
+                if (compareResolutions(detectedResolution, existingRes) < 0) {
+                    resolutionComboBox.getItems().add(i, detectedResolution + " (Écran natif)");
+                    inserted = true;
+                    break;
+                }
+            }
+            if (!inserted) {
+                resolutionComboBox.getItems().add(detectedResolution + " (Écran natif)");
+            }
+        } else {
+            // Si la résolution détectée existe déjà, la marquer comme native
+            int index = resolutionComboBox.getItems().indexOf(detectedResolution);
+            resolutionComboBox.getItems().set(index, detectedResolution + " (Écran natif)");
+        }
         
         // Déterminer la résolution par défaut (celle de l'écran ou la sauvegardée)
         String defaultResolution = determineDefaultResolution();
@@ -59,17 +86,61 @@ public class ControleurOptions {
         initializeBackgroundSystem();
     }
     
+    // Méthode pour comparer deux résolutions (format "WIDTHxHEIGHT")
+    private int compareResolutions(String res1, String res2) {
+        try {
+            String[] parts1 = res1.split("x");
+            String[] parts2 = res2.split("x");
+            
+            int width1 = Integer.parseInt(parts1[0]);
+            int height1 = Integer.parseInt(parts1[1]);
+            int width2 = Integer.parseInt(parts2[0]);
+            int height2 = Integer.parseInt(parts2[1]);
+            
+            // Comparer d'abord par largeur, puis par hauteur
+            if (width1 != width2) {
+                return Integer.compare(width1, width2);
+            }
+            return Integer.compare(height1, height2);
+        } catch (Exception e) {
+            return 0; // En cas d'erreur, considérer comme égales
+        }
+    }
+    
     private String determineDefaultResolution() {
         // Récupérer la résolution sauvegardée
         String savedResolution = UserPreferences.getSelectedResolution();
         
-        // Vérifier si la résolution sauvegardée est valide
-        if (resolutionComboBox.getItems().contains(savedResolution)) {
-            return savedResolution;
+        // Vérifier si la résolution sauvegardée est valide (en tenant compte des nouvelles options)
+        for (String item : resolutionComboBox.getItems()) {
+            // Comparer en ignorant les suffixes comme "(Écran natif)"
+            String cleanItem = item.replace(" (Écran natif)", "");
+            String cleanSaved = savedResolution.replace(" (Écran natif)", "");
+            
+            if (cleanItem.equals(cleanSaved) || item.equals(savedResolution)) {
+                return item; // Retourner la version avec le bon suffixe
+            }
         }
         
-        // Sinon, utiliser "Dynamique" par défaut
-        return "Dynamique";
+        // Si aucune correspondance, utiliser la résolution native de l'écran par défaut
+        double screenWidth = JeuQuoridor.getScreenWidth();
+        double screenHeight = JeuQuoridor.getScreenHeight();
+        String nativeResolution = (int)screenWidth + "x" + (int)screenHeight;
+        
+        // Chercher la résolution native dans la liste
+        for (String item : resolutionComboBox.getItems()) {
+            if (item.startsWith(nativeResolution)) {
+                System.out.println("🖥️ Using native screen resolution as default: " + item);
+                return item;
+            }
+        }
+        
+        // Sinon, utiliser la première résolution de la liste
+        if (!resolutionComboBox.getItems().isEmpty()) {
+            return resolutionComboBox.getItems().get(0);
+        }
+        
+        return "1920x1080"; // Fallback ultime
     }
     
     private void applyResolution(String resolution) {
@@ -78,22 +149,18 @@ public class ControleurOptions {
         // Sauvegarder la préférence
         UserPreferences.setSelectedResolution(resolution);
         
-        if ("Dynamique".equals(resolution)) {
-            // Mode dynamique : utiliser la taille de l'écran
-            double screenWidth = JeuQuoridor.getScreenWidth();
-            double screenHeight = JeuQuoridor.getScreenHeight();
-            JeuQuoridor.setResolution(screenWidth, screenHeight, true); // true pour mode maximisé
-        } else {
-            // Mode résolution fixe
-            String[] parts = resolution.split("x");
-            if (parts.length == 2) {
-                try {
-                    double width = Double.parseDouble(parts[0]);
-                    double height = Double.parseDouble(parts[1]);
-                    JeuQuoridor.setResolution(width, height, false); // false pour mode fenêtré
-                } catch (NumberFormatException e) {
-                    System.err.println("❌ Résolution invalide: " + resolution);
-                }
+        // Toutes les résolutions sont maintenant traitées comme des résolutions fixes
+        // Nettoyer les suffixes comme "(Écran natif)"
+        String cleanResolution = resolution.replace(" (Écran natif)", "");
+        String[] parts = cleanResolution.split("x");
+        if (parts.length == 2) {
+            try {
+                double width = Double.parseDouble(parts[0]);
+                double height = Double.parseDouble(parts[1]);
+                JeuQuoridor.setResolution(width, height, false); // false pour mode fenêtré
+                System.out.println("🖥️ Fixed resolution applied: " + width + "x" + height);
+            } catch (NumberFormatException e) {
+                System.err.println("❌ Résolution invalide: " + resolution);
             }
         }
     }
@@ -186,6 +253,10 @@ public class ControleurOptions {
             if (JeuQuoridor.getCurrentGameScene() != null) {
                 JeuQuoridor.getPrimaryStage().setScene(JeuQuoridor.getCurrentGameScene());
                 applySavedResolutionToCurrentScene();
+                
+                // Déclencher le redimensionnement du plateau après le retour au jeu
+                triggerGameBoardResizeAfterOptions();
+                
                 JeuQuoridor.showGameMenuOverlay();
             } else {
                 JeuQuoridor.goMenu();
@@ -200,31 +271,46 @@ public class ControleurOptions {
         try {
             String savedResolution = UserPreferences.getSelectedResolution();
             
-            if ("Dynamique".equals(savedResolution)) {
-                // Mode dynamique : juste s'assurer que c'est maximisé
-                if (!JeuQuoridor.getPrimaryStage().isMaximized()) {
-                    JeuQuoridor.getPrimaryStage().setMaximized(true);
-                }
-            } else {
-                // Mode résolution fixe : appliquer seulement si nécessaire
-                String[] parts = savedResolution.split("x");
-                if (parts.length == 2) {
-                    double width = Double.parseDouble(parts[0]);
-                    double height = Double.parseDouble(parts[1]);
-                    
-                    // Vérifier si la résolution est déjà correcte pour éviter les animations inutiles
-                    double currentWidth = JeuQuoridor.getPrimaryStage().getWidth();
-                    double currentHeight = JeuQuoridor.getPrimaryStage().getHeight();
-                    
-                    if (Math.abs(currentWidth - width) > 10 || Math.abs(currentHeight - height) > 10) {
-                        // Appliquer seulement si la différence est significative
-                        JeuQuoridor.setResolution(width, height, false);
-                    }
+            // Toutes les résolutions sont maintenant traitées comme des résolutions fixes
+            // Nettoyer les suffixes comme "(Écran natif)"
+            String cleanResolution = savedResolution.replace(" (Écran natif)", "");
+            String[] parts = cleanResolution.split("x");
+            if (parts.length == 2) {
+                double width = Double.parseDouble(parts[0]);
+                double height = Double.parseDouble(parts[1]);
+                
+                // Vérifier si la résolution est déjà correcte pour éviter les animations inutiles
+                double currentWidth = JeuQuoridor.getPrimaryStage().getWidth();
+                double currentHeight = JeuQuoridor.getPrimaryStage().getHeight();
+                
+                if (Math.abs(currentWidth - width) > 10 || Math.abs(currentHeight - height) > 10) {
+                    // Appliquer seulement si la différence est significative
+                    JeuQuoridor.setResolution(width, height, false);
+                    System.out.println("🖥️ Applied fixed resolution: " + width + "x" + height);
                 }
             }
         } catch (Exception e) {
             System.err.println("⚠️ Error applying saved resolution: " + e.getMessage());
             // Fallback silencieux sans forcer
         }
+    }
+    
+    private void triggerGameBoardResizeAfterOptions() {
+        // Déclencher le redimensionnement du plateau après un petit délai
+        // pour s'assurer que la scène et la résolution sont bien appliquées
+        javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.millis(200));
+        delay.setOnFinished(e -> {
+            try {
+                // Récupérer le contrôleur de jeu via JeuQuoridor
+                if (JeuQuoridor.getCurrentGameScene() != null) {
+                    // Appeler la méthode statique de redimensionnement dans JeuQuoridor
+                    JeuQuoridor.triggerGameBoardResize();
+                    System.out.println("🎯 Game board resize triggered after returning from options");
+                }
+            } catch (Exception ex) {
+                System.err.println("⚠️ Error triggering game board resize after options: " + ex.getMessage());
+            }
+        });
+        delay.play();
     }
 }

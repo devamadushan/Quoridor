@@ -811,6 +811,8 @@ public class ControleurJeu {
     }
     
     private void applyScaling() {
+        System.out.println("🔄 Applying scaling with factor: " + scaleFactor);
+        
         // Mise à l'échelle du conteneur du plateau
         if (boardContainer != null) {
             // Calculer la taille du plateau mise à l'échelle
@@ -835,17 +837,18 @@ public class ControleurJeu {
             boardContainer.setMinSize(containerSize, containerSize);
             boardContainer.setMaxSize(containerSize, containerSize);
             
-            // Recréer le plateau de jeu avec la nouvelle échelle
-            if (cellButtons != null && cellButtons[0] != null && cellButtons[0][0] != null) {
-                createGameBoard();
-                if (plateau != null) {
-                    updateBoardState();
-                    // Redessiner tous les murs existants avec la nouvelle échelle
-                    redrawAllWalls();
-                }
+            // Toujours recréer le plateau de jeu avec la nouvelle échelle
+            System.out.println("🔄 Recreating game board with scale factor: " + scaleFactor);
+            createGameBoard();
+            
+            if (plateau != null) {
+                updateBoardState();
+                // Redessiner tous les murs existants avec la nouvelle échelle
+                redrawAllWalls();
+                System.out.println("🔄 Board state and walls updated with new scale");
             }
             
-            System.out.println("🔄 Mise à l'échelle " + scaleFactor + " appliquée au plateau (taille: " + containerSize + ")");
+            System.out.println("🔄 Board scaling applied: " + scaleFactor + " (container: " + containerSize + "px)");
         }
         
         // Mise à l'échelle des contrôles audio et du texte
@@ -891,11 +894,14 @@ public class ControleurJeu {
             // Mise à l'échelle du texte
             if (labelMursRestants != null) {
                 double fontSize = Math.max(baseFontSize * scaleFactor, baseFontSize * 0.7);
-                labelMursRestants.setStyle("-fx-font-size: " + fontSize + "px;");
+                labelMursRestants.setStyle(
+                    labelMursRestants.getStyle().replaceAll("-fx-font-size: [^;]+;", "") + 
+                    " -fx-font-size: " + fontSize + "px;"
+                );
             }
             
-            System.out.println("🔄 Contrôles mis à l'échelle - Bouton: " + baseButtonSize + 
-                             "px, Slider: " + baseSliderWidth + "px, Police: " + baseFontSize + "px");
+            System.out.println("🔄 UI controls scaled - Button: " + baseButtonSize + 
+                             "px, Slider: " + baseSliderWidth + "px, Font: " + baseFontSize + "px");
         }
         
         // Réappliquer le background sauvegardé seulement si ce n'est pas un redimensionnement en cours
@@ -1062,5 +1068,34 @@ public class ControleurJeu {
         } catch (Exception e) {
             System.err.println("❌ Failed to apply saved background: " + e.getMessage());
         }
+    }
+
+    // Méthode publique pour déclencher le redimensionnement du plateau depuis l'extérieur
+    public void triggerBoardResize() {
+        System.out.println("🎯 Board resize triggered externally - forcing complete recalculation");
+        
+        // Force un recalcul complet immédiatement
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Reset du flag de redimensionnement pour s'assurer que tout est recalculé
+                isResizing = false;
+                
+                // Force un recalcul complet des dimensions
+                updateScaling();
+                
+                // Ensure proper layout refresh
+                if (boardPane != null) {
+                    boardPane.requestLayout();
+                }
+                if (boardContainer != null) {
+                    boardContainer.requestLayout();
+                }
+                
+                System.out.println("🎯 Complete board resize and layout refresh completed");
+            } catch (Exception e) {
+                System.err.println("❌ Error in triggerBoardResize: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
     }
 }
