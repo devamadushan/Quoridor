@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+             fx:controller="com.dryt.quoridor.controller.ControleurOptions"
+             styleClass="menu-background">
+
+    <VBox spacing="50" alignment="CENTER">
+        
+        <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
+            <Text text="Résolution" styleClass="menu-label"/>
+            <ComboBox fx:id="resolutionComboBox" styleClass="menu-spinner"/>
+            <Button text="RETOUR" onAction="#onRetour" styleClass="back-button"/>
+        </VBox>
+    </VBox>
+</StackPane>

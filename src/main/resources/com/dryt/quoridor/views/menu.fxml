@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.dryt.quoridor.controller.ControleurMenu"
+          styleClass="menu-background">
+
+    <VBox spacing="50" alignment="CENTER">
+        
+        <HBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
+            <Button text="JOUER" onAction="#onJouer" styleClass="play-button"/>
+            <Button text="OPTIONS" onAction="#onOptions" styleClass="options-button"/>
+            <Button text="QUITTER" onAction="#onQuitter" styleClass="quit-button"/>
+        </HBox>
+    </VBox>
+</StackPane>

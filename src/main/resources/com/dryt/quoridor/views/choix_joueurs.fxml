@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.dryt.quoridor.controller.ControleurChoixJoueurs"
+            prefWidth="1024.0" prefHeight="1024.0"
+            styleClass="menu-background">
+
+    <VBox spacing="50" alignment="CENTER">        
+        <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
+            <Button text="1 VS 1 (HUMAINS)" onAction="#on1v1Humain" styleClass="menu-button"/>
+            <Button text="1 VS 1 IA" onAction="#on1v1IA" styleClass="menu-button"/>
+            <Button text="4 JOUEURS" onAction="#on4Joueurs" styleClass="menu-button"/>
+
+            <HBox spacing="30" alignment="CENTER">
+                <Button text="RETOUR" onAction="#onRetour" styleClass="back-button"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</StackPane>
