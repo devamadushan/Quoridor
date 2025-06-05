@@ -105,16 +105,16 @@
     -fx-border-color: #4682B4 !important;
 }
 
-/* ----- PLAYER 3 (RED TROLL) ----- */
-.player1 {
+/* ----- PLAYER 3 (GREEN TROLL) ----- */
+.player3 {
     -fx-background-image: url("../images/piontroll3.png") !important;
     -fx-background-size: cover !important;
     -fx-background-position: center !important;
     -fx-border-color: #14dc17 !important;
 }
 
-/* ----- PLAYER 2 (BLUE TROLL) ----- */
-.player2 {
+/* ----- PLAYER 4 (YELLOW TROLL) ----- */
+.player4 {
     -fx-background-image: url("../images/piontroll4.png") !important;
     -fx-background-size: cover !important;
     -fx-background-position: center !important;
