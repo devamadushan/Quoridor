@@ -2,15 +2,20 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.dryt.quoridor.controller.ControleurMenu"
-            prefWidth="1024" prefHeight="1024">
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 
-    <VBox spacing="20" alignment="CENTER"
-          AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-        <Button text="Jouer" onAction="#onJouer" />
-        <Button text="Options" onAction="#onOptions" />
-        <Button text="Quitter" onAction="#onQuitter" />
+<StackPane xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.dryt.quoridor.controller.ControleurMenu"
+          styleClass="menu-background">
+
+    <VBox spacing="50" alignment="CENTER">
+        
+        <HBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
+            <Button text="JOUER" onAction="#onJouer" styleClass="play-button"/>
+            <Button text="OPTIONS" onAction="#onOptions" styleClass="options-button"/>
+            <Button text="QUITTER" onAction="#onQuitter" styleClass="quit-button"/>
+        </HBox>
     </VBox>
-</AnchorPane>
+</StackPane>
