@@ -776,17 +776,21 @@
 }
 
 .error-message {
-    -fx-font-size: 20px;
-    -fx-text-fill: #ff0000;
+    -fx-font-size: 24px;
+    -fx-text-fill: #c1a57b;
     -fx-font-weight: bold;
-    -fx-padding: 15px 30px;
-    -fx-background-color: rgba(255, 255, 255, 0.95);
-    -fx-background-radius: 10px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 15, 0, 0, 3);
-    -fx-min-height: 50px;
+    -fx-padding: 20px 40px;
+    -fx-background-color: rgba(20, 20, 30, 0.9);
+    -fx-background-radius: 15px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 15, 0, 0, 2),
+                innershadow(gaussian, rgba(60,60,80,0.4), 6, 0.4, 0, 0);
+    -fx-min-height: 60px;
     -fx-alignment: center;
     -fx-wrap-text: true;
-    -fx-max-width: 400px;
+    -fx-max-width: 500px;
     -fx-translate-y: 0;
     -fx-translate-x: 0;
+    -fx-border-color: rgba(100, 100, 120, 0.8);
+    -fx-border-width: 2px;
+    -fx-border-radius: 15px;
 }
