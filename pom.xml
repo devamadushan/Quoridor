@@ -202,10 +202,9 @@
                     <input>target</input>
                     <mainJar>${project.artifactId}-${project.version}-shaded.jar</mainJar>
                     <mainClass>com.dryt.quoridor.app.QuoridorLauncher</mainClass>
-                    <type>EXE</type>
-                    <winConsole>true</winConsole>
-                    <winMenu>false</winMenu>
-                    <winShortcut>false</winShortcut>
+                    <winConsole>false</winConsole>
+                    <winDirChooser>false</winDirChooser>
+                    <winPerUserInstall>false</winPerUserInstall>
                     <javaOptions>
                         <option>-Dfile.encoding=UTF-8</option>
                         <option>-Dprism.verbose=true</option>
@@ -213,7 +212,6 @@
                         <option>-Djavafx.animation.fullspeed=true</option>
                         <option>-Xms256m</option>
                         <option>-Xmx1024m</option>
-                        <option>-Djava.util.logging.level=INFO</option>
                     </javaOptions>
                 </configuration>
                 <executions>
