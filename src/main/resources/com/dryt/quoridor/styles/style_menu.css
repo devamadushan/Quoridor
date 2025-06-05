@@ -91,11 +91,11 @@
 }
 
 .menu-label {
-    -fx-text-fill: #c1a57b;
-    -fx-font-size: 22px;
+    -fx-fill: #c1a57b;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 5, 0, 0, 1);
 }
+
 
 .menu-spinner {
     -fx-background-color: rgba(44, 88, 44, 0.8);
@@ -125,6 +125,24 @@
     -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-alignment: center;
+}
+
+.menu-spinner .list-cell {
+    -fx-text-fill: #c1a57b;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.menu-spinner .combo-box-popup .list-view .list-cell {
+    -fx-text-fill: #c1a57b;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(44, 88, 44, 0.913);
+}
+
+.menu-spinner .combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: rgba(74, 144, 74, 0.7);
+    -fx-text-fill: #0b0b0b;
 }
 
 .play-button {

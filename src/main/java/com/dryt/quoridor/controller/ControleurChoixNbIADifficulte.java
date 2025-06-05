@@ -63,11 +63,13 @@ public class ControleurChoixNbIADifficulte {
                 hbox.setAlignment(javafx.geometry.Pos.CENTER);
                 
                 Label label = new Label("IA " + (i + 1) + " :");
+                label.setStyle("-fx-text-fill: #c1a57b; -fx-font-size: 20px; -fx-font-weight: bold;");
                 label.getStyleClass().add("menu-label");
                 
                 ComboBox<DifficulteIA> comboBox = new ComboBox<>();
                 comboBox.getItems().addAll(DifficulteIA.values());
                 comboBox.setValue(difficultesSelectionnees.get(i));
+                comboBox.setStyle("-fx-text-fill: #c1a57b; -fx-font-size: 20px; -fx-font-weight: bold;");
                 comboBox.getStyleClass().add("menu-spinner");
                 
                 comboBox.setOnAction(e -> {
@@ -79,7 +81,7 @@ public class ControleurChoixNbIADifficulte {
             }
         } else {
             difficulteContainer.setVisible(false);
-            messageMode.setText("Mode 4 joueurs humains");
+            messageMode.setText("Mode 4 joueurs");
         }
         
         // Le bouton valider est toujours visible

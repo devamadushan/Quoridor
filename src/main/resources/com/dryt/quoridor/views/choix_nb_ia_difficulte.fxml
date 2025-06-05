@@ -6,10 +6,9 @@
 
 <StackPane prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dryt.quoridor.controller.ControleurChoixNbIADifficulte" styleClass="menu-background">
     <VBox spacing="50" alignment="CENTER">
-        <Text text="CHOIX DU NOMBRE D'IA" styleClass="title-text"/>
         
         <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
-            <Text fx:id="messageMode" text="Mode 4 joueurs humains" styleClass="menu-label"/>
+            <Text fx:id="messageMode" text="Mode 4 joueurs" styleClass="menu-label"/>
             <Text text="Nombre d'IA (0-3)" styleClass="menu-label"/>
             
             <HBox spacing="20" alignment="CENTER">

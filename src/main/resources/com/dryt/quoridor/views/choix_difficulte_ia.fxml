@@ -6,7 +6,6 @@
 
 <StackPane prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dryt.quoridor.controller.ControleurChoixDifficulteIA" styleClass="menu-background">
     <VBox spacing="50" alignment="CENTER">
-        <Text text="CHOIX DE LA DIFFICULTÉ" styleClass="title-text"/>
         
         <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
             <Text text="Choisissez la difficulté de l'IA" styleClass="menu-label"/>
