@@ -6,7 +6,7 @@
 
     <groupId>com.DRYT</groupId>
     <artifactId>Quoridor</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>Quoridor</name>
 
     <properties>
@@ -146,7 +146,7 @@
                             <shadedClassifierName>shaded</shadedClassifierName>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.dryt.quoridor.app.JeuQuoridor</mainClass>
+                                    <mainClass>com.dryt.quoridor.app.QuoridorLauncher</mainClass>
                                 </transformer>
                             </transformers>
                             <filters>
@@ -157,6 +157,8 @@
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/*/module-info.class</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -194,11 +196,12 @@
                 <version>1.6.5</version>
                 <configuration>
                     <name>Quoridor</name>
-                    <appVersion>1.0.0</appVersion>
+                    <appVersion>${project.version}</appVersion>
                     <vendor>DRYT</vendor>
                     <destination>target/dist</destination>
                     <input>target</input>
                     <mainJar>${project.artifactId}-${project.version}-shaded.jar</mainJar>
+                    <mainClass>com.dryt.quoridor.app.QuoridorLauncher</mainClass>
                     <javaOptions>
                         <option>-Dfile.encoding=UTF-8</option>
                     </javaOptions>
