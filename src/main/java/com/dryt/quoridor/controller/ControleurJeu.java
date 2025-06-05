@@ -19,16 +19,19 @@ public class ControleurJeu {
 
     @FXML
     private Pane boardPane;
+    
+    @FXML
+    private Pane boardContainer;
 
     @FXML
     private javafx.scene.control.Label labelMursRestants;
 
     private Plateau plateau;
     private Button[][] cellButtons;
-    private final int cellSize = 60;
-    private final int wallSize = 8;
-    private final double offsetX = 80;
-    private final double offsetY = 80;
+    private final double cellSize = 50;
+    private final double wallSize = 6;
+    private final double offsetX = 20;
+    private final double offsetY = 20;
     private Rectangle ghostWall;
     private MinimaxAI aiStrategy;
 
@@ -36,36 +39,95 @@ public class ControleurJeu {
     private void initialize() {
         plateau = JeuQuoridor.getPlateau();
         cellButtons = new Button[9][9];
-
+        
         javafx.application.Platform.runLater(() -> {
-            for (int y = 0; y < 9; y++) {
-                for (int x = 0; x < 9; x++) {
-                    double baseX = offsetX + x * (cellSize + wallSize);
-                    double baseY = offsetY + y * (cellSize + wallSize);
-
-                    Button cell = new Button();
-                    cell.setPrefSize(cellSize, cellSize);
-                    cell.getStyleClass().add("cell");
-                    cell.setLayoutX(baseX);
-                    cell.setLayoutY(baseY);
-                    final int cx = x;
-                    final int cy = y;
-                    cell.setOnAction(event -> onCellClicked(cx, cy));
-                    cellButtons[cx][cy] = cell;
-                    boardPane.getChildren().add(cell);
-
-                    if (x < 8 && y < 9)
-                        createWallPlaceholder(baseX + cellSize, baseY + cellSize / 2.0 - wallSize / 2.0, x, y, true);
-                    if (y < 8 && x < 9)
-                        createWallPlaceholder(baseX + cellSize / 2.0 - wallSize / 2.0, baseY + cellSize, x, y, false);
-                    if (x < 8 && y < 8)
-                        createWallPlaceholder(baseX + cellSize, baseY + cellSize, x, y, true);
-                }
-            }
+            // Ensure CSS is loaded
+            loadCSS();
+            // Set proper container size based on board dimensions
+            setBoardContainerSize();
+            createGameBoard();
             updateBoardState();
         });
 
         aiStrategy = new MinimaxAI(4);
+    }
+    
+    private void setBoardContainerSize() {
+        // Calculate the actual board size
+        double boardWidth = 2 * offsetX + 9 * cellSize + 8 * wallSize;  // 538px
+        double boardHeight = 2 * offsetY + 9 * cellSize + 8 * wallSize; // 538px
+        
+        // Set board pane to exact content size
+        boardPane.setPrefSize(boardWidth, boardHeight);
+        boardPane.setMinSize(boardWidth, boardHeight);
+        boardPane.setMaxSize(boardWidth, boardHeight);
+        
+        // Set container size closer to game size (40px padding on each side)
+        double containerPadding = 10;
+        double containerSize = boardWidth + (2 * containerPadding); // 618px
+        
+        boardContainer.setPrefSize(containerSize, containerSize);
+        boardContainer.setMinSize(containerSize, containerSize);
+        boardContainer.setMaxSize(containerSize, containerSize);
+        
+        
+        System.out.println("🎯 Board pane sized to: " + boardWidth + "x" + boardHeight);
+        System.out.println("🎯 Board container sized to: " + containerSize + "x" + containerSize);
+    }
+    
+    private void loadCSS() {
+        try {
+            // Add CSS programmatically as backup
+            String cssPath = getClass().getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm();
+            boardPane.getScene().getStylesheets().add(cssPath);
+            System.out.println("✅ CSS loaded: " + cssPath);
+        } catch (Exception e) {
+            System.out.println("❌ Failed to load CSS: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void createGameBoard() {
+        // Nettoyer le plateau existant
+        boardPane.getChildren().clear();
+        
+        for (int y = 0; y < 9; y++) {
+            for (int x = 0; x < 9; x++) {
+                double baseX = offsetX + x * (cellSize + wallSize);
+                double baseY = offsetY + y * (cellSize + wallSize);
+
+                Button cell = new Button();
+                cell.setPrefSize(cellSize, cellSize);
+                
+                // Apply checkerboard pattern: alternating colors based on position
+                if ((x + y) % 2 == 0) {
+                    cell.getStyleClass().add("cell");        // Light cells
+                } else {
+                    cell.getStyleClass().add("cell-dark");   // Dark cells
+                }
+                
+                // Debug: Log which class was applied
+                String cellClass = (x + y) % 2 == 0 ? "cell" : "cell-dark";
+                System.out.println("🎨 Cell [" + x + "," + y + "] -> " + cellClass + " (sum=" + (x+y) + ")");
+                
+                cell.setLayoutX(baseX);
+                cell.setLayoutY(baseY);
+                final int cx = x;
+                final int cy = y;
+                cell.setOnAction(event -> onCellClicked(cx, cy));
+                cellButtons[cx][cy] = cell;
+                boardPane.getChildren().add(cell);
+
+                if (x < 8 && y < 9)
+                    createWallPlaceholder(baseX + cellSize, baseY + cellSize / 2.0 - wallSize / 2.0, x, y, true);
+                if (y < 8 && x < 9)
+                    createWallPlaceholder(baseX + cellSize / 2.0 - wallSize / 2.0, baseY + cellSize, x, y, false);
+                if (x < 8 && y < 8)
+                    createWallPlaceholder(baseX + cellSize, baseY + cellSize, x, y, true);
+            }
+        }
+        
+        System.out.println("🎯 Board creation completed - CSS should now show alternating cell colors!");
     }
 
     private void createWallPlaceholder(double x, double y, int wx, int wy, boolean vertical) {
@@ -131,8 +193,8 @@ public class ControleurJeu {
                 || noWallsLeft;
 
         ghostWall.setStyle(invalid
-                ? "-fx-fill: rgba(255, 0, 0, 0.3); -fx-stroke: red;"
-                : "-fx-fill: rgba(0, 0, 0, 0.3); -fx-stroke: green;");
+                ? "-fx-fill: rgba(255, 0, 0, 0.4); -fx-stroke: red; -fx-stroke-width: 3;"
+                : "-fx-fill: rgba(218, 165, 32, 0.6); -fx-stroke: #FFD700; -fx-stroke-width: 3; -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.8), 6, 0.7, 0, 0);");
 
         if (vertical) {
             ghostWall.setWidth(wallSize);
@@ -192,25 +254,60 @@ public class ControleurJeu {
     }
 
     private void updateBoardState() {
+        System.out.println("🎮 Updating board state...");
+        
+        // Clear only game-specific styles, preserve base cell styling
         for (int y = 0; y < 9; y++) {
             for (int x = 0; x < 9; x++) {
                 cellButtons[x][y].getStyleClass().removeAll("highlight", "player1", "player2", "player3", "player4");
+                // Preserve "cell" or "cell-dark" classes for checkerboard pattern
             }
         }
 
+        // Add player styles
         for (Joueur joueur : plateau.getJoueurs()) {
             String styleClass = "player" + joueur.getId();
             cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
+            System.out.println("🎭 Added " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
+            System.out.println("   Cell classes: " + cellButtons[joueur.getX()][joueur.getY()].getStyleClass());
         }
 
+        // Add highlight styles for possible moves
         System.out.println("Possible moves: ");
         for (int[] move : plateau.getPossibleMoves()) {
             System.out.println(Arrays.toString(move));
             cellButtons[move[0]][move[1]].getStyleClass().add("highlight");
+            System.out.println("✨ Added highlight to cell [" + move[0] + "," + move[1] + "]");
         }
 
-        labelMursRestants.setText("Joueur " + plateau.getCurrentPlayer().getId()
-                + " - murs restants : " + plateau.getCurrentPlayer().getWallsRemaining());
+        // Update walls remaining display for all players
+        StringBuilder wallInfo = new StringBuilder();
+        
+        // Sort players by ID to ensure consistent order (J1, J2, J3, J4)
+        java.util.List<Joueur> sortedPlayers = new java.util.ArrayList<>(plateau.getJoueurs());
+        sortedPlayers.sort((j1, j2) -> Integer.compare(j1.getId(), j2.getId()));
+        
+        for (int i = 0; i < sortedPlayers.size(); i++) {
+            Joueur joueur = sortedPlayers.get(i);
+            
+            if (i > 0) {
+                wallInfo.append("    ");  // Space separator for same line
+            }
+            
+            // Highlight current player with arrows
+            if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
+                wallInfo.append("► ");
+            }
+            
+            wallInfo.append("J").append(joueur.getId())
+                   .append(": ").append(joueur.getWallsRemaining()).append(" murs");
+            
+            if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
+                wallInfo.append(" ◄");
+            }
+        }
+        
+        labelMursRestants.setText(wallInfo.toString());
     }
 
     private void switchPlayerTurn() {
@@ -235,5 +332,19 @@ public class ControleurJeu {
                 switchPlayerTurn();
             }
         }
+    }
+    
+    @FXML
+    private void onNouvellePartie() {
+        System.out.println("🎮 Starting new game...");
+        JeuQuoridor.goChoixJoueurs();
+    }
+    
+    @FXML
+    private void onOpenMenu() {
+        System.out.println("📋 Opening menu overlay...");
+        // TODO: Add menu overlay functionality
+        // For now, just return to main menu
+        JeuQuoridor.goMenu();
     }
 }

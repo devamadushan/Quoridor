@@ -31,11 +31,15 @@
 
 /* Style pour les pions des joueurs */
 .joueur1 {
-    -fx-background-color: tomato;    /* pion Joueur 1 en rouge clair */
+    -fx-background-image: url("../images/piontroll2.png");
+    -fx-background-size: cover;
+    -fx-background-position: center;
     -fx-text-fill: white;
 }
 .joueur2 {
-    -fx-background-color: royalblue; /* pion Joueur 2 en bleu */
+    -fx-background-image: url("../images/piontroll1.png");
+    -fx-background-size: cover;
+    -fx-background-position: center;
     -fx-text-fill: white;
 }
 /* style.css */
