@@ -20,6 +20,11 @@ import com.dryt.quoridor.app.JeuQuoridor;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.scene.input.KeyCode;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.scene.control.Label;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,6 +49,41 @@ public class ControleurJeu {
     
     @FXML 
     private Slider volumeSlider;
+
+    // Victory overlay controls
+    @FXML
+    private StackPane victoryOverlay;
+    
+    @FXML
+    private Label victoryTitleLabel;
+    
+    @FXML
+    private Label victoryMessageLabel;
+    
+    @FXML
+    private Button victoryRedoButton;
+    
+    @FXML
+    private Button victoryHomeButton;
+    
+    @FXML
+    private Button victorySettingsButton;
+
+    // Menu overlay elements
+    @FXML
+    private StackPane menuOverlay;
+
+    @FXML
+    private Button menuResumeButton;
+
+    @FXML
+    private Button menuNewGameButton;
+
+    @FXML
+    private Button menuHomeButton;
+
+    @FXML
+    private Button menuSettingsButton;
 
     private Plateau plateau;
     private Button[][] cellButtons;
@@ -456,11 +496,8 @@ public class ControleurJeu {
             // Stop background music when game ends
             stopBackgroundMusic();
             
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setHeaderText(GameConstants.MSG_GAME_OVER);
-            alert.setContentText(String.format(GameConstants.MSG_PLAYER_WINS, winner.getId()));
-            alert.showAndWait();
-            JeuQuoridor.goMenu();
+            // Show custom victory popup instead of standard alert
+            showVictoryPopup(winner.getId());
             return;
         }
 
@@ -473,7 +510,7 @@ public class ControleurJeu {
         // Clear only game-specific styles, preserve base cell styling
         for (int y = 0; y < 9; y++) {
             for (int x = 0; x < 9; x++) {
-                cellButtons[x][y].getStyleClass().removeAll("highlight", "player1", "player2", "player3", "player4");
+                cellButtons[x][y].getStyleClass().removeAll("highlight", "player1", "player2", "player3", "player4", "current-player");
                 // Preserve "cell" or "cell-dark" classes for checkerboard pattern
             }
         }
@@ -489,11 +526,23 @@ public class ControleurJeu {
                 String styleClass = "player" + skinId;
                 cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
                 System.out.println("🎭 Added " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
+                
+                // Add current player indicator if it's this player's turn
+                if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
+                    cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add("current-player");
+                    System.out.println("👑 Added current-player indicator to player " + joueur.getId());
+                }
             } else {
                 // Fallback to default player style
                 String styleClass = "player" + joueur.getId();
                 cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
                 System.out.println("🎭 Added fallback " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
+                
+                // Add current player indicator if it's this player's turn
+                if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
+                    cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add("current-player");
+                    System.out.println("👑 Added current-player indicator to player " + joueur.getId());
+                }
             }
         }
 
@@ -564,11 +613,9 @@ public class ControleurJeu {
             // Stop background music when game ends
             stopBackgroundMusic();
             
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setHeaderText(GameConstants.MSG_GAME_OVER);
-            alert.setContentText(String.format(GameConstants.MSG_PLAYER_WINS, winner.getId()));
-            alert.showAndWait();
-            JeuQuoridor.goMenu();
+            // Show custom victory popup instead of standard alert
+            showVictoryPopup(winner.getId());
+            return;
         } else {
             switchPlayerTurn();
         }
@@ -589,24 +636,25 @@ public class ControleurJeu {
     
     // FXML methods that were missing (restored from interface version)
     @FXML
-    private void onNouvellePartie() {
-        System.out.println("🎮 Starting new game...");
-        
-        // Stop current background music before starting new game
-        stopBackgroundMusic();
-        
-        JeuQuoridor.goChoixJoueurs();
-    }
-    
-    @FXML
     private void onOpenMenu() {
         System.out.println("📋 Opening menu overlay...");
         
         // Stop background music when returning to menu
         stopBackgroundMusic();
         
-        // Return to main menu
-        JeuQuoridor.goMenu();
+        // Show the menu overlay
+        if (menuOverlay != null) {
+            menuOverlay.setVisible(true);
+            menuOverlay.setManaged(true);
+            
+            // Bring to front
+            menuOverlay.toFront();
+            
+            System.out.println("🏠 Menu overlay displayed successfully");
+        } else {
+            System.err.println("❌ Menu overlay is null, falling back to menu");
+            JeuQuoridor.goMenu();
+        }
     }
 
     private void setupKeyboardShortcuts() {
@@ -729,5 +777,113 @@ public class ControleurJeu {
             double baseFontSize = 14 * scaleFactor;
             boardPane.getScene().getRoot().setStyle("-fx-font-size: " + baseFontSize + "px;");
         }
+    }
+
+    private void showVictoryPopup(int winnerId) {
+        System.out.println("🏆 Showing victory overlay for player " + winnerId);
+        
+        // Set the victory message
+        if (victoryMessageLabel != null) {
+            victoryMessageLabel.setText("Le joueur " + winnerId + " a gagné !");
+        }
+        
+        // Show the victory overlay
+        if (victoryOverlay != null) {
+            victoryOverlay.setVisible(true);
+            victoryOverlay.setManaged(true);
+            
+            // Bring to front
+            victoryOverlay.toFront();
+            
+            System.out.println("🏆 Victory overlay displayed successfully");
+        } else {
+            System.err.println("❌ Victory overlay is null, falling back to menu");
+            JeuQuoridor.goMenu();
+        }
+    }
+    
+    private void hideVictoryOverlay() {
+        if (victoryOverlay != null) {
+            victoryOverlay.setVisible(false);
+            victoryOverlay.setManaged(false);
+        }
+    }
+    
+    @FXML
+    private void onVictoryReplay() {
+        System.out.println("🔄 Victory replay button clicked");
+        
+        // Hide the victory overlay
+        hideVictoryOverlay();
+        
+        // Restart the game with same parameters
+        JeuQuoridor.restartCurrentGame();
+    }
+    
+    @FXML
+    private void onVictoryMenu() {
+        System.out.println("🏠 Victory menu button clicked");
+        
+        // Hide the victory overlay
+        hideVictoryOverlay();
+        
+        // Return to main menu
+        JeuQuoridor.goMenu();
+    }
+    
+    @FXML
+    private void onVictorySettings() {
+        System.out.println("⚙️ Victory settings button clicked");
+        
+        // For now, just show a placeholder message
+        System.out.println("⚙️ Settings functionality to be implemented");
+    }
+    
+    private void hideMenuOverlay() {
+        if (menuOverlay != null) {
+            menuOverlay.setVisible(false);
+            menuOverlay.setManaged(false);
+        }
+    }
+    
+    @FXML
+    private void onMenuResume() {
+        System.out.println("▶️ Menu resume button clicked");
+        
+        // Hide the menu overlay and return to the game
+        hideMenuOverlay();
+        
+        // Restart background music if it was playing
+        startBackgroundMusic();
+    }
+    
+    @FXML
+    private void onMenuNewGame() {
+        System.out.println("🔄 Menu restart game button clicked");
+        
+        // Hide the menu overlay
+        hideMenuOverlay();
+        
+        // Restart the current game with same settings
+        JeuQuoridor.restartCurrentGame();
+    }
+    
+    @FXML
+    private void onMenuHome() {
+        System.out.println("🏠 Menu home button clicked");
+        
+        // Hide the menu overlay
+        hideMenuOverlay();
+        
+        // Return to main menu
+        JeuQuoridor.goMenu();
+    }
+    
+    @FXML
+    private void onMenuSettings() {
+        System.out.println("⚙️ Menu settings button clicked");
+        
+        // For now, just show a placeholder message
+        System.out.println("⚙️ Settings functionality to be implemented");
     }
 }

@@ -211,42 +211,83 @@ public class JeuQuoridor extends Application {
     }
 
     public static void startGame() throws Exception {
+        // 🎮 Start game with appropriate player configuration
+        if (nombreJoueurs == 2) {
+            if (isVsAI) {
+                System.out.println("Mode 1 VS 1 IA sélectionné");
+            } else {
+                System.out.println("Mode 1 VS 1 Humain sélectionné");
+            }
+        } else {
+            System.out.println("Mode 4 joueurs sélectionné avec " + nombreIA4Joueurs + " IA");
+        }
+
+        // Print player configuration
+        System.out.println("🎮 Configuration des joueurs :");
+        if (nombreJoueurs == 2) {
+            System.out.println("Joueur 1 - Humain");
+            System.out.println("Joueur 2 - " + (isVsAI ? "IA" : "Humain"));
+        } else {
+            for (int i = 1; i <= 4; i++) {
+                boolean isAI = i > (4 - nombreIA4Joueurs);
+                System.out.println("Joueur " + i + " - " + (isAI ? "IA" : "Humain"));
+            }
+        }
+
+        // Calculate window size based on current screen
+        double[] windowSize = calculateOptimalWindowSize();
+        double windowWidth = windowSize[0];
+        double windowHeight = windowSize[1];
+
+        URL resource = JeuQuoridor.class.getResource("/com/dryt/quoridor/views/jeu.fxml");
+        if (resource == null) {
+            throw new Exception("Cannot find jeu.fxml");
+        }
+        
+        FXMLLoader loader = new FXMLLoader(resource);
+        Parent gameRoot = loader.load();
+        
+        // Store the controller for later use
+        ControleurJeu controleur = loader.getController();
+        
+        Scene sceneJeu = new Scene(gameRoot, windowWidth, windowHeight);
+        sceneJeu.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
+        
+        primaryStage.setScene(sceneJeu);
+        
+        if (isMaximized) {
+            primaryStage.setMaximized(true);
+            System.out.println("🎮 Game started in maximized: " + primaryStage.getWidth() + "x" + primaryStage.getHeight());
+        } else {
+            primaryStage.setMaximized(false);
+            centerStageOnScreen(primaryStage, windowWidth, windowHeight);
+            System.out.println("🎮 Game started windowed: " + windowWidth + "x" + windowHeight);
+        }
+        
         // Create plateau based on game configuration
         if (nombreJoueurs == 2) {
             if (isVsAI) {
-                // Mode 1v1 Humain vs IA
-                plateau = new Plateau(22, 1);
+                plateau = new Plateau(22, 1); // 1v1 Humain vs IA
             } else {
-                // Mode 1v1 Humain vs Humain
-                plateau = new Plateau(21, 0);
+                plateau = new Plateau(21, 0); // 1v1 Humain vs Humain
             }
-        } else if (nombreJoueurs == 4) {
-            // Mode 4 joueurs
-            plateau = new Plateau(4, nombreIA4Joueurs);
         } else {
-            throw new IllegalStateException("Nombre de joueurs non géré pour le démarrage du jeu : " + nombreJoueurs);
+            plateau = new Plateau(4, nombreIA4Joueurs); // Mode 4 joueurs
         }
         
-        FXMLLoader loader = new FXMLLoader(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/jeu.fxml"));
-        Parent gameRoot = loader.load();
-        
-        // Get the controller and set up the game
-        ControleurJeu controleur = loader.getController();
-        
-        Scene gameScene = new Scene(gameRoot, screenWidth, screenHeight);
-        gameScene.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
-        gameScene.setOnKeyPressed(e -> handleKeyPress(e));
-        
-        primaryStage.setScene(gameScene);
-        // Smooth maximized transition
-        if (isMaximized) {
-            primaryStage.setMaximized(true);
-        }
-        
-        // Set up the game plateau and display
         controleur.setupPlateauAndDisplay(plateau);
-        
-        System.out.println("🎮 Game started in maximized: " + screenWidth + "x" + screenHeight);
+    }
+    
+    public static void restartCurrentGame() {
+        try {
+            System.out.println("🔄 Restarting current game with same parameters...");
+            startGame(); // Reuse the existing game parameters
+        } catch (Exception e) {
+            System.err.println("❌ Failed to restart game: " + e.getMessage());
+            e.printStackTrace();
+            // Fallback to menu if restart fails
+            goMenu();
+        }
     }
 
     public static void goMenu() {

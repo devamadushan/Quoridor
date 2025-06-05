@@ -39,9 +39,6 @@
                 
                 <!-- Boutons de navigation à droite -->
                 <Button text="" 
-                        onAction="#onNouvellePartie"
-                        styleClass="new-game-top-button"/>
-                <Button text="" 
                         onAction="#onOpenMenu"
                         styleClass="menu-open-button"/>
             </children>
@@ -53,37 +50,137 @@
 
     <!-- Zone centrale pour le plateau de jeu -->
     <center>
-        <VBox alignment="CENTER" spacing="30" VBox.vgrow="ALWAYS">
+        <!-- StackPane pour permettre l'overlay de victoire -->
+        <StackPane>
             <children>
-                <!-- Conteneur du plateau avec centrage automatique -->
-                <StackPane VBox.vgrow="ALWAYS">
+                <!-- Contenu principal du jeu -->
+                <VBox alignment="CENTER" spacing="30" VBox.vgrow="ALWAYS">
                     <children>
-                        <!-- Conteneur brun en arrière-plan (MUST BE FIRST) -->
-                        <Pane fx:id="boardContainer" 
-                              prefWidth="100.0" prefHeight="100.0" 
-                              styleClass="board-container"
-                              mouseTransparent="true"/>
+                        <!-- Conteneur du plateau avec centrage automatique -->
+                        <StackPane VBox.vgrow="ALWAYS">
+                            <children>
+                                <!-- Conteneur brun en arrière-plan (MUST BE FIRST) -->
+                                <Pane fx:id="boardContainer" 
+                                      prefWidth="100.0" prefHeight="100.0" 
+                                      styleClass="board-container"
+                                      mouseTransparent="true"/>
+                                
+                                <!-- Plateau de jeu centré (MUST BE SECOND - ON TOP) -->
+                                <Pane fx:id="boardPane" 
+                                      prefWidth="580.0" prefHeight="580.0"
+                                      style="-fx-background-color: transparent;" />
+                            </children>
+                        </StackPane>
                         
-                        <!-- Plateau de jeu centré (MUST BE SECOND - ON TOP) -->
-                        <Pane fx:id="boardPane" 
-                              prefWidth="580.0" prefHeight="580.0"
-                              style="-fx-background-color: transparent;" />
+                        <!-- Informations du jeu en bas -->
+                        <Label fx:id="labelMursRestants" 
+                               text="Murs restants : 10" 
+                               styleClass="game-label"
+                               wrapText="true"
+                               textAlignment="CENTER"
+                               maxWidth="Infinity"
+                               style="-fx-font-size: 1.4em; -fx-text-fill: #F5DEB3; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);"/>
+                    </children>
+                    <padding>
+                        <Insets top="30" bottom="30" left="50" right="50"/>
+                    </padding>
+                </VBox>
+                
+                <!-- Overlay de victoire (caché par défaut) avec fond plus sombre -->
+                <StackPane fx:id="victoryOverlay" 
+                           visible="false" 
+                           managed="false"
+                           styleClass="victory-overlay-root">
+                    <children>
+                        <!-- Fond semi-transparent plus sombre -->
+                        <Pane styleClass="victory-overlay-background-dark"/>
+                        
+                        <!-- Panel de victoire avec image de fond plus sombre (vide maintenant) -->
+                        <VBox alignment="CENTER" spacing="30" styleClass="victory-panel-dark">
+                            <!-- Panel vide, juste l'image de fond -->
+                        </VBox>
+                        
+                        <!-- Boutons positionnés séparément, beaucoup plus bas -->
+                        <VBox alignment="CENTER" spacing="30" styleClass="victory-buttons-container">
+                            <children>
+                                <!-- 3 Boutons d'action horizontaux (séparés du panel) -->
+                                <HBox alignment="CENTER" spacing="40">
+                                    <children>
+                                        <!-- Bouton Redo/Recommencer -->
+                                        <Button fx:id="victoryRedoButton"
+                                                text=""
+                                                onAction="#onVictoryReplay"
+                                                styleClass="victory-redo-button"/>
+                                                
+                                        <!-- Bouton Home -->
+                                        <Button fx:id="victoryHomeButton"
+                                                text=""
+                                                onAction="#onVictoryMenu"
+                                                styleClass="victory-home-button-new"/>
+                                                
+                                        <!-- Bouton Settings -->
+                                        <Button fx:id="victorySettingsButton"
+                                                text=""
+                                                onAction="#onVictorySettings"
+                                                styleClass="victory-settings-button"/>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
                     </children>
                 </StackPane>
                 
-                <!-- Informations du jeu en bas -->
-                <Label fx:id="labelMursRestants" 
-                       text="Murs restants : 10" 
-                       styleClass="game-label"
-                       wrapText="true"
-                       textAlignment="CENTER"
-                       maxWidth="Infinity"
-                       style="-fx-font-size: 1.4em; -fx-text-fill: #F5DEB3; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);"/>
+                <!-- Menu overlay (caché par défaut) avec fond sombre -->
+                <StackPane fx:id="menuOverlay" 
+                           visible="false" 
+                           managed="false"
+                           styleClass="menu-overlay-root">
+                    <children>
+                        <!-- Fond semi-transparent sombre -->
+                        <Pane styleClass="menu-overlay-background"/>
+                        
+                        <!-- Panel de menu avec image de fond (vide maintenant) -->
+                        <VBox alignment="CENTER" spacing="30" styleClass="menu-panel">
+                            <!-- Panel vide, juste l'image de fond -->
+                        </VBox>
+                        
+                        <!-- Boutons positionnés séparément, plus bas -->
+                        <VBox alignment="CENTER" spacing="30" styleClass="menu-buttons-container">
+                            <children>
+                                <!-- 4 Boutons d'action horizontaux (séparés du panel) avec espacement réduit -->
+                                <HBox alignment="CENTER" spacing="20">
+                                    <children>
+                                        <!-- Bouton Resume/Reprendre le jeu -->
+                                        <Button fx:id="menuResumeButton"
+                                                text=""
+                                                onAction="#onMenuResume"
+                                                styleClass="menu-resume-button"/>
+                                        
+                                        <!-- Bouton Nouvelle partie -->
+                                        <Button fx:id="menuNewGameButton"
+                                                text=""
+                                                onAction="#onMenuNewGame"
+                                                styleClass="menu-new-game-button"/>
+                                                
+                                        <!-- Bouton Home/Retour au menu principal -->
+                                        <Button fx:id="menuHomeButton"
+                                                text=""
+                                                onAction="#onMenuHome"
+                                                styleClass="menu-home-button"/>
+                                                
+                                        <!-- Bouton Settings -->
+                                        <Button fx:id="menuSettingsButton"
+                                                text=""
+                                                onAction="#onMenuSettings"
+                                                styleClass="menu-settings-button"/>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </StackPane>
             </children>
-            <padding>
-                <Insets top="30" bottom="30" left="50" right="50"/>
-            </padding>
-        </VBox>
+        </StackPane>
     </center>
 
 </BorderPane>
