@@ -8,6 +8,10 @@ import javafx.fxml.FXMLLoader;
 import com.dryt.quoridor.model.Plateau;
 import com.dryt.quoridor.ai.DifficulteIA;
 import com.dryt.quoridor.controller.ControleurJeu;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,48 +27,142 @@ public class JeuQuoridor extends Application {
     private static boolean isVsAI = false; // Pour le mode 1v1: true si contre IA, false si 1v1 humain
     private static int nombreIA4Joueurs = 0; // Variable pour stocker le nombre d'IA en mode 4 joueurs
     private static Plateau plateau;
-    private static double windowX;
-    private static double windowY;
     private static DifficulteIA difficulteIA = DifficulteIA.MOYEN; // Difficulté par défaut pour 1v1 IA
     private static List<DifficulteIA> difficultesIA = new ArrayList<>(); // Difficultés pour les IA en mode 4 joueurs
     private static int[] selectedSkins = new int[4]; // Tableau pour stocker les skins sélectionnés par chaque joueur (index 0 pour joueur 1, etc.)
+    
+    // Screen resolution variables
+    private static double screenWidth;
+    private static double screenHeight;
+    private static double scaleFactorX = 1.0;
+    private static double scaleFactorY = 1.0;
+    private static boolean isMaximized = true; // Use maximized window instead of fullscreen
+    private static double currentResolutionWidth = 1920.0; // Default game resolution
+    private static double currentResolutionHeight = 1080.0;
 
     @Override
     public void start(Stage stage) throws Exception {
         primaryStage = stage;
+        
+        // Detect screen resolution
+        detectScreenResolution();
+        
+        // Use maximized window by default
+        double windowWidth = screenWidth;
+        double windowHeight = screenHeight;
 
         Parent menuRoot = FXMLLoader.load(getClass().getResource("/com/dryt/quoridor/views/menu.fxml"));
-        sceneMenu = new Scene(menuRoot, 1920, 1080);
+        sceneMenu = new Scene(menuRoot, windowWidth, windowHeight);
 
         Parent optionsRoot = FXMLLoader.load(getClass().getResource("/com/dryt/quoridor/views/options.fxml"));
-        sceneOptions = new Scene(optionsRoot, 1920, 1080);
+        sceneOptions = new Scene(optionsRoot, windowWidth, windowHeight);
 
         Parent choixRoot = FXMLLoader.load(getClass().getResource("/com/dryt/quoridor/views/choix_joueurs.fxml"));
-        sceneChoixJoueurs = new Scene(choixRoot, 1920, 1080);
+        sceneChoixJoueurs = new Scene(choixRoot, windowWidth, windowHeight);
 
         sceneMenu.getStylesheets().add(getClass().getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
         sceneOptions.getStylesheets().add(getClass().getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
         sceneChoixJoueurs.getStylesheets().add(getClass().getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
 
+        // Add keyboard shortcuts to all initial scenes
+        sceneMenu.setOnKeyPressed(e -> handleKeyPress(e));
+        sceneOptions.setOnKeyPressed(e -> handleKeyPress(e));
+        sceneChoixJoueurs.setOnKeyPressed(e -> handleKeyPress(e));
+
         stage.setTitle("Jeu Quoridor");
         stage.setScene(sceneMenu);
-        stage.setResizable(false);
+        stage.setResizable(true);
+        
+        // Start in maximized mode
+        stage.setMaximized(true);
+        
         stage.show();
-
-        // Sauvegarder la position initiale
-       // windowX = stage.getX();
-        //windowY = stage.getY();
+        
+        System.out.println("🖥️ Screen detected: " + screenWidth + "x" + screenHeight);
+        System.out.println("🎮 Game started in maximized mode");
+        System.out.println("⌨️ Press F11 to toggle maximized, Escape to exit maximized");
     }
-
-    private static void updateWindowPosition() {
-        if (primaryStage != null) {
-            primaryStage.setX(windowX);
-            primaryStage.setY(windowY);
+    
+    private static void detectScreenResolution() {
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        screenWidth = screenBounds.getWidth();
+        screenHeight = screenBounds.getHeight();
+        
+        // Calculate scale factors based on a reference resolution (1920x1080)
+        scaleFactorX = screenWidth / 1920.0;
+        scaleFactorY = screenHeight / 1080.0;
+        
+        // Use the smaller scale factor to maintain aspect ratio
+        double uniformScale = Math.min(scaleFactorX, scaleFactorY);
+        scaleFactorX = uniformScale;
+        scaleFactorY = uniformScale;
+    }
+    
+    private static void handleKeyPress(KeyEvent event) {
+        if (event.getCode() == KeyCode.F11) {
+            isMaximized = !isMaximized;
+            primaryStage.setMaximized(isMaximized);
+            // Only log once, no repeated console messages
+        } else if (event.getCode() == KeyCode.ESCAPE && primaryStage.isMaximized()) {
+            primaryStage.setMaximized(false);
+            isMaximized = false;
         }
+    }
+    
+    private static double[] calculateOptimalWindowSize() {
+        // Base window size for 1920x1080
+        double baseWidth = 1400.0;
+        double baseHeight = 900.0;
+        
+        // For screens larger than 1920x1080, cap the scaling
+        double maxScale = 1.2; // Don't scale more than 20% above base size
+        double effectiveScaleX = Math.min(scaleFactorX, maxScale);
+        double effectiveScaleY = Math.min(scaleFactorY, maxScale);
+        
+        // Scale based on screen size, but cap at 80% of screen size (was 90%)
+        double targetWidth = Math.min(baseWidth * effectiveScaleX, screenWidth * 0.8);
+        double targetHeight = Math.min(baseHeight * effectiveScaleY, screenHeight * 0.8);
+        
+        // Ensure minimum size for small screens
+        targetWidth = Math.max(targetWidth, 1000.0);  // Reduced from 1200
+        targetHeight = Math.max(targetHeight, 700.0); // Reduced from 800
+        
+        // For very large screens, use a more conservative approach
+        if (screenWidth >= 2560 || screenHeight >= 1440) {
+            targetWidth = Math.min(targetWidth, 1600.0);
+            targetHeight = Math.min(targetHeight, 1000.0);
+        }
+        
+        return new double[]{targetWidth, targetHeight};
+    }
+    
+    private static void centerStageOnScreen(Stage stage, double width, double height) {
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        double centerX = (screenBounds.getWidth() - width) / 2.0;
+        double centerY = (screenBounds.getHeight() - height) / 2.0;
+        
+        stage.setX(centerX);
+        stage.setY(centerY);
     }
 
     public static Stage getPrimaryStage() {
         return primaryStage;
+    }
+    
+    public static double getScaleFactorX() {
+        return scaleFactorX;
+    }
+    
+    public static double getScaleFactorY() {
+        return scaleFactorY;
+    }
+    
+    public static double getScreenWidth() {
+        return screenWidth;
+    }
+    
+    public static double getScreenHeight() {
+        return screenHeight;
     }
 
     public static void setNombreJoueurs(int nb) {
@@ -113,118 +211,122 @@ public class JeuQuoridor extends Application {
     }
 
     public static void startGame() throws Exception {
-        windowX = primaryStage.getX(); // Sauvegarder la position avant de changer de scène
-        windowY = primaryStage.getY();
-
-        // Créer le plateau avec le bon nombre de joueurs et d'IA en fonction de la sélection
+        // Create plateau based on game configuration
         if (nombreJoueurs == 2) {
             if (isVsAI) {
-                // Mode 1v1 Humain vs IA (nombreJoueurs=2, 1 IA)
-                plateau = new Plateau(22, 1); // Utilise le constructeur 22 pour 1v1 IA
+                // Mode 1v1 Humain vs IA
+                plateau = new Plateau(22, 1);
             } else {
-                // Mode 1v1 Humain vs Humain (nombreJoueurs=2, 0 IA)
-                plateau = new Plateau(21, 0); // Utilise le constructeur 21 pour 1v1 humain
+                // Mode 1v1 Humain vs Humain
+                plateau = new Plateau(21, 0);
             }
         } else if (nombreJoueurs == 4) {
-            // Mode 4 joueurs (Humains vs IA). Le nombreIA4Joueurs a été défini dans ControleurChoixNbIADifficulte
-            plateau = new Plateau(4, nombreIA4Joueurs); // Utilise le constructeur 4 pour 4 joueurs avec X IA
+            // Mode 4 joueurs
+            plateau = new Plateau(4, nombreIA4Joueurs);
         } else {
             throw new IllegalStateException("Nombre de joueurs non géré pour le démarrage du jeu : " + nombreJoueurs);
         }
-
+        
         FXMLLoader loader = new FXMLLoader(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/jeu.fxml"));
         Parent gameRoot = loader.load();
-        // Obtenir le contrôleur après le chargement du FXML
-        ControleurJeu gameController = loader.getController();
-        // Initialiser le plateau et l'affichage dans le contrôleur
-        if (gameController != null) {
-            gameController.setupPlateauAndDisplay(plateau);
+        
+        // Get the controller and set up the game
+        ControleurJeu controleur = loader.getController();
+        
+        Scene gameScene = new Scene(gameRoot, screenWidth, screenHeight);
+        gameScene.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
+        gameScene.setOnKeyPressed(e -> handleKeyPress(e));
+        
+        primaryStage.setScene(gameScene);
+        // Smooth maximized transition
+        if (isMaximized) {
+            primaryStage.setMaximized(true);
         }
-
-        Scene sceneJeu = new Scene(gameRoot, primaryStage.getWidth(), primaryStage.getHeight());
-        sceneJeu.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_jeu.css").toExternalForm());
-        primaryStage.setScene(sceneJeu);
-        updateWindowPosition(); // Appliquer la position après le changement de scène
+        
+        // Set up the game plateau and display
+        controleur.setupPlateauAndDisplay(plateau);
+        
+        System.out.println("🎮 Game started in maximized: " + screenWidth + "x" + screenHeight);
     }
 
     public static void goMenu() {
-        windowX = primaryStage.getX(); // Sauvegarder la position avant de changer de scène
-        windowY = primaryStage.getY();
         primaryStage.setScene(sceneMenu);
-        updateWindowPosition(); // Appliquer la position après le changement de scène
+        // Maintain maximized state without animation
+        if (!primaryStage.isMaximized() && isMaximized) {
+            primaryStage.setMaximized(true);
+        }
     }
 
     public static void goOptions() {
-        windowX = primaryStage.getX(); // Sauvegarder la position avant de changer de scène
-        windowY = primaryStage.getY();
         primaryStage.setScene(sceneOptions);
-        updateWindowPosition(); // Appliquer la position après le changement de scène
+        // Maintain maximized state without animation  
+        if (!primaryStage.isMaximized() && isMaximized) {
+            primaryStage.setMaximized(true);
+        }
     }
 
     public static void goChoixJoueurs() {
-        windowX = primaryStage.getX(); // Sauvegarder la position avant de changer de scène
-        windowY = primaryStage.getY();
         primaryStage.setScene(sceneChoixJoueurs);
-        updateWindowPosition(); // Appliquer la position après le changement de scène
+        // Maintain maximized state without animation
+        if (!primaryStage.isMaximized() && isMaximized) {
+            primaryStage.setMaximized(true);
+        }
     }
 
     // Nouvelle méthode pour naviguer vers le choix des skins
     public static void goChoixSkins() {
-        windowX = primaryStage.getX();
-        windowY = primaryStage.getY();
         try {
             FXMLLoader loader = new FXMLLoader(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/choix_skins.fxml"));
             Parent skinsRoot = loader.load();
-            // Futurement : passer des données au contrôleur de choix de skins si nécessaire
-            // ControleurChoixSkins skinsController = loader.getController();
 
-            Scene sceneSkins = new Scene(skinsRoot, primaryStage.getWidth(), primaryStage.getHeight());
+            Scene sceneSkins = new Scene(skinsRoot, screenWidth, screenHeight);
             sceneSkins.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
+            sceneSkins.setOnKeyPressed(e -> handleKeyPress(e));
             primaryStage.setScene(sceneSkins);
-            updateWindowPosition();
+            // Smooth maximized transition
+            if (isMaximized) {
+                primaryStage.setMaximized(true);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            // Optionnel: Afficher une alerte à l'utilisateur en cas d'erreur
         }
     }
 
     // Nouvelle méthode pour naviguer vers le choix de difficulté de l'IA (mode 1v1 IA)
     public static void goChoixDifficulteIA() {
-        windowX = primaryStage.getX();
-        windowY = primaryStage.getY();
         try {
             FXMLLoader loader = new FXMLLoader(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/choix_difficulte_ia.fxml"));
             Parent difficulteRoot = loader.load();
-            // Futurement : passer des données au contrôleur de difficulté IA si nécessaire
-            // ControleurChoixDifficulteIA difficulteController = loader.getController();
 
-            Scene sceneDifficulte = new Scene(difficulteRoot, primaryStage.getWidth(), primaryStage.getHeight());
+            Scene sceneDifficulte = new Scene(difficulteRoot, screenWidth, screenHeight);
             sceneDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
+            sceneDifficulte.setOnKeyPressed(e -> handleKeyPress(e));
             primaryStage.setScene(sceneDifficulte);
-            updateWindowPosition();
+            // Smooth maximized transition
+            if (isMaximized) {
+                primaryStage.setMaximized(true);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            // Optionnel: Afficher une alerte à l'utilisateur en cas d'erreur
         }
     }
 
     // Nouvelle méthode pour naviguer vers le choix du nombre et de la difficulté des IA (mode 4 joueurs)
     public static void goChoixNbIADifficulte() {
-        windowX = primaryStage.getX();
-        windowY = primaryStage. getY();
         try {
             FXMLLoader loader = new FXMLLoader(JeuQuoridor.class.getResource("/com/dryt/quoridor/views/choix_nb_ia_difficulte.fxml"));
             Parent nbDifficulteRoot = loader.load();
-            // Futurement : passer des données au contrôleur de choix nb IA et difficulté si nécessaire
-            // ControleurChoixNbIADifficulte nbDifficulteController = loader.getController();
 
-            Scene sceneNbDifficulte = new Scene(nbDifficulteRoot, primaryStage.getWidth(), primaryStage.getHeight());
+            Scene sceneNbDifficulte = new Scene(nbDifficulteRoot, screenWidth, screenHeight);
             sceneNbDifficulte.getStylesheets().add(JeuQuoridor.class.getResource("/com/dryt/quoridor/styles/style_menu.css").toExternalForm());
+            sceneNbDifficulte.setOnKeyPressed(e -> handleKeyPress(e));
             primaryStage.setScene(sceneNbDifficulte);
-            updateWindowPosition();
+            // Smooth maximized transition
+            if (isMaximized) {
+                primaryStage.setMaximized(true);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            // Optionnel: Afficher une alerte à l'utilisateur en cas d'erreur
         }
     }
 
@@ -237,19 +339,54 @@ public class JeuQuoridor extends Application {
     }
 
     public static void setDifficultesIA(List<DifficulteIA> difficultes) {
-        difficultesIA = new ArrayList<>(difficultes);
+        difficultesIA.clear();
+        difficultesIA.addAll(difficultes);
     }
 
     public static List<DifficulteIA> getDifficultesIA() {
-        return difficultesIA;
+        return new ArrayList<>(difficultesIA);
     }
 
-    public static void setResolution(int width, int height) {
-        Stage stage = getPrimaryStage();
-        stage.setWidth(width);
-        stage.setHeight(height);
-        stage.setX(0);
-        stage.setY(height == 600 ? 0 : -500);
+    public static void setPlateau(Plateau p) {
+        plateau = p;
+    }
+
+    public static void setResolution(double width, double height) {
+        currentResolutionWidth = width;
+        currentResolutionHeight = height;
+        
+        if (primaryStage != null) {
+            Scene currentScene = primaryStage.getScene();
+            if (currentScene != null) {
+                // Update the scene size
+                currentScene.getRoot().setStyle("-fx-pref-width: " + width + "; -fx-pref-height: " + height + ";");
+                
+                if (isMaximized) {
+                    // In maximized, we keep maximized but the content adapts to the target resolution
+                    primaryStage.setMaximized(true);
+                    System.out.println("🔧 Resolution set to: " + width + "x" + height + " (maximized)");
+                } else {
+                    // In windowed mode, change the actual window size
+                    primaryStage.setWidth(width);
+                    primaryStage.setHeight(height);
+                    centerStageOnScreen(primaryStage, width, height);
+                    System.out.println("🔧 Resolution set to: " + width + "x" + height + " (windowed)");
+                }
+            }
+        }
+    }
+
+    // Add getters for current resolution
+    public static double getCurrentResolutionWidth() {
+        return currentResolutionWidth;
+    }
+    
+    public static double getCurrentResolutionHeight() {
+        return currentResolutionHeight;
+    }
+    
+    public static boolean isMaximized() {
+        return isMaximized;
     }
 
     public static void main(String[] args) {

@@ -7,7 +7,7 @@
 <?import javafx.geometry.Insets?>
 
 <BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            prefWidth="1200.0" prefHeight="800.0"
+            prefWidth="1400.0" prefHeight="900.0"
             fx:controller="com.dryt.quoridor.controller.ControleurJeu"
             styleClass="root">
 
@@ -23,17 +23,17 @@
                         styleClass="menu-open-button"/>
             </children>
             <padding>
-                <Insets top="10" bottom="10" left="20" right="20"/>
+                <Insets top="15" bottom="15" left="30" right="30"/>
             </padding>
         </HBox>
     </top>
 
     <!-- Zone centrale pour le plateau de jeu -->
     <center>
-        <VBox alignment="CENTER" spacing="20">
+        <VBox alignment="CENTER" spacing="30" VBox.vgrow="ALWAYS">
             <children>
                 <!-- Conteneur du plateau avec centrage automatique -->
-                <StackPane>
+                <StackPane VBox.vgrow="ALWAYS">
                     <children>
                         <!-- Conteneur brun en arrière-plan (MUST BE FIRST) -->
                         <Pane fx:id="boardContainer" 
@@ -54,11 +54,11 @@
                        styleClass="game-label"
                        wrapText="true"
                        textAlignment="CENTER"
-                       maxWidth="600"
-                       style="-fx-font-size: 20px; -fx-text-fill: #F5DEB3; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);"/>
+                       maxWidth="800"
+                       style="-fx-font-size: 22px; -fx-text-fill: #F5DEB3; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);"/>
             </children>
             <padding>
-                <Insets top="20" bottom="20" left="20" right="20"/>
+                <Insets top="30" bottom="30" left="50" right="50"/>
             </padding>
         </VBox>
     </center>

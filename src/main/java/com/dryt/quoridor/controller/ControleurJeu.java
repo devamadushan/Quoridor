@@ -15,6 +15,8 @@ import com.dryt.quoridor.model.Joueur;
 import com.dryt.quoridor.model.Mur;
 import com.dryt.quoridor.app.JeuQuoridor;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
+import javafx.scene.input.KeyCode;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,6 +55,7 @@ public class ControleurJeu {
             loadCSS();
             setBoardContainerSize();
             createGameBoard();
+            setupKeyboardShortcuts();
         });
     }
     
@@ -434,5 +437,32 @@ public class ControleurJeu {
         // TODO: Add menu overlay functionality
         // For now, just return to main menu
         JeuQuoridor.goMenu();
+    }
+
+    private void setupKeyboardShortcuts() {
+        if (boardPane.getScene() != null) {
+            boardPane.getScene().setOnKeyPressed(e -> {
+                switch (e.getCode()) {
+                    case F11:
+                        toggleFullscreen();
+                        break;
+                    case ESCAPE:
+                        if (JeuQuoridor.getPrimaryStage().isFullScreen()) {
+                            JeuQuoridor.getPrimaryStage().setFullScreen(false);
+                        }
+                        break;
+                }
+            });
+            
+            // Make sure the scene can receive key events
+            boardPane.getScene().getRoot().setFocusTraversable(true);
+            boardPane.getScene().getRoot().requestFocus();
+        }
+    }
+    
+    private void toggleFullscreen() {
+        Stage stage = JeuQuoridor.getPrimaryStage();
+        stage.setFullScreen(!stage.isFullScreen());
+        System.out.println("🖥️ Fullscreen toggled: " + stage.isFullScreen());
     }
 }
