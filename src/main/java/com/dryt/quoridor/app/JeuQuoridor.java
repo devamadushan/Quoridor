@@ -689,7 +689,23 @@ public class JeuQuoridor extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        try {
+            // Tentative de lancement standard JavaFX
+            launch(args);
+        } catch (Exception e) {
+            System.err.println("Erreur lors du lancement de l'application JavaFX: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Tentative alternative pour les environnements jpackage
+            try {
+                System.out.println("Tentative de lancement alternatif...");
+                Application.launch(JeuQuoridor.class, args);
+            } catch (Exception e2) {
+                System.err.println("Échec du lancement alternatif: " + e2.getMessage());
+                e2.printStackTrace();
+                System.exit(1);
+            }
+        }
     }
 
     // Global music management methods
