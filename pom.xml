@@ -1,140 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.DRYT</groupId>
-    <artifactId>Quoridor</artifactId>
+    <groupId>com.dryt.quoridor</groupId>
+    <artifactId>quoridor</artifactId>
     <version>1.0.2</version>
-    <name>Quoridor</name>
+    <name>Quoridor Game</name>
+    <description>Jeu de stratégie Quoridor avec IA et interface JavaFX</description>
 
     <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.10.2</junit.version>
+        <javafx.version>21.0.1</javafx.version>
+        <junit.version>5.10.0</junit.version>
+        <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
+        <jpackage.maven.plugin.version>1.6.0</jpackage.maven.plugin.version>
+        <maven.compiler.version>3.13.0</maven.compiler.version>
+        <maven.shade.version>3.5.1</maven.shade.version>
+        <maven.exec.version>3.1.1</maven.exec.version>
     </properties>
 
     <dependencies>
+        <!-- JavaFX Controls -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>21</version>
+            <version>${javafx.version}</version>
         </dependency>
+
+        <!-- JavaFX FXML -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>21</version>
+            <version>${javafx.version}</version>
         </dependency>
+
+        <!-- JavaFX Web -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>21</version>
+            <version>${javafx.version}</version>
         </dependency>
+
+        <!-- JavaFX Swing -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>21</version>
+            <version>${javafx.version}</version>
         </dependency>
+
+        <!-- JavaFX Media -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-media</artifactId>
-            <version>21</version>
+            <version>${javafx.version}</version>
         </dependency>
+
+        <!-- Jackson pour JSON -->
         <dependency>
-            <groupId>org.controlsfx</groupId>
-            <artifactId>controlsfx</artifactId>
-            <version>11.2.1</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.16.0</version>
         </dependency>
+
+        <!-- Apache Commons Math -->
         <dependency>
-            <groupId>com.dlsc.formsfx</groupId>
-            <artifactId>formsfx-core</artifactId>
-            <version>11.6.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
         </dependency>
-        <dependency>
-            <groupId>net.synedra</groupId>
-            <artifactId>validatorfx</artifactId>
-            <version>0.5.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.kordamp.ikonli</groupId>
-            <artifactId>ikonli-javafx</artifactId>
-            <version>12.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.kordamp.bootstrapfx</groupId>
-            <artifactId>bootstrapfx-core</artifactId>
-            <version>0.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.hansolo</groupId>
-            <artifactId>tilesfx</artifactId>
-            <version>21.0.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.github.almasb</groupId>
-            <artifactId>fxgl</artifactId>
-            <version>17.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.pixelduke</groupId>
-            <artifactId>fxthemes</artifactId>
-            <version>1.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
+            <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
+            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>${maven.compiler.version}</version>
                 <configuration>
                     <source>21</source>
                     <target>21</target>
+                    <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>--add-exports</arg>
+                        <arg>javafx.base/com.sun.javafx.logging=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>javafx.base/com.sun.javafx.binding=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>javafx.base/com.sun.javafx.event=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
-            
-            <!-- Maven Shade Plugin pour créer un JAR exécutable avec toutes les dépendances -->
+
+            <!-- Maven Shade Plugin for Uber JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>${maven.shade.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -142,23 +132,51 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>shaded</shadedClassifierName>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
+                                <!-- Service Provider Transformer -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                
+                                <!-- Manifest Transformer -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.dryt.quoridor.app.QuoridorLauncher</mainClass>
+                                    <manifestEntries>
+                                        <Built-By>Quoridor Build System</Built-By>
+                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                        <JavaFX-Version>${javafx.version}</JavaFX-Version>
+                                        <Multi-Release>true</Multi-Release>
+                                    </manifestEntries>
+                                </transformer>
+                                
+                                <!-- Properties Files Transformer -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.handlers</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.schemas</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.tooling</resource>
+                                </transformer>
+                                
+                                <!-- JavaFX specific transformers -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/services/javafx.application.Application</resource>
                                 </transformer>
                             </transformers>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
-                                        <exclude>META-INF/MANIFEST.MF</exclude>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
-                                        <exclude>module-info.class</exclude>
-                                        <exclude>META-INF/versions/*/module-info.class</exclude>
+                                        <exclude>META-INF/NOTICE*</exclude>
+                                        <exclude>META-INF/LICENSE*</exclude>
+                                        <exclude>about.html</exclude>
+                                        <exclude>plugin.xml</exclude>
+                                        <exclude>plugin.properties</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -171,49 +189,149 @@
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
+                <version>${javafx.maven.plugin.version}</version>
+                <configuration>
+                    <mainClass>com.dryt.quoridor.app.QuoridorLauncher</mainClass>
+                    <arguments>
+                        <argument>--add-opens</argument>
+                        <argument>javafx.controls/javafx.scene.control=ALL-UNNAMED</argument>
+                        <argument>--add-opens</argument>
+                        <argument>javafx.controls/javafx.scene.control.skin=ALL-UNNAMED</argument>
+                        <argument>--add-opens</argument>
+                        <argument>javafx.graphics/javafx.scene=ALL-UNNAMED</argument>
+                        <argument>--add-opens</argument>
+                        <argument>javafx.base/com.sun.javafx.runtime=ALL-UNNAMED</argument>
+                    </arguments>
+                </configuration>
                 <executions>
                     <execution>
-                        <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.dryt.quoridor.app.JeuQuoridor</mainClass>
-                            <launcher>app</launcher>
-                            <jlinkZipName>app</jlinkZipName>
-                            <jlinkImageName>app</jlinkImageName>
-                            <noManPages>true</noManPages>
-                            <stripDebug>true</stripDebug>
-                            <noHeaderFiles>true</noHeaderFiles>
+                            <mainClass>com.dryt.quoridor.app.QuoridorLauncher</mainClass>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            
-            <!-- jpackage Plugin pour créer un .exe natif -->
+
+            <!-- jpackage Maven Plugin for Native Executable -->
             <plugin>
                 <groupId>org.panteleyev</groupId>
                 <artifactId>jpackage-maven-plugin</artifactId>
-                <version>1.6.5</version>
+                <version>${jpackage.maven.plugin.version}</version>
                 <configuration>
+                    <!-- Basic Configuration -->
                     <name>Quoridor</name>
                     <appVersion>${project.version}</appVersion>
-                    <vendor>DRYT</vendor>
-                    <destination>target/dist</destination>
+                    <vendor>DryT Games</vendor>
+                    <description>Jeu de stratégie Quoridor avec Intelligence Artificielle</description>
+                    <copyright>© 2024 DryT Games. Tous droits réservés.</copyright>
+                    
+                    <!-- Input Configuration -->
                     <input>target</input>
-                    <mainJar>${project.artifactId}-${project.version}-shaded.jar</mainJar>
+                    <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
                     <mainClass>com.dryt.quoridor.app.QuoridorLauncher</mainClass>
+                    
+                    <!-- Output Configuration -->
+                    <dest>target/dist</dest>
+                    <type>EXE</type>
+                    
+                    <!-- Runtime Configuration -->
+                    <runtimeImage>target/runtime</runtimeImage>
+                    
+                    <!-- Java Options for Performance and Compatibility -->
                     <javaOptions>
-                        <option>-Dfile.encoding=UTF-8</option>
-                        <option>-Dprism.verbose=false</option>
-                        <option>-Djavafx.animation.fullspeed=true</option>
+                        <!-- Memory Management -->
                         <option>-Xms512m</option>
                         <option>-Xmx1024m</option>
-                        <option>-Dprism.order=es2,sw</option>
+                        <option>-XX:+UseG1GC</option>
+                        <option>-XX:+UseStringDeduplication</option>
+                        <option>-XX:MaxGCPauseMillis=200</option>
+                        
+                        <!-- JavaFX Properties -->
+                        <option>-Djavafx.preloader=com.dryt.quoridor.app.QuoridorLauncher</option>
+                        <option>-Djava.awt.headless=false</option>
+                        <option>-Dprism.verbose=false</option>
+                        <option>-Dprism.lcdtext=true</option>
+                        <option>-Dprism.subpixeltext=true</option>
+                        <option>-Dprism.dirtyopts=true</option>
+                        <option>-Dprism.vsync=true</option>
+                        <option>-Dquantum.multithreaded=true</option>
+                        
+                        <!-- Windows Specific -->
+                        <option>-Dfile.encoding=UTF-8</option>
+                        <option>-Duser.language=fr</option>
+                        <option>-Duser.country=FR</option>
+                        <option>-Dsun.java2d.d3d=true</option>
+                        <option>-Dsun.java2d.dpiaware=true</option>
+                        
+                        <!-- Performance -->
+                        <option>-Djava.awt.useSystemAAFontSettings=on</option>
+                        <option>-Dswing.aatext=true</option>
+                        <option>-Dsun.java2d.opengl=true</option>
+                        
+                        <!-- Launcher Properties -->
+                        <option>-Dlauncher.standalone=true</option>
+                        <option>-Dquoridor.version=${project.version}</option>
+                        
+                        <!-- Module System -->
+                        <option>--add-opens=javafx.controls/javafx.scene.control=ALL-UNNAMED</option>
+                        <option>--add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED</option>
+                        <option>--add-opens=javafx.graphics/javafx.scene=ALL-UNNAMED</option>
+                        <option>--add-opens=javafx.base/com.sun.javafx.runtime=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.lang=ALL-UNNAMED</option>
+                        <option>--add-opens=java.base/java.util=ALL-UNNAMED</option>
+                        <option>--add-opens=java.desktop/java.awt=ALL-UNNAMED</option>
+                        <option>--add-opens=java.desktop/javax.swing=ALL-UNNAMED</option>
+                        
+                        <!-- Exports -->
+                        <option>--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED</option>
+                        <option>--add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED</option>
+                        <option>--add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED</option>
+                        <option>--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED</option>
+                        <option>--add-exports=javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED</option>
                     </javaOptions>
+                    
+                    <!-- Windows Specific Configuration -->
+                    <winConsole>false</winConsole>
+                    <winDirChooser>true</winDirChooser>
+                    <winShortcut>true</winShortcut>
+                    <winMenu>true</winMenu>
+                    <winMenuGroup>DryT Games</winMenuGroup>
+                    <winPerUserInstall>false</winPerUserInstall>
+                    <winUpgradeUuid>550e8400-e29b-41d4-a716-446655440000</winUpgradeUuid>
+                    
+                    <!-- Additional Arguments -->
+                    <arguments>
+                        <argument>--launcher-log-level=INFO</argument>
+                    </arguments>
+                    
+                    <!-- File Associations -->
+                    <fileAssociations>
+                        <fileAssociation>
+                            <extension>quoridor</extension>
+                            <mimeType>application/x-quoridor</mimeType>
+                            <description>Fichier de sauvegarde Quoridor</description>
+                        </fileAssociation>
+                    </fileAssociations>
+                    
+                    <!-- Icon Configuration -->
+                    <icon>src/main/resources/com/dryt/quoridor/icon/quoridor.ico</icon>
+                    
+                    <!-- Resource Directories -->
+                    <resourceDir>src/main/resources</resourceDir>
+                    
+                    <!-- License -->
+                    <licenseFile>LICENSE</licenseFile>
+                    
+                    <!-- Installation Directory -->
+                    <installDir>Quoridor</installDir>
+                    
+                    <!-- Verbose Output -->
+                    <verbose>true</verbose>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>mac</id>
+                        <id>win</id>
                         <phase>package</phase>
                         <goals>
                             <goal>jpackage</goal>
@@ -221,6 +339,110 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Maven Exec Plugin for Custom Scripts -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${maven.exec.version}</version>
+                <executions>
+                    <!-- Create Custom Runtime -->
+                    <execution>
+                        <id>create-runtime</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>jlink</executable>
+                            <arguments>
+                                <argument>--module-path</argument>
+                                <argument>${java.home}/jmods</argument>
+                                <argument>--add-modules</argument>
+                                <argument>java.base,java.desktop,java.logging,java.xml,java.naming,java.security.sasl,java.security.jgss,java.net.http,javafx.controls,javafx.fxml,javafx.web,javafx.swing,javafx.media</argument>
+                                <argument>--output</argument>
+                                <argument>target/runtime</argument>
+                                <argument>--compress=2</argument>
+                                <argument>--no-header-files</argument>
+                                <argument>--no-man-pages</argument>
+                                <argument>--strip-debug</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Surefire Plugin for Tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <argLine>
+                        --add-opens javafx.graphics/javafx.scene=ALL-UNNAMED
+                        --add-opens javafx.controls/javafx.scene.control=ALL-UNNAMED
+                        --add-opens javafx.controls/javafx.scene.control.skin=ALL-UNNAMED
+                        --add-opens javafx.base/com.sun.javafx.runtime=ALL-UNNAMED
+                        --add-opens java.base/java.lang=ALL-UNNAMED
+                    </argLine>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <!-- Profiles for different build environments -->
+    <profiles>
+        <!-- Development Profile -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <javafx.args>--add-opens javafx.controls/javafx.scene.control=ALL-UNNAMED --add-opens javafx.controls/javafx.scene.control.skin=ALL-UNNAMED</javafx.args>
+            </properties>
+        </profile>
+
+        <!-- Production Profile -->
+        <profile>
+            <id>prod</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <debug>false</debug>
+                            <optimize>true</optimize>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Windows-specific profile -->
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <configuration>
+                            <type>EXE</type>
+                            <winConsole>false</winConsole>
+                            <winDirChooser>true</winDirChooser>
+                            <winShortcut>true</winShortcut>
+                            <winMenu>true</winMenu>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

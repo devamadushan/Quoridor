@@ -1,54 +1,362 @@
-name: Build Windows Executable
+name: Build Quoridor Windows Executable
 
 on:
-  workflow_dispatch:  # Permet de lancer manuellement
   push:
-    tags:
-      - 'v*'
+    branches: [ main, master, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Type de build'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - 'release'
+          - 'debug'
+          - 'installer'
 
 jobs:
   build-windows:
     runs-on: windows-latest
     
+    strategy:
+      matrix:
+        java: [21]
+      fail-fast: false
+
+    env:
+      MAVEN_OPTS: "-Xmx2048m -XX:+UseG1GC"
+      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"
+
     steps:
-    - name: Checkout code
+    - name: 🔄 Checkout Repository
       uses: actions/checkout@v4
-      
-    - name: Set up JDK 21
+      with:
+        fetch-depth: 0
+
+    - name: 📦 Setup Java JDK ${{ matrix.java }}
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
+        java-version: ${{ matrix.java }}
         distribution: 'temurin'
+        architecture: x64
+        cache: maven
+
+    - name: 🔧 Configure Git for Windows
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+
+    - name: 📊 Display System Information
+      run: |
+        echo "=== SYSTEM INFORMATION ==="
+        systeminfo | findstr /C:"OS Name" /C:"OS Version" /C:"Total Physical Memory"
+        java -version
+        mvn -version
+        echo "=== ENVIRONMENT VARIABLES ==="
+        echo "JAVA_HOME: $env:JAVA_HOME"
+        echo "PATH: $env:PATH"
+        echo "Working Directory: $PWD"
+        echo "=========================="
+
+    - name: 🧹 Clean Previous Build Artifacts
+      run: |
+        echo "Nettoyage des artefacts précédents..."
+        if (Test-Path "target") { Remove-Item -Recurse -Force "target" }
+        if (Test-Path "dist") { Remove-Item -Recurse -Force "dist" }
+        echo "Nettoyage terminé."
+
+    - name: ✅ Validate Maven Configuration
+      run: |
+        echo "Validation de la configuration Maven..."
+        mvn help:effective-pom -Doutput=effective-pom.xml
+        mvn help:effective-settings
+        if (Test-Path "effective-pom.xml") {
+          echo "Fichier POM effectif créé avec succès"
+        } else {
+          echo "Erreur: Impossible de créer le POM effectif"
+          exit 1
+        }
+
+    - name: 📥 Download Dependencies
+      run: |
+        echo "Téléchargement des dépendances..."
+        mvn dependency:resolve -B -V
+        mvn dependency:resolve-sources -B
+        echo "Dépendances téléchargées avec succès"
+
+    - name: 🔍 Verify JavaFX Modules
+      run: |
+        echo "Vérification des modules JavaFX..."
+        mvn dependency:tree | findstr javafx
+        echo "=== MODULES JAVAFX DETECTES ==="
+        $javaHome = $env:JAVA_HOME
+        $jmodsPath = "$javaHome\jmods"
+        if (Test-Path $jmodsPath) {
+          echo "JMods trouvés dans: $jmodsPath"
+          Get-ChildItem "$jmodsPath\javafx*" | ForEach-Object { echo $_.Name }
+        } else {
+          echo "Aucun JMods trouvé, téléchargement de JavaFX..."
+          mvn org.openjfx:javafx-maven-plugin:0.0.8:help
+        }
+
+    - name: 🧪 Run Tests
+      run: |
+        echo "Exécution des tests..."
+        mvn test -B -Dtest.parallel=true -Dmaven.test.failure.ignore=false
+      continue-on-error: false
+
+    - name: 📋 Generate Test Report
+      if: always()
+      run: |
+        if (Test-Path "target/surefire-reports") {
+          echo "=== RAPPORT DE TESTS ==="
+          Get-ChildItem "target/surefire-reports/*.xml" | ForEach-Object {
+            $content = Get-Content $_.FullName
+            if ($content -match 'failures="([^"]*)"') {
+              $failures = $matches[1]
+              echo "Fichier: $($_.Name) - Échecs: $failures"
+            }
+          }
+        }
+
+    - name: 🏗️ Compile and Package
+      run: |
+        echo "Compilation et empaquetage..."
+        mvn clean compile -B -V
+        mvn package -B -DskipTests=true
         
-    - name: Cache Maven dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+        echo "Vérification des artefacts générés..."
+        if (Test-Path "target/*.jar") {
+          Get-ChildItem "target/*.jar" | ForEach-Object {
+            $size = [math]::Round($_.Length / 1MB, 2)
+            echo "JAR: $($_.Name) - Taille: ${size}MB"
+          }
+        } else {
+          echo "ERREUR: Aucun JAR généré"
+          exit 1
+        }
+
+    - name: 🔧 Create Custom Runtime with jlink
+      run: |
+        echo "Création du runtime personnalisé..."
+        $javaHome = $env:JAVA_HOME
+        $jlinkPath = "$javaHome\bin\jlink.exe"
         
-    - name: Build with Maven
-      run: mvn clean package -q
-      
-    - name: Create Windows installer
-      run: mvn jpackage:jpackage -q
-      
-    - name: List build artifacts
-      run: dir target\dist
-      
-    - name: Upload Windows executable
+        if (Test-Path $jlinkPath) {
+          echo "Utilisation de jlink: $jlinkPath"
+          
+          # Créer le runtime avec les modules nécessaires
+          & $jlinkPath `
+            --module-path "$javaHome\jmods" `
+            --add-modules java.base,java.desktop,java.logging,java.xml,java.naming,java.security.sasl,java.security.jgss,java.net.http,javafx.controls,javafx.fxml,javafx.web,javafx.swing,javafx.media `
+            --output "target/runtime" `
+            --compress=2 `
+            --no-header-files `
+            --no-man-pages `
+            --strip-debug
+            
+          if (Test-Path "target/runtime") {
+            $runtimeSize = (Get-ChildItem "target/runtime" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+            echo "Runtime créé avec succès - Taille: $([math]::Round($runtimeSize, 2))MB"
+          } else {
+            echo "ERREUR: Échec de la création du runtime"
+            exit 1
+          }
+        } else {
+          echo "ERREUR: jlink non trouvé dans $jlinkPath"
+          exit 1
+        }
+
+    - name: 📦 Create Windows Executable with jpackage
+      run: |
+        echo "Création de l'exécutable Windows..."
+        $buildType = "${{ github.event.inputs.build_type }}"
+        if ([string]::IsNullOrEmpty($buildType)) { $buildType = "release" }
+        
+        echo "Type de build: $buildType"
+        
+        # Exécuter jpackage
+        mvn org.panteleyev:jpackage-maven-plugin:1.6.0:jpackage -B
+        
+        # Vérifier la création de l'exécutable
+        if (Test-Path "target/dist") {
+          echo "=== CONTENU DU RÉPERTOIRE DIST ==="
+          Get-ChildItem "target/dist" -Recurse | ForEach-Object {
+            if ($_.PSIsContainer) {
+              echo "📁 $($_.FullName.Replace($PWD, '.'))"
+            } else {
+              $size = [math]::Round($_.Length / 1MB, 2)
+              echo "📄 $($_.FullName.Replace($PWD, '.')) - ${size}MB"
+            }
+          }
+          
+          # Chercher l'exécutable principal
+          $exeFiles = Get-ChildItem "target/dist" -Filter "*.exe" -Recurse
+          if ($exeFiles.Count -gt 0) {
+            $mainExe = $exeFiles[0]
+            $exeSize = [math]::Round($mainExe.Length / 1MB, 2)
+            echo "✅ Exécutable principal créé: $($mainExe.Name) - ${exeSize}MB"
+            
+            # Test de l'exécutable (version uniquement)
+            echo "Test de l'exécutable..."
+            try {
+              $version = & $mainExe.FullName --version 2>&1
+              echo "Version détectée: $version"
+            } catch {
+              echo "⚠️ Impossible de tester l'exécutable (normal pour jpackage)"
+            }
+          } else {
+            echo "❌ ERREUR: Aucun exécutable trouvé"
+            exit 1
+          }
+        } else {
+          echo "❌ ERREUR: Répertoire dist non créé"
+          exit 1
+        }
+
+    - name: 🎯 Create Installer (if requested)
+      if: github.event.inputs.build_type == 'installer' || startsWith(github.ref, 'refs/tags/')
+      run: |
+        echo "Création de l'installateur Windows..."
+        # Modifier temporairement le pom.xml pour créer un MSI
+        $pomContent = Get-Content "pom.xml" -Raw
+        $newPomContent = $pomContent -replace '<type>EXE</type>', '<type>MSI</type>'
+        Set-Content "pom.xml" -Value $newPomContent
+        
+        # Créer l'installateur
+        mvn org.panteleyev:jpackage-maven-plugin:1.6.0:jpackage -B
+        
+        # Restaurer le pom.xml original
+        Set-Content "pom.xml" -Value $pomContent
+        
+        if (Test-Path "target/dist/*.msi") {
+          $msiFile = Get-ChildItem "target/dist/*.msi" | Select-Object -First 1
+          $msiSize = [math]::Round($msiFile.Length / 1MB, 2)
+          echo "✅ Installateur MSI créé: $($msiFile.Name) - ${msiSize}MB"
+        }
+
+    - name: 📊 Generate Build Summary
+      if: always()
+      run: |
+        echo "=== RÉSUMÉ DE BUILD ==="
+        echo "Timestamp: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+        echo "Java Version: ${{ matrix.java }}"
+        echo "Build Type: ${{ github.event.inputs.build_type }}"
+        echo "Git Ref: ${{ github.ref }}"
+        echo "Git SHA: ${{ github.sha }}"
+        
+        if (Test-Path "target") {
+          $targetSize = (Get-ChildItem "target" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+          echo "Taille totale target: $([math]::Round($targetSize, 2))MB"
+        }
+        
+        echo "=== ARTEFACTS GÉNÉRÉS ==="
+        if (Test-Path "target/dist") {
+          Get-ChildItem "target/dist" -File | ForEach-Object {
+            $size = [math]::Round($_.Length / 1MB, 2)
+            echo "📦 $($_.Name) - ${size}MB"
+          }
+        }
+        echo "======================="
+
+    - name: 📤 Upload Windows Executable
       uses: actions/upload-artifact@v4
+      if: success()
       with:
-        name: Quoridor-Windows
-        path: target/dist/Quoridor-*.exe
-        
-    - name: Create release (if tag)
-      if: startsWith(github.ref, 'refs/tags/')
+        name: quoridor-windows-executable-java${{ matrix.java }}
+        path: |
+          target/dist/*.exe
+          target/dist/Quoridor/**
+        retention-days: 30
+        compression-level: 6
+
+    - name: 📤 Upload Windows Installer
+      uses: actions/upload-artifact@v4
+      if: success() && (github.event.inputs.build_type == 'installer' || startsWith(github.ref, 'refs/tags/'))
+      with:
+        name: quoridor-windows-installer-java${{ matrix.java }}
+        path: target/dist/*.msi
+        retention-days: 30
+
+    - name: 📤 Upload JAR Artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: quoridor-jar-java${{ matrix.java }}
+        path: |
+          target/*.jar
+          !target/*-sources.jar
+          !target/*-javadoc.jar
+        retention-days: 15
+
+    - name: 📤 Upload Build Logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: build-logs-java${{ matrix.java }}
+        path: |
+          target/surefire-reports/**
+          effective-pom.xml
+          *.log
+        retention-days: 7
+
+    - name: 🚀 Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/') && success()
       uses: softprops/action-gh-release@v1
       with:
+        name: Quoridor ${{ github.ref_name }}
+        body: |
+          ## 🎮 Quoridor ${{ github.ref_name }}
+          
+          ### 📦 Téléchargements
+          - **Exécutable Windows** : `Quoridor.exe` - Exécutable autonome avec JRE intégré
+          - **JAR Exécutable** : `quoridor-${{ github.ref_name }}.jar` - Nécessite Java 21+
+          
+          ### ✨ Nouveautés
+          - Interface JavaFX optimisée
+          - Intelligence artificielle améliorée
+          - Performances optimisées
+          - Exécutable standalone sans dépendances
+          
+          ### 🔧 Configuration Requise
+          - **Windows** : Windows 10/11 (64-bit)
+          - **Mémoire** : 512 MB RAM minimum, 1 GB recommandé
+          - **Espace disque** : 200 MB d'espace libre
+          
+          ### 🚀 Installation
+          1. Télécharger `Quoridor.exe`
+          2. Exécuter l'installateur
+          3. Lancer le jeu depuis le menu Démarrer ou le raccourci bureau
+          
+          ---
+          *Build automatique via GitHub Actions*
         files: |
-          target/dist/Quoridor-*.exe
+          target/dist/*.exe
+          target/dist/*.msi
+          target/*.jar
         draft: false
-        prerelease: false
+        prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+        generate_release_notes: true
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job de notification
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build-windows]
+    if: always()
+    
+    steps:
+    - name: 📢 Build Notification
+      run: |
+        if [ "${{ needs.build-windows.result }}" == "success" ]; then
+          echo "✅ Build Windows réussi!"
+          echo "Artefacts disponibles dans la section Actions"
+        else
+          echo "❌ Échec du build Windows"
+          echo "Vérifiez les logs pour plus de détails"
+        fi 
