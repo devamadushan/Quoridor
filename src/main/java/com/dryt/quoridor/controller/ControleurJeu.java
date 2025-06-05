@@ -256,7 +256,7 @@ public class ControleurJeu {
             cellButtons[move[0]][move[1]].getStyleClass().add("highlight");
         }
 
-        labelMursRestants.setText("Joueur " + plateau.getCurrentPlayer().getId()
+        labelMursRestants.setText("Joueur " + plateau.getCurrentPlayer().getNom()
                 + " - murs restants : " + plateau.getCurrentPlayer().getWallsRemaining());
     }
 

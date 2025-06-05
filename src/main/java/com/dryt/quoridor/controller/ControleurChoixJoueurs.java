@@ -23,7 +23,7 @@ public class ControleurChoixJoueurs {
         radio2Humains.setSelected(true);
 
 
-        spinnerIA.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 3, 1));
+        spinnerIA.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 3, 0));
         spinnerIA.setEditable(true);
         spinnerIA.setDisable(true);
 

@@ -11,9 +11,9 @@
     <VBox spacing="50" alignment="CENTER">
         
         <VBox spacing="30" alignment="CENTER" styleClass="menu-buttons">
-            <RadioButton fx:id="radio2Humains" text="1 VS 1 (HUMAINS)" selected="true" styleClass="menu-radio"/>
-            <RadioButton fx:id="radio1v1Bot" text="1 VS 1 IA" styleClass="menu-radio"/>
-            <RadioButton fx:id="radio4Joueurs" text="4 JOUEURS (HUMAINS + IA)" styleClass="menu-radio"/>
+            <RadioButton fx:id="radio2Humains" text="1 VS 1" selected="true" styleClass="menu-radio"/>
+            <RadioButton fx:id="radio1v1Bot" text="1 VS IA" styleClass="menu-radio"/>
+            <RadioButton fx:id="radio4Joueurs" text="4 JOUEURS" styleClass="menu-radio"/>
 
             <HBox alignment="CENTER" spacing="20" styleClass="menu-buttons">
                 <Label text="NOMBRE D'IA :" styleClass="menu-label"/>

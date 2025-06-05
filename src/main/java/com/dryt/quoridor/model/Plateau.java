@@ -18,35 +18,36 @@ public class Plateau {
     public Plateau(int nombreJoueurs, int nbAI) {
         joueurs = new ArrayList<>();
         if (nombreJoueurs == 21) {
-            joueurs.add(new Joueur(1, "rouge",4, 0, 10, false));
-            joueurs.add(new Joueur(2,"bleue", 4, 8, 10, false));
+            joueurs.add(new Joueur(1, "Rouge",4, 0, 10, false));
+            joueurs.add(new Joueur(2,"Bleue", 4, 8, 10, false));
         } else if (nombreJoueurs == 22) {
-            joueurs.add(new Joueur(2, "bleue",4, 8, 10, false));
-            joueurs.add(new Joueur(1, "rouge",4, 0, 10, true));
+            joueurs.add(new Joueur(2, "Bleue",4, 8, 10, false));
+            joueurs.add(new Joueur(1, "Rouge",4, 0, 10, true));
         } else if (nombreJoueurs == 2) {
-            joueurs.add(new Joueur(2, "rouge",4, 8, 10, false));
-            joueurs.add(new Joueur(1, "bleue",4, 0, 10, true));
+            joueurs.add(new Joueur(2, "Rouge",4, 8, 10, false));
+            joueurs.add(new Joueur(1, "Bleue",4, 0, 10, true));
         } else if (nombreJoueurs == 4) {
+
             if (nbAI == 1) {
-                joueurs.add(new Joueur(4,"jaune", 8, 4, 5, true));
-                joueurs.add(new Joueur(2, "bleue",4, 8, 5, false));
-                joueurs.add(new Joueur(3,"rouge" ,0, 4, 5, false));
-                joueurs.add(new Joueur(1,"vert" ,4, 0, 5, false));
+                joueurs.add(new Joueur(4,"Orange", 8, 4, 5, true));
+                joueurs.add(new Joueur(2, "Bleue",4, 8, 5, false));
+                joueurs.add(new Joueur(3,"Vert" ,0, 4, 5, false));
+                joueurs.add(new Joueur(1,"Rouge" ,4, 0, 5, false));
             } else if (nbAI == 2) {
-                joueurs.add(new Joueur(4,"jaune", 8, 4, 5, true));
-                joueurs.add(new Joueur(2,"bleue", 4, 8, 5, false));
-                joueurs.add(new Joueur(3, "vert",0, 4, 5, false));
-                joueurs.add(new Joueur(1, "rouge",4, 0, 5, true));
+                joueurs.add(new Joueur(4,"Orange", 8, 4, 5, true));
+                joueurs.add(new Joueur(2,"Bleue", 4, 8, 5, false));
+                joueurs.add(new Joueur(3, "Vert",0, 4, 5, false));
+                joueurs.add(new Joueur(1, "Rouge",4, 0, 5, true));
             } else if (nbAI == 3) {
                 joueurs.add(new Joueur(4, "jaune",8, 4, 5, true));
                 joueurs.add(new Joueur(2, "bleue",4, 8, 5, false));
                 joueurs.add(new Joueur(3, "vert",0, 4, 5, true));
-                joueurs.add(new Joueur(1, "rouge",4, 0, 5, true));
+                joueurs.add(new Joueur(1, "Rouge",4, 0, 5, true));
             } else {
-                joueurs.add(new Joueur(4,"jaune" ,8, 4, 5, false));
-                joueurs.add(new Joueur(2, "blleue",4, 8, 5, false));
-                joueurs.add(new Joueur(3, "vert",0, 4, 5, false));
-                joueurs.add(new Joueur(1, "rouge",4, 0, 5, false));
+                joueurs.add(new Joueur(4,"Orange" ,8, 4, 5, false));
+                joueurs.add(new Joueur(2, "Bleue",4, 8, 5, false));
+                joueurs.add(new Joueur(3, "Vert",0, 4, 5, false));
+                joueurs.add(new Joueur(1, "Rouge",4, 0, 5, false));
             }
         } else {
             throw new IllegalArgumentException("Nombre de joueurs non supporté: " + nombreJoueurs);
