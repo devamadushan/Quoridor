@@ -249,13 +249,21 @@ public class ControleurJeu {
 
                 Button cell = new Button();
                 cell.setPrefSize(scaledCellSize, scaledCellSize);
+                cell.setMinSize(scaledCellSize, scaledCellSize);
+                cell.setMaxSize(scaledCellSize, scaledCellSize);
                 
-                // Apply checkerboard pattern: alternating colors based on position
+                // Appliquer le style de la cellule
                 if ((x + y) % 2 == 0) {
                     cell.getStyleClass().add("cell");        // Light cells
                 } else {
                     cell.getStyleClass().add("cell-dark");   // Dark cells
                 }
+                
+                // Centrer le contenu de la cellule
+                cell.setStyle(cell.getStyle() + 
+                    "-fx-padding: 0;" +
+                    "-fx-content-display: center;" +
+                    "-fx-alignment: center;");
                 
                 cell.setLayoutX(baseX);
                 cell.setLayoutY(baseY);
@@ -487,12 +495,32 @@ public class ControleurJeu {
             if (playerIndex >= 0 && playerIndex < selectedSkins.length) {
                 int skinId = selectedSkins[playerIndex];
                 String styleClass = "player" + skinId;
-                cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
+                Button cell = cellButtons[joueur.getX()][joueur.getY()];
+                cell.getStyleClass().add(styleClass);
+                
+                // Ajuster la taille de l'icône en fonction de la taille de la cellule
+                double cellSize = GameConstants.CELL_SIZE * scaleFactor;
+                double iconSize = cellSize * 0.8; // 80% de la taille de la cellule
+                cell.setStyle(cell.getStyle() + 
+                    String.format("-fx-background-size: %fpx %fpx;", iconSize, iconSize) +
+                    "-fx-background-position: center;" +
+                    "-fx-background-repeat: no-repeat;");
+                
                 System.out.println("🎭 Added " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
             } else {
                 // Fallback to default player style
                 String styleClass = "player" + joueur.getId();
-                cellButtons[joueur.getX()][joueur.getY()].getStyleClass().add(styleClass);
+                Button cell = cellButtons[joueur.getX()][joueur.getY()];
+                cell.getStyleClass().add(styleClass);
+                
+                // Ajuster la taille de l'icône en fonction de la taille de la cellule
+                double cellSize = GameConstants.CELL_SIZE * scaleFactor;
+                double iconSize = cellSize * 0.8; // 80% de la taille de la cellule
+                cell.setStyle(cell.getStyle() + 
+                    String.format("-fx-background-size: %fpx %fpx;", iconSize, iconSize) +
+                    "-fx-background-position: center;" +
+                    "-fx-background-repeat: no-repeat;");
+                
                 System.out.println("🎭 Added fallback " + styleClass + " to cell [" + joueur.getX() + "," + joueur.getY() + "]");
             }
         }
@@ -505,7 +533,7 @@ public class ControleurJeu {
             System.out.println("✨ Added highlight to cell [" + move[0] + "," + move[1] + "]");
         }
 
-        // Update walls remaining display for all players (IMPROVED FROM INTERFACE VERSION)
+        // Update walls remaining display for all players
         StringBuilder wallInfo = new StringBuilder();
         
         // Sort players by ID to ensure consistent order (J1, J2, J3, J4)
@@ -516,10 +544,9 @@ public class ControleurJeu {
             Joueur joueur = sortedPlayers.get(i);
             
             if (i > 0) {
-                wallInfo.append("\n");  // New line separator instead of spaces
+                wallInfo.append("\n");
             }
             
-            // Highlight current player with arrows
             if (joueur.getId() == plateau.getCurrentPlayer().getId()) {
                 wallInfo.append("► ");
             }
