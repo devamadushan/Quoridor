@@ -41,6 +41,10 @@ public class Joueur {
     public void incrementWalls(){
         wallsRemaining++;
     }
+    
+    public void setWallsRemaining(int walls) {
+        this.wallsRemaining = walls;
+    }
     public boolean isAI() {
         return isAI;
     }

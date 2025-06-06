@@ -66,6 +66,17 @@
                                        textAlignment="LEFT"
                                        maxWidth="200"
                                        style="-fx-font-size: 1.4em; -fx-text-fill: #F5DEB3; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);"/>
+                                
+                                <!-- Bouton d'annulation -->
+                                <Button fx:id="undoButton"
+                                        text=""
+                                        onAction="#onUndo"
+                                        styleClass="undo-button"
+                                        disable="true">
+                                    <tooltip>
+                                        <Tooltip text="Annuler le dernier coup"/>
+                                    </tooltip>
+                                </Button>
                             </children>
                             <padding>
                                 <Insets top="50" bottom="30" left="30" right="10"/>

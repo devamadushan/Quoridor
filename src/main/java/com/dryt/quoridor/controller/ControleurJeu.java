@@ -16,6 +16,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import com.dryt.quoridor.model.Plateau;
 import com.dryt.quoridor.model.Joueur;
+import com.dryt.quoridor.model.GameState;
 import com.dryt.quoridor.model.Mur;
 import com.dryt.quoridor.app.JeuQuoridor;
 import javafx.scene.shape.Rectangle;
@@ -92,6 +93,9 @@ public class ControleurJeu {
 
     @FXML
     private Label errorMessageLabel;
+    
+    @FXML
+    private Button undoButton;
 
     private Plateau plateau;
     private Button[][] cellButtons;
@@ -110,6 +114,10 @@ public class ControleurJeu {
     // Optimisation du redimensionnement
     private PauseTransition resizeDebounceTimer;
     private boolean isResizing = false;
+    
+    // Undo functionality
+    private GameState previousGameState = null;
+    private boolean undoAvailable = false;
 
     // Initialise l'interface du jeu et ses composants
     @FXML
@@ -128,8 +136,8 @@ public class ControleurJeu {
             setupVolumeControls();
             setupDynamicScaling();
             
-            // Apply saved background
-            applySavedBackground();
+            // Ne plus appliquer le fond ici pour éviter le flash - il est déjà appliqué dans startGame()
+            // applySavedBackground();
         });
     }
     
@@ -274,6 +282,11 @@ public class ControleurJeu {
     public void setupPlateauAndDisplay(Plateau plateau) {
         this.plateau = plateau;
         
+        // Réinitialiser l'état d'annulation pour une nouvelle partie
+        previousGameState = null;
+        undoAvailable = false;
+        updateUndoButtonState();
+        
         for (Joueur joueur : plateau.getJoueurs()) {
             if (joueur.isAI()) {
                 if (JeuQuoridor.getNombreJoueurs() == 4) {
@@ -341,6 +354,9 @@ public class ControleurJeu {
                 return;
             }
 
+            // Sauvegarder l'état avant le placement de mur
+            saveGameStateForUndo();
+            
             if (plateau.placeWallCurrentPlayer(effectiveWx, effectiveWy, vertical)) {
                 drawWall(effectiveWx, effectiveWy, vertical);
                 switchPlayerTurn();
@@ -446,10 +462,26 @@ public class ControleurJeu {
     //Redessine tous les murs existants avec le nouveau facteur d'échelle
     private void redrawAllWalls() {
         if (plateau != null) {
+            // Supprimer tous les murs visuels existants
+            clearAllWallsFromUI();
+            
+            // Redessiner uniquement les murs qui existent dans le modèle
             for (Mur mur : plateau.getMurs()) {
                 drawWall(mur.getX(), mur.getY(), mur.isVertical());
             }
             System.out.println(plateau.getMurs().size() + " mur(s) redessiné(s) avec l'échelle " + scaleFactor);
+        }
+    }
+    
+    // Supprime tous les éléments visuels de murs du plateau
+    private void clearAllWallsFromUI() {
+        if (boardPane != null) {
+            // Supprimer tous les rectangles qui ont la classe "wall-placed"
+            boardPane.getChildren().removeIf(node -> 
+                node instanceof Rectangle && 
+                node.getStyleClass().contains("wall-placed")
+            );
+            System.out.println("Tous les murs visuels supprimés de l'interface");
         }
     }
 
@@ -463,6 +495,9 @@ public class ControleurJeu {
         }
         
         System.out.println("Déplacement valide vers [" + x + "," + y + "] - exécution du mouvement");
+        
+        // Sauvegarder l'état avant le mouvement
+        saveGameStateForUndo();
         
         if (!plateau.moveCurrentPlayer(x, y)) {
             System.out.println("Échec du déplacement pour le joueur " + plateau.getCurrentPlayer().getId());
@@ -628,7 +663,12 @@ public class ControleurJeu {
 
         if (currentPlayer.isAI()) {
             PauseTransition pause = new PauseTransition(Duration.millis(500));
-            pause.setOnFinished(e -> runIA());
+            pause.setOnFinished(e -> {
+                runIA();
+                // Ne PAS désactiver l'annulation après le tour de l'IA
+                // L'humain doit pouvoir annuler sa séquence (son coup + réponse IA)
+                System.out.println("Tour de l'IA terminé - annulation reste disponible pour l'humain");
+            });
             pause.play();
         }
     }
@@ -666,6 +706,23 @@ public class ControleurJeu {
         } else {
             System.err.println("Menu de pause non initialisé, retour au menu principal");
             JeuQuoridor.goMenu();
+        }
+    }
+    
+    // Affiche l'écran de victoire
+    public void showVictoryOverlay() {
+        System.out.println("Affichage de l'écran de victoire (appel externe)");
+        
+        if (victoryOverlay != null) {
+            victoryOverlay.setVisible(true);
+            victoryOverlay.setManaged(true);
+            
+            // Bring to front
+            victoryOverlay.toFront();
+            
+            System.out.println("Écran de victoire affiché avec succès");
+        } else {
+            System.err.println("Écran de victoire non initialisé");
         }
     }
 
@@ -936,7 +993,10 @@ public class ControleurJeu {
     @FXML
     private void onVictorySettings() {
         System.out.println("Bouton paramètres cliqué");
-        System.out.println("Fonctionnalité des paramètres à implémenter");
+        
+        hideVictoryOverlay();
+        
+        JeuQuoridor.goOptionsFromEndGame();
     }
     
     // Cache le menu de pause
@@ -1052,5 +1112,53 @@ public class ControleurJeu {
                 e.printStackTrace();
             }
         });
+    }
+    
+    // Sauvegarde l'état du jeu pour permettre l'annulation (uniquement pour les joueurs humains)
+    private void saveGameStateForUndo() {
+        // Seuls les coups des joueurs humains peuvent être annulés
+        if (plateau.getCurrentPlayer().isAI()) {
+            System.out.println("Pas de sauvegarde pour l'IA");
+            return;
+        }
+        
+        previousGameState = new GameState(plateau);
+        undoAvailable = true;
+        updateUndoButtonState();
+        System.out.println("État du jeu sauvegardé pour annulation");
+    }
+    
+    // Met à jour l'état du bouton d'annulation
+    private void updateUndoButtonState() {
+        if (undoButton != null) {
+            undoButton.setDisable(!undoAvailable);
+        }
+    }
+    
+    // Annule le dernier coup
+    @FXML
+    private void onUndo() {
+        if (!undoAvailable || previousGameState == null) {
+            System.out.println("Aucune action à annuler");
+            return;
+        }
+        
+        System.out.println("Annulation du dernier coup");
+        
+        // Restaurer l'état précédent
+        previousGameState.restoreToBoard(plateau);
+        
+        // Mettre à jour l'affichage
+        updateBoardState();
+        redrawAllWalls();
+        updateWallCountDisplay();
+        
+        // TOUJOURS désactiver l'annulation après une restauration
+        // Cela empêche l'annulation en chaîne et assure qu'on ne peut annuler qu'un coup à la fois
+        undoAvailable = false;
+        previousGameState = null;
+        updateUndoButtonState();
+        
+        System.out.println("État du jeu restauré avec succès - annulation désactivée");
     }
 }

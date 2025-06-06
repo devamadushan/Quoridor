@@ -251,6 +251,16 @@ public class ControleurOptions {
             } else {
                 JeuQuoridor.goMenu();
             }
+        } else if ("endgame".equals(previousContext)) {
+            System.out.println("Retour à l'écran de fin de partie...");
+            if (JeuQuoridor.getCurrentGameScene() != null) {
+                JeuQuoridor.getPrimaryStage().setScene(JeuQuoridor.getCurrentGameScene());
+                applySavedResolutionToCurrentScene();
+                triggerGameBoardResizeAfterOptions();
+                JeuQuoridor.showGameVictoryOverlay();
+            } else {
+                JeuQuoridor.goMenu();
+            }
         } else {
             System.out.println("Retour au menu principal...");
             JeuQuoridor.goMenu();

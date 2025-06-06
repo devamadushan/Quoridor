@@ -320,6 +320,48 @@ public class Plateau {
     public List<Mur> getMurs() {
         return mursPlaces;
     }
+    
+    // Getter methods for GameState
+    public boolean[][] getVerticalWallPositions() {
+        return verticalWallPositions;
+    }
+    
+    public boolean[][] getHorizontalWallPositions() {
+        return horizontalWallPositions;
+    }
+    
+    public boolean[][] getBlockedRight() {
+        return blockedRight;
+    }
+    
+    public boolean[][] getBlockedDown() {
+        return blockedDown;
+    }
+    
+    // Setter methods for GameState restoration
+    public void setCurrentPlayer(Joueur player) {
+        this.currentPlayer = player;
+    }
+    
+    public void setMurs(List<Mur> murs) {
+        this.mursPlaces = murs;
+    }
+    
+    public void setVerticalWallPositions(boolean[][] walls) {
+        this.verticalWallPositions = walls;
+    }
+    
+    public void setHorizontalWallPositions(boolean[][] walls) {
+        this.horizontalWallPositions = walls;
+    }
+    
+    public void setBlockedRight(boolean[][] blocked) {
+        this.blockedRight = blocked;
+    }
+    
+    public void setBlockedDown(boolean[][] blocked) {
+        this.blockedDown = blocked;
+    }
 
 
     public boolean allPlayersHaveAPathAfterWall(int wx, int wy, boolean vertical) {

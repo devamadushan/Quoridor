@@ -560,6 +560,40 @@
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.6), 5, 0.6, 0, 0);
 }
 
+/* ----- UNDO BUTTON STYLES ----- */
+.undo-button {
+    -fx-background-image: url("../styles/menu_game/regame_btn.png");
+    -fx-background-size: contain;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-color: transparent;
+    -fx-text-fill: transparent;
+    -fx-border-width: 0;
+    -fx-min-width: 60;
+    -fx-min-height: 40;
+    -fx-pref-width: 60;
+    -fx-pref-height: 40;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 5, 0.6, 3, 3);
+}
+
+.undo-button:hover {
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 8, 0.8, 3, 3);
+}
+
+.undo-button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.6), 5, 0.6, 0, 0);
+}
+
+.undo-button:disabled {
+    -fx-opacity: 0.4;
+    -fx-cursor: default;
+}
+
 /* ----- MAKE TOP BAR DARKER (CORRECTED SELECTOR) ----- */
 .root BorderPane .top,
 .root .top HBox {

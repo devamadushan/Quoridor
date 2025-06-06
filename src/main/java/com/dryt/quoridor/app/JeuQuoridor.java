@@ -238,7 +238,12 @@ public class JeuQuoridor extends Application {
 
     // Démarre une nouvelle partie
     public static void startGame() throws Exception {
-        startGame(null);
+        // Préserver le fond d'écran actuel s'il existe, sinon utiliser celui des préférences
+        String preserveBackground = currentBackgroundFileName;
+        if (preserveBackground == null || preserveBackground.isEmpty()) {
+            preserveBackground = com.dryt.quoridor.utils.UserPreferences.getSelectedBackground();
+        }
+        startGame(preserveBackground);
     }
     
     // Démarre une nouvelle partie avec un fond préservé
@@ -284,11 +289,7 @@ public class JeuQuoridor extends Application {
         
         currentGameScene = sceneJeu;
         
-        primaryStage.setScene(sceneJeu);
-        
-        applySavedResolution();
-        System.out.println("Jeu démarré avec la résolution : " + primaryStage.getWidth() + "x" + primaryStage.getHeight());
-        
+        // Appliquer le fond AVANT d'afficher la scène pour éviter le flash
         try {
             String backgroundToApply;
             if (preserveCurrentBackground != null && !preserveCurrentBackground.isEmpty()) {
@@ -307,6 +308,11 @@ public class JeuQuoridor extends Application {
         } catch (Exception e) {
             System.err.println("Impossible d'appliquer le fond : " + e.getMessage());
         }
+        
+        primaryStage.setScene(sceneJeu);
+        
+        applySavedResolution();
+        System.out.println("Jeu démarré avec la résolution : " + primaryStage.getWidth() + "x" + primaryStage.getHeight());
         
         if (nombreJoueurs == 2) {
             if (isVsAI) {
@@ -328,14 +334,17 @@ public class JeuQuoridor extends Application {
         try {
             System.out.println("Redémarrage de la partie en cours...");
             
+            // TOUJOURS préserver le fond d'écran actuel lors des nouvelles parties
             String preserveBackground = currentBackgroundFileName;
-            if (preserveBackground != null && !preserveBackground.isEmpty()) {
-                System.out.println("Préservation du fond actuel : " + preserveBackground);
-                startGame(preserveBackground);
-            } else {
-                System.out.println("Aucun fond à préserver, utilisation du comportement par défaut");
-                startGame(null);
+            if (preserveBackground == null || preserveBackground.isEmpty()) {
+                // Si aucun fond actuel, utiliser celui des préférences
+                preserveBackground = com.dryt.quoridor.utils.UserPreferences.getSelectedBackground();
             }
+            
+            System.out.println("Fond préservé pour nouvelle partie : " + preserveBackground);
+            // Forcer la préservation du fond
+            backgroundWasPreserved = true;
+            startGame(preserveBackground);
         } catch (Exception e) {
             System.err.println("Échec du redémarrage : " + e.getMessage());
             e.printStackTrace();
@@ -362,6 +371,12 @@ public class JeuQuoridor extends Application {
     // Ouvre les options depuis le jeu
     public static void goOptionsFromGame() {
         optionsPreviousContext = "game";
+        primaryStage.setScene(sceneOptions);
+    }
+    
+    // Ouvre les options depuis l'écran de fin de partie
+    public static void goOptionsFromEndGame() {
+        optionsPreviousContext = "endgame";
         primaryStage.setScene(sceneOptions);
     }
     
@@ -532,6 +547,13 @@ public class JeuQuoridor extends Application {
     public static void showGameMenuOverlay() {
         if (currentGameController != null) {
             currentGameController.showMenuOverlay();
+        }
+    }
+    
+    // Affiche l'écran de victoire en superposition
+    public static void showGameVictoryOverlay() {
+        if (currentGameController != null) {
+            currentGameController.showVictoryOverlay();
         }
     }
 

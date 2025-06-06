@@ -22,6 +22,13 @@ public class ControleurFin {
         JeuQuoridor.goMenu();
     }
 
+    // Ouvre les options du jeu
+    @FXML
+    private void onOptions(ActionEvent event) {
+        System.out.println("ControleurFin: onOptions called!");
+        JeuQuoridor.goOptions();
+    }
+
     // Ferme l'application
     @FXML
     private void quitter(ActionEvent event) {
