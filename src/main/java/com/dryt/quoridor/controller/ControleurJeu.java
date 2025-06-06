@@ -614,12 +614,16 @@ public class ControleurJeu {
         if (action.getType() == MoveType.MOVE) {
             if (!plateau.moveCurrentPlayer(action.getX(), action.getY())) {
                 System.err.println(GameConstants.ERROR_INVALID_MOVE);
+                int[] fallback = plateau.getPossibleMoves().getFirst();
+                plateau.moveCurrentPlayer(fallback[0], fallback[1]);
                 return;
             }
         } else if (action.getType() == MoveType.WALL) {
              if (!plateau.canPlaceWall(action.getX(), action.getY(), action.getVertical())
                     || !plateau.placeWallCurrentPlayer(action.getX(), action.getY(), action.getVertical())) {
                  System.err.println(GameConstants.ERROR_INVALID_WALL);
+                 int[] fallback = plateau.getPossibleMoves().getFirst();
+                 plateau.moveCurrentPlayer(fallback[0], fallback[1]);
                  return;
              } else {
                  drawWall(action.getX(), action.getY(), action.getVertical());
