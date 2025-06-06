@@ -9,10 +9,22 @@ Ce guide explique comment configurer un environnement Java/Maven complet sur Win
 ### Windows
 1. Télécharger Java JDK 21 : https://jdk.java.net/21/
 2. Installer le JDK (ex. `C:\Program Files\Java\jdk-21`)
-3. Variables d'environnement :
-   - JAVA_HOME : `C:\Program Files\Java\jdk-21`
-   - Ajouter `%JAVA_HOME%\bin` à `Path`
-4. Vérification :
+3. Configurer les variables d'environnement (via ligne de commande) :
+
+Ouvrir un terminal en mode administrateur (CMD ou PowerShell) et exécuter :
+```cmd
+setx JAVA_HOME "C:\Program Files\Java\jdk-21"
+setx PATH "%PATH%;%JAVA_HOME%\bin"
+```
+
+Pour PowerShell :
+```powershell
+$oldPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+$newPath = "$oldPath;%JAVA_HOME%\bin"
+setx PATH "$newPath"
+```
+4. Redémarrer le terminal (ou l’ordinateur si nécessaire)
+5. Vérification :
 ```bash
 java -version
 javac -version
@@ -30,23 +42,29 @@ java -version
 brew install openjdk@21
 sudo ln -sfn /opt/homebrew/opt/openjdk@21 /Library/Java/JavaVirtualMachines/openjdk-21.jdk
 ```
-Ajouter à votre shell (zsh/bash) :
+Ajouter à votre shell (~/.zshrc ou ~/.bash_profile) :
 ```bash
 export JAVA_HOME="/opt/homebrew/opt/openjdk@21"
 export PATH="$JAVA_HOME/bin:$PATH"
 ```
+Puis :
+```bash
+source ~/.zshrc  # ou ~/.bash_profile
+```
 
 ---
 
-## Étape 2 : Installer Maven
+## 📦 Étape 2 : Installer Maven
 
 ### Windows
-1. Télécharger : https://maven.apache.org/download.cgi
-2. Extraire (ex. `C:\maven\apache-maven-3.9.6`)
-3. Variables d'environnement :
-   - M2_HOME : `C:\maven\apache-maven-3.9.6`
-   - Ajouter `%M2_HOME%\bin` à `Path`
-4. Vérification :
+1. Télécharger Maven : https://maven.apache.org/download.cgi
+2. Extraire Maven, par exemple dans `C:\maven\apache-maven-3.9.6`
+3. Configurer les variables d'environnement (via ligne de commande) :
+```cmd
+setx M2_HOME "C:\maven\apache-maven-3.9.6"
+setx PATH "%PATH%;%M2_HOME%\bin"
+```
+4. Redémarrer le terminal, puis vérifier :
 ```bash
 mvn -version
 ```
@@ -72,7 +90,7 @@ mvn -version
 
 ---
 
-##  Étape 4 : Compiler le projet
+## Étape 4 : Compiler le projet
 
 ```bash
 cd ~/Quoridor-main
@@ -83,7 +101,7 @@ Résultat attendu : `target/Quoridor-1.0.2.jar`
 
 ---
 
-##  Étape 5 : Exécuter l'application
+## Étape 5 : Exécuter l'application
 
 ### Option 1 : via Maven
 ```bash
