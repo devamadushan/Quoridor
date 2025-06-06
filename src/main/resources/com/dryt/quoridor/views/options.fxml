@@ -14,16 +14,13 @@
             <Text text="Résolution" styleClass="menu-label"/>
             <ComboBox fx:id="resolutionComboBox" styleClass="menu-spinner"/>
             
-            <!-- Section de sélection de fond d'écran -->
             <Text text="Fond d'écran" styleClass="menu-label"/>
             <HBox spacing="20" alignment="CENTER">
-                <!-- Flèche gauche -->
                 <Button fx:id="backgroundPrevButton" 
                         text="◀" 
                         onAction="#onPreviousBackground"
                         styleClass="background-nav-button"/>
                 
-                <!-- Image de prévisualisation -->
                 <VBox spacing="10" alignment="CENTER">
                     <ImageView fx:id="backgroundPreview" 
                                fitWidth="200" 
@@ -33,7 +30,6 @@
                     <Text fx:id="backgroundNameLabel" text="Paysage mystique" styleClass="background-name-label"/>
                 </VBox>
                 
-                <!-- Flèche droite -->
                 <Button fx:id="backgroundNextButton" 
                         text="▶" 
                         onAction="#onNextBackground"

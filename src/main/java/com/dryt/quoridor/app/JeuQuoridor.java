@@ -251,6 +251,8 @@ public class JeuQuoridor extends Application {
         //DEMANDE APRES LA SOUTENANCE: SON SANS COUPURE
         // Réinitialiser l'état du mute
         isMusicMuted = false;
+        currentGameController = null;
+        currentGameScene = null;
         
         if (nombreJoueurs == 2) {
             if (isVsAI) {
@@ -328,9 +330,16 @@ public class JeuQuoridor extends Application {
             plateau = new Plateau(4, nombreIA4Joueurs);
         }
         
-        controleur.setupPlateauAndDisplay(plateau);
-        
-        startGlobalMusic(true);
+        // Attendre que la scène soit complètement initialisée avant de configurer le plateau
+        javafx.application.Platform.runLater(() -> {
+            try {
+                controleur.setupPlateauAndDisplay(plateau);
+                startGlobalMusic(true);
+            } catch (Exception e) {
+                System.err.println("Erreur lors de l'initialisation du plateau : " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
     }
     
     // Redémarre la partie en cours

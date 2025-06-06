@@ -1,4 +1,4 @@
-/* ----- MYSTICAL NIGHT LANDSCAPE BACKGROUND ----- */
+/* ----- FOND MYSTIQUE NOCTURNE ----- */
 .root {
     -fx-background-image: url("background/zudarts-lee-150831-13.jpg");
     -fx-background-size: cover;
@@ -7,12 +7,11 @@
     -fx-background-color: #2B3A4A;
 }
 
-/* Remove the overlay for better visibility */
 .root:before {
     -fx-background-color: transparent;
 }
 
-/* ----- MYSTICAL TRANSPARENT BOARD CONTAINER ----- */
+/* ----- CONTENEUR DU PLATEAU TRANSPARENT ----- */
 .board-container {
     -fx-background-color: rgba(20, 20, 30, 0.3);
     -fx-border-color: rgba(100, 100, 120, 0.8);
@@ -24,7 +23,7 @@
     -fx-opacity: 1;
 }
 
-/* ----- DARK TRANSPARENT CELL COLORS WITH MORE CONTRAST ----- */
+/* ----- COULEURS DES CELLULES AVEC CONTRASTE ----- */
 .cell {
     -fx-background-color: rgba(90, 90, 110, 0.5) !important;
     -fx-border-color: rgba(130, 130, 150, 0.8) !important;
@@ -35,7 +34,6 @@
     -fx-cursor: hand !important;
 }
 
-/* ----- DARKER CELLS WITH BLUE TINT ----- */
 .cell-dark {
     -fx-background-color: rgba(50, 50, 70, 0.6) !important;
     -fx-border-color: rgba(80, 80, 100, 0.8) !important;
@@ -46,7 +44,6 @@
     -fx-cursor: hand !important;
 }
 
-/* ----- HOVER EFFECTS FOR BOTH CELL TYPES ----- */
 .cell:hover, .cell-dark:hover {
     -fx-background-color: #FFFACD !important;
     -fx-border-color: #CD853F !important;
@@ -75,7 +72,6 @@
     -fx-scale-y: 1.12 !important;
 }
 
-/* ----- PLAYER PIECES ----- */
 .player1, .player2, .player3, .player4 {
     -fx-background-radius: 50% !important;
     -fx-border-radius: 50% !important;
@@ -178,7 +174,6 @@
     -fx-border-color: #c8c20e !important;
 }
 
-/* ----- BROWN WALL STYLES ----- */
 .wall-placed {
     -fx-fill: #8B4513;
     -fx-stroke: #654321;
@@ -194,7 +189,6 @@
                 innershadow(gaussian, rgba(255,215,0,0.4), 4, 0.5, 0, 0);
 }
 
-/* ----- TEXT COLORS ----- */
 .game-label {
     -fx-text-fill: #F5F5DC;
     -fx-font-weight: bold;
@@ -208,7 +202,6 @@
     -fx-font-weight: bold;
 }
 
-/* ----- REGULAR BUTTONS (FOR GAME CELLS) ----- */
 .button {
     -fx-background-color: transparent;
     -fx-text-fill: transparent;
@@ -218,7 +211,6 @@
     -fx-border-radius: 0;
 }
 
-/* ----- TOP BUTTONS (Menu and New Game) ----- */
 .menu-open-button {
     -fx-background-image: url("open_menu_40x40.png");
     -fx-background-size: contain;
@@ -278,7 +270,6 @@
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.3), 3, 0.5, 0, 0);
 }
 
-/* ----- NEW GAME BUTTON (Larger size for UI panels) ----- */
 .new-game-button {
     -fx-background-image: url("new_game_resized.png");
     -fx-background-size: cover;
@@ -304,7 +295,6 @@
     -fx-scale-y: 0.95;
 }
 
-/* ----- MENU BUTTONS WITH PIXEL ART IMAGES ----- */
 .menu-button {
     -fx-background-color: #8B4513;
     -fx-text-fill: #F5DEB3;
@@ -335,13 +325,11 @@
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.3), 3, 0.5, 0, 0);
 }
 
-/* ----- OVERLAY MENU BACKGROUND ----- */
 .menu-overlay {
     -fx-background-color: rgba(0, 0, 0, 0.7);
     -fx-opacity: 1;
 }
 
-/* ----- MENU PANEL ----- */
 .menu-panel {
     -fx-background-image: url("menu_resized.png");
     -fx-background-size: contain;
@@ -355,7 +343,6 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0.6, 0, 0);
 }
 
-/* ----- INFO PANEL WITH BACKGROUND ----- */
 .info-panel {
     -fx-background-image: url("panel_resized.png");
     -fx-background-size: contain;
@@ -365,20 +352,17 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0.4, 2, 2);
 }
 
-/* ----- ADJUST INFO PANEL FOR WIDER SCREENS ----- */
 .root[prefWidth="1920.0"] .right,
 .root[width="1920.0"] .right {
     -fx-translate-x: -200;
 }
 
-/* Alternative approach - move info panel left on wider screens */
 @media screen and (min-width: 1920px) {
     .right {
         -fx-translate-x: -150;
     }
 }
 
-/* ----- VOLUME CONTROLS WITH DYNAMIC SCALING ----- */
 .volume-button {
     -fx-background-color: transparent;
     -fx-text-fill: #F5DEB3;
@@ -439,7 +423,6 @@
     -fx-scale-y: 0.95;
 }
 
-/* ----- VOLUME SLIDER WITH DYNAMIC SCALING ----- */
 .slider {
     -fx-background-color: transparent;
 }
@@ -471,10 +454,8 @@
     -fx-background-color: #B8860B;
 }
 
-/* ----- DARKER VICTORY OVERLAY STYLES (NEW) ----- */
 .victory-overlay-root {
     -fx-background-color: transparent;
-    /* Ensure overlay root covers the entire window */
     -fx-min-width: 100%;
     -fx-min-height: 100%;
     -fx-pref-width: 100%;
@@ -485,7 +466,6 @@
 
 .victory-overlay-background-dark {
     -fx-background-color: rgba(0, 0, 0, 0.9);
-    /* Simple full coverage approach */
     -fx-min-width: 100%;
     -fx-min-height: 100%;
     -fx-pref-width: 100%;
@@ -495,7 +475,6 @@
 }
 
 .victory-buttons-container {
-    /* Position the buttons much closer to the panel - moved much higher */
     -fx-translate-y: 50;
     -fx-alignment: center;
 }
@@ -519,7 +498,6 @@
     -fx-font-size: 2.8em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.9), 4, 0.9, 3, 3);
-    /* Position in the top area */
     -fx-translate-y: -80;
 }
 
@@ -528,7 +506,6 @@
     -fx-font-size: 1.8em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);
-    /* Adjust spacing to account for title offset */
     -fx-translate-y: -20;
 }
 
@@ -592,7 +569,6 @@
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.6), 5, 0.6, 0, 0);
 }
 
-/* ----- UNDO BUTTON STYLES ----- */
 .undo-button {
     -fx-background-image: url("../styles/menu_game/regame_btn.png");
     -fx-background-size: contain;
@@ -633,10 +609,8 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 0, 2);
 }
 
-/* ----- ORIGINAL VICTORY OVERLAY STYLES (KEPT FOR COMPATIBILITY) ----- */
 .victory-overlay-background {
     -fx-background-color: rgba(0, 0, 0, 0.8);
-    /* Ensure background covers everything */
     -fx-min-width: 100%;
     -fx-min-height: 100%;
     -fx-max-width: Infinity;
@@ -660,7 +634,6 @@
     -fx-font-size: 2.4em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 3, 0.8, 2, 2);
-    /* Position in the green banner area */
     -fx-translate-y: -90;
 }
 
@@ -669,7 +642,6 @@
     -fx-font-size: 1.6em;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.2), 2, 0.4, 1, 1);
-    /* Adjust spacing to account for title offset */
     -fx-translate-y: -30;
 }
 
@@ -717,10 +689,8 @@
     -fx-effect: innershadow(gaussian, rgba(0,0,0,0.5), 4, 0.5, 0, 0);
 }
 
-/* ----- MENU OVERLAY STYLES (NEW) ----- */
 .menu-overlay-root {
     -fx-background-color: transparent;
-    /* Ensure overlay root covers the entire window */
     -fx-min-width: 100%;
     -fx-min-height: 100%;
     -fx-pref-width: 100%;
@@ -731,7 +701,6 @@
 
 .menu-overlay-background {
     -fx-background-color: rgba(0, 0, 0, 0.9);
-    /* Simple full coverage approach */
     -fx-min-width: 100%;
     -fx-min-height: 100%;
     -fx-pref-width: 100%;
@@ -741,7 +710,6 @@
 }
 
 .menu-buttons-container {
-    /* Position the buttons closer to the panel */
     -fx-translate-y: 50;
     -fx-alignment: center;
 }
@@ -756,7 +724,6 @@
     -fx-min-width: 600;
     -fx-min-height: 500;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.9), 25, 0.9, 0, 0);
-    /* Move the entire panel higher */
     -fx-translate-y: -150;
 }
 

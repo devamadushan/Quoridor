@@ -8,7 +8,7 @@ package com.dryt.quoridor.app;
 public class QuoridorLauncher {
     public static void main(String[] args) {
         try {
-            System.out.println("🎮 Starting Quoridor Game...");
+            System.out.println("Starting Quoridor Game...");
             System.out.println("Java Version: " + System.getProperty("java.version"));
             System.out.println("JavaFX Version: " + System.getProperty("javafx.version"));
             System.out.println("OS: " + System.getProperty("os.name"));
@@ -23,9 +23,9 @@ public class QuoridorLauncher {
             // Vérifier que JavaFX est disponible
             try {
                 Class.forName("javafx.application.Application");
-                System.out.println("✅ JavaFX runtime detected");
+                System.out.println("JavaFX runtime detected");
             } catch (ClassNotFoundException e) {
-                System.err.println("❌ JavaFX runtime not found!");
+                System.err.println("JavaFX runtime not found!");
                 throw new RuntimeException("JavaFX not available", e);
             }
             
@@ -39,24 +39,24 @@ public class QuoridorLauncher {
             }
             
             if (fallbackMode) {
-                System.out.println("🔄 Using JavaFX fallback mode...");
+                System.out.println("Using JavaFX fallback mode...");
                 javafx.application.Application.launch(JeuQuoridor.class, args);
             } else {
                 // Lancer l'application JavaFX normalement
-                System.out.println("🚀 Launching Quoridor via main method...");
+                System.out.println("Launching Quoridor via main method...");
                 JeuQuoridor.main(args);
             }
             
         } catch (Exception e) {
-            System.err.println("❌ Erreur lors du lancement de Quoridor: " + e.getMessage());
+            System.err.println("Erreur lors du lancement de Quoridor: " + e.getMessage());
             e.printStackTrace();
             
             // Tentative alternative en lançant directement la classe JavaFX
             try {
-                System.out.println("🔄 Tentative de lancement direct de JavaFX...");
+                System.out.println("Tentative de lancement direct de JavaFX...");
                 javafx.application.Application.launch(JeuQuoridor.class, args);
             } catch (Exception e2) {
-                System.err.println("💥 Échec complet du lancement: " + e2.getMessage());
+                System.err.println("Échec complet du lancement: " + e2.getMessage());
                 e2.printStackTrace();
                 
                 // Pause pour que l'utilisateur puisse voir l'erreur

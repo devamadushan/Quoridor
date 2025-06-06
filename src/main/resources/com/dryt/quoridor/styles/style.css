@@ -1,20 +1,22 @@
-/* Style global pour la scène : fond légèrement brun (pour rappeler un plateau en bois) */
+/* Style global pour la scène */
 .root {
     -fx-background-color: #DEB887;
 }
 
 /* Style général pour tous les boutons */
 .button {
-    -fx-background-color: #8FBC8F;   /* vert doux */
+    -fx-background-color: #8FBC8F;
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
+
 .button:hover {
-    -fx-background-color: #82AE82;  /* légèrement plus foncé au survol */
+    -fx-background-color: #82AE82;
 }
+
 .button:pressed {
-    -fx-background-color: #5F8F5F;  /* plus foncé lorsqu'on clique */
+    -fx-background-color: #5F8F5F;
 }
 
 /* Style pour les cases de la grille du plateau */
@@ -31,20 +33,23 @@
 
 /* Style pour les pions des joueurs */
 .joueur1 {
-    -fx-background-color: tomato;    /* pion Joueur 1 en rouge clair */
+    -fx-background-color: tomato;
     -fx-text-fill: white;
 }
+
 .joueur2 {
-    -fx-background-color: royalblue; /* pion Joueur 2 en bleu */
+    -fx-background-color: royalblue;
     -fx-text-fill: white;
 }
-/* style.css */
+
 .highlight {
-    -fx-background-color: rgba(0,255,0,0.5); /* vert semi-transparent */
+    -fx-background-color: rgba(0,255,0,0.5);
 }
+
 .pawn {
-    -fx-background-color: #FFA500; /* exemple: pion en orange */
+    -fx-background-color: #FFA500;
 }
+
 .board-cell {
     -fx-border-color: #000;
     -fx-border-width: 1;

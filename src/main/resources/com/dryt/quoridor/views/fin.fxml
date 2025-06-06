@@ -10,9 +10,7 @@
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.dryt.quoridor.controller.ControleurFin" alignment="CENTER" spacing="20">
     <padding><Insets top="30" right="20" bottom="30" left="20"/></padding>
-    <!-- Message de victoire (mis à jour dynamiquement via le contrôleur) -->
     <Label fx:id="labelVictoire" text="Victoire !" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-    <!-- Boutons de fin -->
     <HBox alignment="CENTER" spacing="15">
         <Button text="Menu Principal" onAction="#retourMenu" prefWidth="130"/>
         <Button text="OPTIONS" onAction="#onOptions" prefWidth="100"/>

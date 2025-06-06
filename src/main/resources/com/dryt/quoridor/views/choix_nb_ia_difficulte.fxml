@@ -19,7 +19,6 @@
                 <Text text="Choisissez la difficulté des IA" styleClass="menu-label"/>
                 
                 <VBox fx:id="difficulteButtons" spacing="10" alignment="CENTER">
-                    <!-- Les boutons de difficulté seront ajoutés dynamiquement -->
                 </VBox>
             </VBox>
 
