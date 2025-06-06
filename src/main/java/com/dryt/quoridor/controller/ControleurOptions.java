@@ -10,6 +10,9 @@ import javafx.scene.text.Text;
 import com.dryt.quoridor.app.JeuQuoridor;
 import com.dryt.quoridor.utils.BackgroundManager;
 import com.dryt.quoridor.utils.UserPreferences;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ControleurOptions {
     
@@ -39,7 +42,8 @@ public class ControleurOptions {
         
         System.out.println("Résolution d'écran détectée : " + detectedResolution);
         
-        resolutionComboBox.getItems().addAll(
+        // Liste des résolutions disponibles
+        List<String> availableResolutions = Arrays.asList(
             "800x600", 
             "1024x768", 
             "1280x720", 
@@ -51,19 +55,21 @@ public class ControleurOptions {
             "2560x1440"
         );
         
+        // Filtrer les résolutions plus grandes que la résolution native
+        List<String> filteredResolutions = availableResolutions.stream()
+            .filter(res -> {
+                String[] parts = res.split("x");
+                int width = Integer.parseInt(parts[0]);
+                int height = Integer.parseInt(parts[1]);
+                return width <= screenWidth && height <= screenHeight;
+            })
+            .collect(Collectors.toList());
+        
+        resolutionComboBox.getItems().addAll(filteredResolutions);
+        
+        // Ajouter la résolution native si elle n'est pas déjà dans la liste
         if (!resolutionComboBox.getItems().contains(detectedResolution)) {
-            boolean inserted = false;
-            for (int i = 0; i < resolutionComboBox.getItems().size(); i++) {
-                String existingRes = resolutionComboBox.getItems().get(i);
-                if (compareResolutions(detectedResolution, existingRes) < 0) {
-                    resolutionComboBox.getItems().add(i, detectedResolution + " (Écran natif)");
-                    inserted = true;
-                    break;
-                }
-            }
-            if (!inserted) {
-                resolutionComboBox.getItems().add(detectedResolution + " (Écran natif)");
-            }
+            resolutionComboBox.getItems().add(detectedResolution + " (Écran natif)");
         } else {
             int index = resolutionComboBox.getItems().indexOf(detectedResolution);
             resolutionComboBox.getItems().set(index, detectedResolution + " (Écran natif)");
