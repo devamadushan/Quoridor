@@ -54,7 +54,7 @@ source ~/.zshrc  # ou ~/.bash_profile
 
 ---
 
-## 📦 Étape 2 : Installer Maven
+##  Étape 2 : Installer Maven
 
 ### Windows
 1. Télécharger Maven : https://maven.apache.org/download.cgi
