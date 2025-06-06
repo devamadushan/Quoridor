@@ -264,12 +264,22 @@ public class ControleurJeu {
     // Configure le plateau et affiche l'interface
     public void setupPlateauAndDisplay(Plateau plateau) {
         this.plateau = plateau;
-        
+
         // Réinitialiser l'état d'annulation pour une nouvelle partie
         previousGameState = null;
         undoAvailable = false;
         updateUndoButtonState();
-        
+
+        // Réinitialiser les stratégies IA
+        aiStrategies = new HashMap<>();
+
+        // Réinitialiser complètement le plateau graphique et les boutons
+        if (boardPane != null) {
+            boardPane.getChildren().clear();
+        }
+        cellButtons = new Button[GameConstants.BOARD_SIZE][GameConstants.BOARD_SIZE];
+        createGameBoard();
+
         for (Joueur joueur : plateau.getJoueurs()) {
             if (joueur.isAI()) {
                 if (JeuQuoridor.getNombreJoueurs() == 4) {
