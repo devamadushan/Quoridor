@@ -9,11 +9,7 @@ import com.dryt.quoridor.utils.UserPreferences;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Slider;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import com.dryt.quoridor.model.Plateau;
 import com.dryt.quoridor.model.Joueur;
 import com.dryt.quoridor.model.GameState;
@@ -21,10 +17,6 @@ import com.dryt.quoridor.model.Mur;
 import com.dryt.quoridor.app.JeuQuoridor;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import javafx.scene.input.KeyCode;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.control.Label;
 import javafx.animation.PauseTransition;
@@ -36,8 +28,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
+
 
 public class ControleurJeu {
 
@@ -106,16 +97,12 @@ public class ControleurJeu {
     private Rectangle ghostWall;
     private Map<Integer, MinimaxAI> aiStrategies;
     
-    // Dynamic scaling
     private double scaleFactor = 1.0;
-    private static final double BASE_WINDOW_WIDTH = 1400.0;
-    private static final double BASE_WINDOW_HEIGHT = 900.0;
-    
+
     // Optimisation du redimensionnement
     private PauseTransition resizeDebounceTimer;
     private boolean isResizing = false;
     
-    // Undo functionality
     private GameState previousGameState = null;
     private boolean undoAvailable = false;
 
@@ -126,7 +113,6 @@ public class ControleurJeu {
         cellButtons = new Button[GameConstants.BOARD_SIZE][GameConstants.BOARD_SIZE];
         aiStrategies = new HashMap<>();
 
-        // Wait for plateau to be set up via setupPlateauAndDisplay
         javafx.application.Platform.runLater(() -> {
             System.out.println("Exécution des initialisations différées");
             loadCSS();
@@ -135,9 +121,7 @@ public class ControleurJeu {
             setupKeyboardShortcuts();
             setupVolumeControls();
             setupDynamicScaling();
-            
-            // Ne plus appliquer le fond ici pour éviter le flash - il est déjà appliqué dans startGame()
-            // applySavedBackground();
+
         });
     }
     
@@ -152,7 +136,6 @@ public class ControleurJeu {
             volumeSlider.setMax(1.0);
             volumeSlider.setValue(JeuQuoridor.getGlobalMusicVolume());
             
-            // Add listener for volume change
             volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
                 JeuQuoridor.setGlobalMusicVolume(newValue.doubleValue());
                 updateVolumeButtonIcon(); 
@@ -196,9 +179,9 @@ public class ControleurJeu {
     // Définit la taille du conteneur du plateau
     private void setBoardContainerSize() {
         if (boardContainer != null) {
-            double boardWidth = 2 * offsetX + 9 * cellSize + 8 * wallSize;  // 538px
-            double boardHeight = 2 * offsetY + 9 * cellSize + 8 * wallSize; // 538px
-            
+            double boardWidth = 2 * offsetX + 9 * cellSize + 8 * wallSize; 
+            double boardHeight = 2 * offsetY + 9 * cellSize + 8 * wallSize; 
+        
             boardPane.setPrefSize(boardWidth, boardHeight);
             boardPane.setMinSize(boardWidth, boardHeight);
             boardPane.setMaxSize(boardWidth, boardHeight);
@@ -436,7 +419,6 @@ public class ControleurJeu {
 
     // Dessine un mur sur le plateau
     private void drawWall(int wx, int wy, boolean vertical) {
-        // Use scaleddimensions
         double scaledCellSize = GameConstants.CELL_SIZE * scaleFactor;
         double scaledWallSize = GameConstants.WALL_SIZE * scaleFactor;
         double scaledOffsetX = GameConstants.OFFSET_X * scaleFactor;
@@ -699,7 +681,6 @@ public class ControleurJeu {
             menuOverlay.setVisible(true);
             menuOverlay.setManaged(true);
             
-            // Bring to front
             menuOverlay.toFront();
             
             System.out.println("Menu de pause affiché avec succès");
@@ -717,7 +698,6 @@ public class ControleurJeu {
             victoryOverlay.setVisible(true);
             victoryOverlay.setManaged(true);
             
-            // Bring to front
             victoryOverlay.toFront();
             
             System.out.println("Écran de victoire affiché avec succès");
