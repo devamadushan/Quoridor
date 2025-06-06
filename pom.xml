@@ -198,32 +198,79 @@
                     <name>Quoridor</name>
                     <appVersion>${project.version}</appVersion>
                     <vendor>DRYT</vendor>
+                    <description>Quoridor Strategy Board Game</description>
                     <destination>target/dist</destination>
                     <input>target</input>
                     <mainJar>${project.artifactId}-${project.version}-shaded.jar</mainJar>
                     <mainClass>com.dryt.quoridor.app.QuoridorLauncher</mainClass>
-                    <winConsole>false</winConsole>
-                    <winDirChooser>false</winDirChooser>
-                    <winPerUserInstall>false</winPerUserInstall>
                     <javaOptions>
                         <option>-Dfile.encoding=UTF-8</option>
-                        <option>-Dprism.verbose=true</option>
                         <option>-Dprism.forceGPU=true</option>
                         <option>-Djavafx.animation.fullspeed=true</option>
                         <option>-Xms256m</option>
                         <option>-Xmx1024m</option>
                     </javaOptions>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>mac</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jpackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
+    
+    <profiles>
+        <!-- Windows Profile -->
+        <profile>
+            <id>windows</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>windows</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <type>EXE</type>
+                                    <winConsole>false</winConsole>
+                                    <winDirChooser>true</winDirChooser>
+                                    <winPerUserInstall>false</winPerUserInstall>
+                                    <winShortcut>true</winShortcut>
+                                    <winMenu>true</winMenu>
+                                    <icon>src/main/resources/icon.ico</icon>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <!-- macOS Profile --> 
+        <profile>
+            <id>mac</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>mac</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <type>DMG</type>
+                                    <icon>src/main/resources/icon.icns</icon>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
