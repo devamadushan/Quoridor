@@ -4,9 +4,7 @@ import com.dryt.quoridor.model.Joueur;
 import com.dryt.quoridor.model.Plateau;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MinimaxAI {
     private final int maxDepth;
