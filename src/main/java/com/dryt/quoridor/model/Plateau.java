@@ -12,9 +12,10 @@ public class Plateau {
     private boolean[][] blockedDown;
     private List<Mur> mursPlaces = new ArrayList<>();
 
-
+    // Constructeur par défaut
     public Plateau(){}
 
+    // Constructeur avec configuration des joueurs
     public Plateau(int nombreJoueurs, int nbAI) {
         joueurs = new ArrayList<>();
         if (nombreJoueurs == 21) {
@@ -58,16 +59,13 @@ public class Plateau {
         horizontalWallPositions = new boolean[8][8];
         blockedRight = new boolean[9][9];
         blockedDown = new boolean[9][9];
-        System.out.println("🎮 Configuration des joueurs :");
+        System.out.println("Configuration des joueurs :");
         for (Joueur j : joueurs) {
             System.out.println("Joueur " + j.getId() + " - " + (j.isAI() ? "IA" : "Humain"));
         }
     }
 
-
-
-
-
+    // Récupère un joueur par son identifiant
     public Joueur getJoueurById(int id) {
         for (Joueur j : joueurs) {
             if (j.getId() == id) return j;
@@ -75,15 +73,17 @@ public class Plateau {
         return null;
     }
 
-
+    // Récupère la liste des joueurs
     public List<Joueur> getJoueurs() {
         return joueurs;
     }
 
+    // Récupère le joueur actuel
     public Joueur getCurrentPlayer() {
         return currentPlayer;
     }
 
+    // Vérifie si un mur peut être placé à la position donnée
     public boolean canPlaceWall(int wx, int wy, boolean vertical) {
         // Vérifie les limites du plateau
         if (vertical && wy >= 8) return false;
@@ -113,11 +113,13 @@ public class Plateau {
         return true;
     }
 
+    // Change le tour du joueur actuel
     public void switchPlayerTurn() {
         int index = joueurs.indexOf(currentPlayer);
         currentPlayer = joueurs.get((index + 1) % joueurs.size());
     }
 
+    // Vérifie si un mur peut être placé sans chevauchement
     public boolean peutPlacerMurSansChevauchement(int wx, int wy, boolean vertical) {
         if (wx < 0 || wy < 0 || wx >= 8 || wy >= 8) return false;
 
@@ -130,15 +132,17 @@ public class Plateau {
         }
     }
 
+    // Vérifie si un mur vertical est présent à la position donnée
     public boolean isVerticalWallAt(int x, int y) {
         return x >= 0 && x < 8 && y >= 0 && y < 8 && verticalWallPositions[x][y];
     }
 
+    // Vérifie si un mur horizontal est présent à la position donnée
     public boolean isHorizontalWallAt(int x, int y) {
         return x >= 0 && x < 8 && y >= 0 && y < 8 && horizontalWallPositions[x][y];
     }
 
-
+    // Vérifie si un mur peut être placé sans croisement
     public boolean peutPlacerMurSansCroix(int x, int y, boolean vertical) {
         if (vertical) {
             return !(murExiste(x - 1, y, false) || murExiste(x, y, false));
@@ -147,11 +151,13 @@ public class Plateau {
         }
     }
 
+    // Vérifie si un mur existe à la position donnée
     private boolean murExiste(int x, int y, boolean vertical) {
         if (x < 0 || y < 0 || x >= 8 || y >= 8) return false;
         return vertical ? verticalWallPositions[x][y] : horizontalWallPositions[x][y];
     }
 
+    // Récupère la liste des mouvements possibles pour le joueur actuel
     public List<int[]> getPossibleMoves() {
         List<int[]> moves = new ArrayList<>();
         Joueur jp = currentPlayer;
@@ -273,9 +279,7 @@ public class Plateau {
         return moves;
     }
 
-
-
-
+    // Vérifie si un joueur est présent à la position donnée
     private boolean isPlayerAt(int x, int y) {
         for (Joueur j : joueurs) {
             if (j.getX() == x && j.getY() == y) return true;
@@ -283,8 +287,7 @@ public class Plateau {
         return false;
     }
 
-
-
+    // Déplace le joueur actuel à la position donnée
     public boolean moveCurrentPlayer(int x, int y) {
         for (int[] m : getPossibleMoves()) {
             if (m[0] == x && m[1] == y) {
@@ -292,20 +295,21 @@ public class Plateau {
                 return true;
             }
         }
-        System.out.println("Move Fails");
+        System.out.println("Déplacement invalide");
         return false;
     }
 
+    // Place un mur pour le joueur actuel
     public boolean placeWallCurrentPlayer(int wx, int wy, boolean vertical) {
         if (currentPlayer.getWallsRemaining() <= 0) return false; 
 
         if (vertical) {
-            if (wy >= 8){ System.out.println("Wall Fails"); return false;}
+            if (wy >= 8){ System.out.println("Placement de mur invalide"); return false;}
             verticalWallPositions[wx][wy] = true;
             blockedRight[wx][wy] = true;
             blockedRight[wx][wy + 1] = true;
         } else {
-            if (wx >= 8){ System.out.println("Wall Fails"); return false;}
+            if (wx >= 8){ System.out.println("Placement de mur invalide"); return false;}
             horizontalWallPositions[wx][wy] = true;
             blockedDown[wx][wy] = true;
             blockedDown[wx + 1][wy] = true;
@@ -316,11 +320,13 @@ public class Plateau {
 
         return true;
     }
+
+    // Récupère la liste des murs placés
     public List<Mur> getMurs() {
         return mursPlaces;
     }
 
-
+    // Vérifie si tous les joueurs ont un chemin vers leur objectif après placement d'un mur
     public boolean allPlayersHaveAPathAfterWall(int wx, int wy, boolean vertical) {
         // Sauvegarder l'état initial avant simulation
         boolean wasWallPresent = vertical ? verticalWallPositions[wx][wy] : horizontalWallPositions[wx][wy];
@@ -361,6 +367,8 @@ public class Plateau {
 
         return allHavePath;
     }
+
+    // Vérifie si un mur chevauche un autre mur
     public boolean isWallOverlapping(int wx, int wy, boolean vertical) {
         if (vertical) {
             if (wx >= 0 && wx < 8 && wy >= 0 && wy < 8) {
@@ -379,18 +387,17 @@ public class Plateau {
         return false;
     }
 
-
-
-
+    // Vérifie si un mur vertical est présent
     public boolean hasVerticalWall(int x, int y) {
         return x >= 0 && x < 8 && y >= 0 && y < 8 && verticalWallPositions[x][y];
     }
 
+    // Vérifie si un mur horizontal est présent
     public boolean hasHorizontalWall(int x, int y) {
         return x >= 0 && x < 8 && y >= 0 && y < 8 && horizontalWallPositions[x][y];
     }
 
-
+    // Récupère le joueur gagnant
     public Joueur getWinner() {
         for (Joueur j : joueurs) {
             boolean isWinner = false;
@@ -408,6 +415,7 @@ public class Plateau {
         return null;
     }
 
+    // Vérifie si un joueur a un chemin vers son objectif
     private boolean hasPathToGoal(Joueur j) {
         boolean[][] visited = new boolean[size][size];
         Queue<int[]> queue = new LinkedList<>();
@@ -436,6 +444,7 @@ public class Plateau {
         return false;
     }
 
+    // Récupère le chemin le plus court vers l'objectif pour un joueur
     public List<int[]> getShortestPathToGoal(Joueur j) {
         boolean[][] visited = new boolean[size][size];
         int[][][] parent = new int[size][size][2]; 
@@ -488,6 +497,7 @@ public class Plateau {
         return path;
     }
 
+    // Récupère les cases voisines accessibles
     private List<int[]> getNeighbors(int x, int y) {
         List<int[]> neighbors = new ArrayList<>();
         if (y > 0 && !blockedDown[x][y - 1]) neighbors.add(new int[]{x, y - 1});
@@ -497,18 +507,21 @@ public class Plateau {
         return neighbors;
     }
 
+    // Supprime un mur vertical
     public void removeVerticalWall(int x, int y) {
         verticalWallPositions[x][y] = false;
         blockedRight[x][y] = false;
         blockedRight[x][y + 1] = false;
     }
 
+    // Supprime un mur horizontal
     public void removeHorizontalWall(int x, int y) {
         horizontalWallPositions[x][y] = false;
         blockedDown[x][y] = false;
         blockedDown[x + 1][y] = false;
     }
 
+    // Crée une copie profonde du plateau
     @Override
     public Plateau clone() {
         Plateau copy = new Plateau();
@@ -523,14 +536,12 @@ public class Plateau {
             copy.joueurs.add(j.clone());
         }
 
-
         copy.currentPlayer = copy.getJoueurById(this.currentPlayer.getId());
-
-
 
         return copy;
     }
 
+    // Crée une copie profonde d'un tableau 2D de booléens
     private boolean[][] deepCopy(boolean[][] original) {
         boolean[][] copy = new boolean[original.length][];
         for (int i = 0; i < original.length; i++) {
@@ -538,5 +549,4 @@ public class Plateau {
         }
         return copy;
     }
-
 }
