@@ -248,6 +248,10 @@ public class JeuQuoridor extends Application {
     
     // Démarre une nouvelle partie avec un fond préservé
     public static void startGame(String preserveCurrentBackground) throws Exception {
+        //DEMANDE APRES LA SOUTENANCE: SON SANS COUPURE
+        // Réinitialiser l'état du mute
+        isMusicMuted = false;
+        
         if (nombreJoueurs == 2) {
             if (isVsAI) {
                 System.out.println("Mode 1 VS 1 IA sélectionné");

@@ -55,7 +55,7 @@ public class ControleurOptions {
             "2560x1440"
         );
         
-        // Filtrer les résolutions plus grandes que la résolution native
+        // DEMADE DU PROF NE PAS POUVOIR CHOISIR PLUS GRAND QUE SA RESOLUTION NATIF
         List<String> filteredResolutions = availableResolutions.stream()
             .filter(res -> {
                 String[] parts = res.split("x");

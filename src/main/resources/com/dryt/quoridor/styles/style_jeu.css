@@ -81,6 +81,8 @@
     -fx-border-radius: 50% !important;
     -fx-border-width: 3 !important;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 5, 0.5, 2, 2) !important;
+   
+   /*DEAMDE DU PROF AMELIORER VISIBILITE DE QUI JOUE*/
     -fx-opacity: 0.35 !important;
     transition: opacity 0.3s ease-in-out;
 }
@@ -89,10 +91,12 @@
     -fx-scale-x: 1.1 !important;
     -fx-scale-y: 1.1 !important;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 7, 0.6, 2, 2) !important;
+    
+    
+    /*DEAMDE DU PROF AMELIORER VISIBILITE DE QUI JOUE*/
     -fx-opacity: 0.6 !important;
 }
-
-/* ----- CURRENT PLAYER INDICATOR (SUBTLE) ----- */
+   /*DEAMDE DU PROF AMELIORER VISIBILITE DE QUI JOUE*/
 .current-player {
     -fx-border-width: 4 !important;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 8, 0.7, 2, 2),
@@ -120,7 +124,7 @@
 
 .current-player.player1 {
     -fx-border-color: #FFD700 !important;
-    -fx-background-color: rgba(255, 0, 0, 0.5) !important;
+    -fx-background-color: rgba(255, 0, 0, 0.759) !important;
     -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.6), 10, 0.8, 0, 0) !important;
 }
 
