@@ -81,37 +81,65 @@
     -fx-border-radius: 50% !important;
     -fx-border-width: 3 !important;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 5, 0.5, 2, 2) !important;
+    -fx-opacity: 0.35 !important;
+    transition: opacity 0.3s ease-in-out;
 }
 
 .player1:hover, .player2:hover, .player3:hover, .player4:hover {
     -fx-scale-x: 1.1 !important;
     -fx-scale-y: 1.1 !important;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 7, 0.6, 2, 2) !important;
+    -fx-opacity: 0.6 !important;
 }
 
 /* ----- CURRENT PLAYER INDICATOR (SUBTLE) ----- */
 .current-player {
-    -fx-border-width: 3 !important;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 5, 0.5, 2, 2),
-                dropshadow(gaussian, rgba(255,215,0,0.5), 6, 0.6, 0, 0) !important;
-    -fx-scale-x: 1.05 !important;
-    -fx-scale-y: 1.05 !important;
+    -fx-border-width: 4 !important;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 8, 0.7, 2, 2),
+                dropshadow(gaussian, rgba(255,215,0,0.8), 10, 0.8, 0, 0) !important;
+    -fx-scale-x: 1.1 !important;
+    -fx-scale-y: 1.1 !important;
+    -fx-opacity: 1.0 !important;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 8, 0.7, 2, 2),
+                    dropshadow(gaussian, rgba(255,215,0,0.8), 10, 0.8, 0, 0) !important;
+    }
+    50% {
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 8, 0.7, 2, 2),
+                    dropshadow(gaussian, rgba(255,215,0,1.0), 15, 1.0, 0, 0) !important;
+    }
+    100% {
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 8, 0.7, 2, 2),
+                    dropshadow(gaussian, rgba(255,215,0,0.8), 10, 0.8, 0, 0) !important;
+    }
 }
 
 .current-player.player1 {
     -fx-border-color: #FFD700 !important;
+    -fx-background-color: rgba(255, 0, 0, 0.5) !important;
+    -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.6), 10, 0.8, 0, 0) !important;
 }
 
 .current-player.player2 {
     -fx-border-color: #FFD700 !important;
+    -fx-background-color: rgba(0, 191, 255, 0.5) !important;
+    -fx-effect: dropshadow(gaussian, rgba(0,191,255,0.6), 10, 0.8, 0, 0) !important;
 }
 
 .current-player.player3 {
     -fx-border-color: #FFD700 !important;
+    -fx-background-color: rgba(50, 205, 50, 0.5) !important;
+    -fx-effect: dropshadow(gaussian, rgba(50,205,50,0.6), 10, 0.8, 0, 0) !important;
 }
 
 .current-player.player4 {
     -fx-border-color: #FFD700 !important;
+    -fx-background-color: rgba(255, 140, 0, 0.5) !important;
+    -fx-effect: dropshadow(gaussian, rgba(255,140,0,0.6), 10, 0.8, 0, 0) !important;
 }
 
 /* ----- PLAYER 1 (RED TROLL) ----- */

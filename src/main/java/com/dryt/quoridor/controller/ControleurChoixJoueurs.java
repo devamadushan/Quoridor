@@ -1,9 +1,7 @@
 package com.dryt.quoridor.controller;
 
-import com.dryt.quoridor.model.Plateau;
 import com.dryt.quoridor.app.JeuQuoridor;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
 import javafx.event.ActionEvent;
 
 public class ControleurChoixJoueurs {
