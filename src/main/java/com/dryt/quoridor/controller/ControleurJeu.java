@@ -55,7 +55,6 @@ public class ControleurJeu {
     @FXML 
     private Slider volumeSlider;
 
-    // Victory overlay controls
     @FXML
     private StackPane victoryOverlay;
     
@@ -74,7 +73,6 @@ public class ControleurJeu {
     @FXML
     private Button victorySettingsButton;
 
-    // Menu overlay elements
     @FXML
     private StackPane menuOverlay;
 
@@ -102,7 +100,6 @@ public class ControleurJeu {
     private Rectangle ghostWall;
     private Map<Integer, MinimaxAI> aiStrategies;
     
-    // Dynamic scaling
     private double scaleFactor = 1.0;
     private static final double BASE_WINDOW_WIDTH = 1400.0;
     private static final double BASE_WINDOW_HEIGHT = 900.0;
@@ -118,7 +115,6 @@ public class ControleurJeu {
         cellButtons = new Button[GameConstants.BOARD_SIZE][GameConstants.BOARD_SIZE];
         aiStrategies = new HashMap<>();
 
-        // Wait for plateau to be set up via setupPlateauAndDisplay
         javafx.application.Platform.runLater(() -> {
             System.out.println("Exécution des initialisations différées");
             loadCSS();
@@ -128,7 +124,6 @@ public class ControleurJeu {
             setupVolumeControls();
             setupDynamicScaling();
             
-            // Apply saved background
             applySavedBackground();
         });
     }
@@ -144,7 +139,6 @@ public class ControleurJeu {
             volumeSlider.setMax(1.0);
             volumeSlider.setValue(JeuQuoridor.getGlobalMusicVolume());
             
-            // Add listener for volume change
             volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
                 JeuQuoridor.setGlobalMusicVolume(newValue.doubleValue());
                 updateVolumeButtonIcon(); 

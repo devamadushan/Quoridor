@@ -1,7 +1,6 @@
 package com.dryt.quoridor.model;
 
 public class Mur {
-    // Orientation: true for vertical, false for horizontal
     private boolean vertical;
     private int x;
     private int y;
