@@ -19,7 +19,7 @@ public class MinimaxAI {
     }
 
     public Action getBestAction(Plateau plateau) {
-        ActionScore result = minimax(plateau, maxDepth, true, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        ActionScore result = minimax(plateau, maxDepth, true, Integer.MIN_VALUE, Integer.MAX_VALUE, plateau);
         if (result.action != null) {
             return result.action;
         }
@@ -32,27 +32,27 @@ public class MinimaxAI {
         throw new IllegalStateException("No valid actions or path to goal for AI");
     }
 
-    private ActionScore minimax(Plateau plateau, int depth, boolean maximizingPlayer, int alpha, int beta) {
+    private ActionScore minimax(Plateau plateau, int depth, boolean maximizingPlayer, float alpha, float beta, Plateau originalPlateau) {
         Joueur winner = plateau.getWinner();
         if (winner != null) {
-            int score = (maximizingPlayer == (winner == plateau.getCurrentPlayer())) ? 10000 : -10000;
+            float score = (maximizingPlayer == (winner == plateau.getCurrentPlayer())) ? 10000 : -10000;
             return new ActionScore(null, score);
         }
         if (depth == 0) {
-            return new ActionScore(null, evaluateBoard(plateau));
+            return new ActionScore(null, evaluateBoard(plateau, originalPlateau));
         }
 
         List<Action> actions = generateAllActions(plateau);
 
         Action bestAction = null;
-        int bestScore = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        float bestScore = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
         for (Action action : actions) {
             Plateau cloned = plateau.clone();
             if (!action.apply(cloned)) continue;
             cloned.switchPlayerTurn();
 
-            int score = minimax(cloned, depth - 1, !maximizingPlayer, alpha, beta).score;
+            float score = minimax(cloned, depth - 1, !maximizingPlayer, alpha, beta,originalPlateau).score;
 
             if (maximizingPlayer) {
                 if (score > bestScore) {
@@ -73,7 +73,7 @@ public class MinimaxAI {
         return new ActionScore(bestAction, bestScore);
     }
 
-    List<Action> generateAllActions(Plateau plateau) {
+    private List<Action> generateAllActions(Plateau plateau) {
         List<Action> pawnMoves = new ArrayList<>();
         List<Action> wallMoves = new ArrayList<>();
 
@@ -119,15 +119,27 @@ public class MinimaxAI {
         return actions;
     }
 
-    private int evaluateBoard(Plateau plateau) {
-        int score = 0;
+    private float evaluateBoard(Plateau plateau, Plateau originalPlateau) {
+        float score = 0;
+        float wallBonus = 1.5F;
+        float wallPlacementBonus = 1.0F;
+        Joueur current = plateau.getCurrentPlayer();
+
         for (Joueur j : plateau.getJoueurs()) {
             int dist = estimateDistance(plateau, j);
 
-            if (j == plateau.getCurrentPlayer()) {
+            if (j == current) {
                 score -= dist;
             } else {
                 score += dist;
+                // Wall advantage: reward current player for having more walls than this opponent
+                score += wallBonus * (current.getWallsRemaining() - j.getWallsRemaining());
+
+                int baseDist = estimateDistance(originalPlateau,j); // Implement this
+                int increase = dist - baseDist;
+                if (increase > 0) {
+                    score += wallPlacementBonus * increase * Math.exp(increase) / 3.0F;
+                }
             }
         }
         return score;
@@ -141,11 +153,12 @@ public class MinimaxAI {
 
     private static class ActionScore {
         Action action;
-        int score;
+        float score;
 
-        public ActionScore(Action action, int score) {
+        public ActionScore(Action action, float score) {
             this.action = action;
             this.score = score;
         }
+
     }
 }
